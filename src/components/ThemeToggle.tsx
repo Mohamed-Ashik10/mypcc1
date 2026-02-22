@@ -18,12 +18,12 @@ export function ThemeToggle() {
     }
 
     return (
-        <div className="flex items-center gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg w-fit">
+        <div className="flex items-center gap-1 p-1 bg-muted rounded-lg w-fit border border-border">
             <button
                 onClick={() => setTheme("light")}
-                className={`p-2 rounded-md transition-colors ${theme === "light"
-                        ? "bg-white text-yellow-500 shadow-sm"
-                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className={`p-2 rounded-md transition-all ${theme === "light"
+                    ? "bg-card text-yellow-500 shadow-sm border border-border"
+                    : "text-muted-foreground hover:text-foreground hover:bg-card/50"
                     }`}
                 title="Light Mode"
             >
@@ -31,9 +31,9 @@ export function ThemeToggle() {
             </button>
             <button
                 onClick={() => setTheme("dark")}
-                className={`p-2 rounded-md transition-colors ${theme === "dark"
-                        ? "bg-gray-700 text-blue-400 shadow-sm"
-                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className={`p-2 rounded-md transition-all ${theme === "dark"
+                    ? "bg-slate-700 text-blue-400 shadow-sm border border-slate-600"
+                    : "text-muted-foreground hover:text-foreground hover:bg-card/50"
                     }`}
                 title="Dark Mode"
             >
@@ -41,9 +41,9 @@ export function ThemeToggle() {
             </button>
             <button
                 onClick={() => setTheme("system")}
-                className={`p-2 rounded-md transition-colors ${theme === "system"
-                        ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
-                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className={`p-2 rounded-md transition-all ${theme === "system"
+                    ? "bg-card text-foreground shadow-sm border border-border"
+                    : "text-muted-foreground hover:text-foreground hover:bg-card/50"
                     }`}
                 title="System Preference"
             >

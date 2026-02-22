@@ -53,14 +53,14 @@ export default function HymnForm({ initialData, mode }: Props) {
     };
 
     const inputCls =
-        "block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition";
+        "block w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all";
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-2xl shadow-md p-8 max-w-2xl">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-card text-card-foreground rounded-2xl shadow-lg p-8 max-w-2xl border border-border">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Hymn Number <span className="text-red-500">*</span>
+                    <label className="block text-sm font-medium text-foreground mb-1.5 ml-1">
+                        Hymn Number <span className="text-destructive">*</span>
                     </label>
                     <input
                         type="number"
@@ -74,8 +74,8 @@ export default function HymnForm({ initialData, mode }: Props) {
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Title <span className="text-red-500">*</span>
+                    <label className="block text-sm font-medium text-foreground mb-1.5 ml-1">
+                        Title <span className="text-destructive">*</span>
                     </label>
                     <input
                         type="text"
@@ -90,8 +90,8 @@ export default function HymnForm({ initialData, mode }: Props) {
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Lyrics <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-foreground mb-1.5 ml-1">
+                    Lyrics <span className="text-destructive">*</span>
                 </label>
                 <textarea
                     name="lyrics"
@@ -102,10 +102,10 @@ export default function HymnForm({ initialData, mode }: Props) {
                     placeholder="Enter the full hymn lyrics here, one verse per block…"
                     className={`${inputCls} resize-y`}
                 />
-                <p className="text-xs text-gray-400 mt-1">Separate verses with a blank line.</p>
+                <p className="text-xs text-muted-foreground/60 mt-2 ml-1">Separate verses with a blank line.</p>
             </div>
 
-            {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>}
+            {error && <p className="text-sm text-destructive bg-destructive/10 p-4 rounded-xl border border-destructive/20">{error}</p>}
 
             <div className="flex gap-3 pt-2">
                 <button
@@ -118,7 +118,7 @@ export default function HymnForm({ initialData, mode }: Props) {
                 <button
                     type="button"
                     onClick={() => router.back()}
-                    className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-200 transition"
+                    className="px-6 py-2.5 bg-muted text-muted-foreground rounded-lg text-sm font-semibold hover:bg-muted/80 transition-all active:scale-95"
                 >
                     Cancel
                 </button>

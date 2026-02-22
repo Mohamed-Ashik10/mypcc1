@@ -35,12 +35,12 @@ export default async function HymnsPage({
         <div>
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h2 className="text-3xl font-bold text-gray-800">🎵 Hymns</h2>
-                    <p className="text-gray-500 mt-1">{total} hymns in the database</p>
+                    <h2 className="text-3xl font-bold text-foreground">🎵 Hymns</h2>
+                    <p className="text-muted-foreground mt-1">{total} hymns in the database</p>
                 </div>
                 <Link
                     href="/admin/hymns/new"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-blue-500 transition"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-blue-500 transition-all active:scale-95"
                 >
                     ➕ Add Hymn
                 </Link>
@@ -53,26 +53,26 @@ export default async function HymnsPage({
                         name="search"
                         defaultValue={search}
                         placeholder="Search by number or title…"
-                        className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        className="flex-1 rounded-lg border border-border bg-card text-foreground px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500"
                     />
-                    <button type="submit" className="px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-500 transition">
+                    <button type="submit" className="px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-500 transition-all active:scale-95">
                         Search
                     </button>
                 </div>
             </form>
 
             {hymns.length === 0 ? (
-                <div className="bg-white rounded-2xl shadow-md p-12 text-center">
-                    <p className="text-5xl mb-4">🎵</p>
-                    <p className="text-gray-500 text-lg">No hymns found.</p>
-                    <Link href="/admin/hymns/new" className="mt-4 inline-block text-blue-600 hover:underline font-medium">
+                <div className="bg-card text-card-foreground rounded-2xl shadow-md p-12 text-center border border-border">
+                    <p className="text-5xl mb-4 text-muted-foreground/20">🎵</p>
+                    <p className="text-muted-foreground text-lg">No hymns found.</p>
+                    <Link href="/admin/hymns/new" className="mt-4 inline-block text-blue-600 dark:text-blue-400 hover:underline font-medium">
                         Add the first hymn →
                     </Link>
                 </div>
             ) : (
-                <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+                <div className="bg-card text-card-foreground rounded-2xl shadow-md overflow-hidden border border-border">
                     <table className="w-full text-sm">
-                        <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
+                        <thead className="bg-muted/50 text-xs text-muted-foreground uppercase tracking-wide">
                             <tr>
                                 <th className="px-6 py-3 text-left w-20">No.</th>
                                 <th className="px-6 py-3 text-left">Title</th>
@@ -80,15 +80,15 @@ export default async function HymnsPage({
                                 <th className="px-6 py-3 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-border">
                             {hymns.map((hymn) => (
-                                <tr key={hymn.id} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-6 py-4 font-bold text-blue-700">{hymn.number}</td>
-                                    <td className="px-6 py-4 font-medium text-gray-800">{hymn.title}</td>
-                                    <td className="px-6 py-4 text-gray-400 max-w-xs truncate">{hymn.lyrics.split("\n")[0]}</td>
+                                <tr key={hymn.id} className="hover:bg-muted/30 transition-colors">
+                                    <td className="px-6 py-4 font-bold text-blue-600 dark:text-blue-400">{hymn.number}</td>
+                                    <td className="px-6 py-4 font-medium text-foreground">{hymn.title}</td>
+                                    <td className="px-6 py-4 text-muted-foreground/60 max-w-xs truncate">{hymn.lyrics.split("\n")[0]}</td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-3">
-                                            <Link href={`/admin/hymns/${hymn.id}/edit`} className="text-xs font-medium text-blue-600 hover:text-blue-800 transition">Edit</Link>
+                                            <Link href={`/admin/hymns/${hymn.id}/edit`} className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition">Edit</Link>
                                             <HymnDeleteButton id={hymn.id} />
                                         </div>
                                     </td>
@@ -105,7 +105,7 @@ export default async function HymnsPage({
                         <Link
                             key={p}
                             href={`/admin/hymns?page=${p}${search ? `&search=${search}` : ""}`}
-                            className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition ${p === page ? "bg-blue-600 text-white shadow" : "bg-white text-gray-600 border border-gray-200 hover:border-blue-400"
+                            className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all ${p === page ? "bg-blue-600 text-white shadow-md scale-105" : "bg-card text-muted-foreground border border-border hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400"
                                 }`}
                         >
                             {p}

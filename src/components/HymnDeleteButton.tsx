@@ -21,7 +21,7 @@ export default function HymnDeleteButton({ id }: { id: string }) {
         <button
             onClick={handleDelete}
             disabled={loading}
-            className="text-xs font-medium text-red-500 hover:text-red-700 disabled:opacity-50 transition"
+            className="text-xs font-medium text-destructive hover:text-destructive/80 disabled:opacity-50 transition-colors"
         >
             {loading ? "…" : "Delete"}
         </button>

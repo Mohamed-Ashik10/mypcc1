@@ -9,7 +9,7 @@ export default async function EditHymnPage({ params }: { params: Promise<{ id: s
 
     return (
         <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">✏️ Edit Hymn #{hymn.number}</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-6">✏️ Edit Hymn #{hymn.number}</h2>
             <HymnForm
                 mode="edit"
                 initialData={{

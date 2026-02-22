@@ -19,7 +19,7 @@ export default async function EditDiaryEntryPage({ params }: { params: Promise<{
 
     return (
         <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">✏️ Edit Diary Entry</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-6">✏️ Edit Diary Entry</h2>
             <DiaryForm mode="edit" initialData={initialData} />
         </div>
     );
