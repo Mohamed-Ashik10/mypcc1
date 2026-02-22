@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from 'react'
+// @ts-ignore
 import * as THREE from 'three'
 // @ts-ignore
 import HALO from 'vanta/dist/vanta.halo.min'
