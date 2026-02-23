@@ -1,6 +1,8 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import HymnDeleteButton from "@/components/HymnDeleteButton";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +16,10 @@ export default async function HymnsPage({
     const limit = 30;
     const skip = (page - 1) * limit;
     const search = searchStr ?? "";
+
+    const session = await getServerSession(authOptions);
+    const userRole = (session?.user as any)?.role || "MEMBER";
+    const canModify = ["ADMIN", "SUPER_ADMIN", "STAFF", "EDITOR"].includes(userRole);
 
     const where = search
         ? {
@@ -38,12 +44,14 @@ export default async function HymnsPage({
                     <h2 className="text-3xl font-bold text-foreground">🎵 Hymns</h2>
                     <p className="text-muted-foreground mt-1">{total} hymns in the database</p>
                 </div>
-                <Link
-                    href="/admin/hymns/new"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-blue-500 transition-all active:scale-95"
-                >
-                    ➕ Add Hymn
-                </Link>
+                {canModify && (
+                    <Link
+                        href="/admin/hymns/new"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-blue-500 transition-all active:scale-95"
+                    >
+                        ➕ Add Hymn
+                    </Link>
+                )}
             </div>
 
             <form method="GET" className="mb-6">
@@ -65,9 +73,11 @@ export default async function HymnsPage({
                 <div className="bg-card text-card-foreground rounded-2xl shadow-md p-12 text-center border border-border">
                     <p className="text-5xl mb-4 text-muted-foreground/20">🎵</p>
                     <p className="text-muted-foreground text-lg">No hymns found.</p>
-                    <Link href="/admin/hymns/new" className="mt-4 inline-block text-blue-600 dark:text-blue-400 hover:underline font-medium">
-                        Add the first hymn →
-                    </Link>
+                    {canModify && (
+                        <Link href="/admin/hymns/new" className="mt-4 inline-block text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                            Add the first hymn →
+                        </Link>
+                    )}
                 </div>
             ) : (
                 <div className="bg-card text-card-foreground rounded-2xl shadow-md overflow-hidden border border-border">
@@ -77,7 +87,7 @@ export default async function HymnsPage({
                                 <th className="px-6 py-3 text-left w-20">No.</th>
                                 <th className="px-6 py-3 text-left">Title</th>
                                 <th className="px-6 py-3 text-left">First Line</th>
-                                <th className="px-6 py-3 text-right">Actions</th>
+                                {canModify && <th className="px-6 py-3 text-right">Actions</th>}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -86,12 +96,14 @@ export default async function HymnsPage({
                                     <td className="px-6 py-4 font-bold text-blue-600 dark:text-blue-400">{hymn.number}</td>
                                     <td className="px-6 py-4 font-medium text-foreground">{hymn.title}</td>
                                     <td className="px-6 py-4 text-muted-foreground/60 max-w-xs truncate">{hymn.lyrics.split("\n")[0]}</td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-3">
-                                            <Link href={`/admin/hymns/${hymn.id}/edit`} className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition">Edit</Link>
-                                            <HymnDeleteButton id={hymn.id} />
-                                        </div>
-                                    </td>
+                                    {canModify && (
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="flex items-center justify-end gap-3">
+                                                <Link href={`/admin/hymns/${hymn.id}/edit`} className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition">Edit</Link>
+                                                <HymnDeleteButton id={hymn.id} />
+                                            </div>
+                                        </td>
+                                    )}
                                 </tr>
                             ))}
                         </tbody>

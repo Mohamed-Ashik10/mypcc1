@@ -1,8 +1,18 @@
 import prisma from "@/lib/prisma";
 
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+
 export const dynamic = "force-dynamic";
 
 export default async function UsersPage() {
+    const session = await getServerSession(authOptions);
+    const userRole = (session?.user as any)?.role;
+    if (!["ADMIN", "SUPER_ADMIN", "STAFF"].includes(userRole)) {
+        redirect("/admin");
+    }
+
     const users = await prisma.user.findMany({
         orderBy: { createdAt: "desc" },
         include: {

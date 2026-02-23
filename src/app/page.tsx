@@ -24,10 +24,10 @@ export default function Home() {
 
         <div className="grid gap-4 sm:flex sm:justify-center">
           <Link
-            href="/auth/login"
+            href="/auth/login?type=admin"
             className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg active:scale-95 group"
           >
-            Access Admin Portal
+            Admin Portal Access
             <svg
               className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform"
               fill="none"
@@ -39,10 +39,10 @@ export default function Home() {
           </Link>
 
           <Link
-            href="/admin"
+            href="/auth/login?type=member"
             className="inline-flex items-center justify-center px-8 py-4 bg-white/50 dark:bg-slate-800/50 hover:bg-white/80 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 font-semibold rounded-xl border border-slate-200 dark:border-slate-700 transition-all active:scale-95"
           >
-            Go to Dashboard
+            Member Services
           </Link>
         </div>
 

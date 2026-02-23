@@ -1,8 +1,18 @@
 import prisma from "@/lib/prisma";
 
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+
 export const dynamic = "force-dynamic";
 
 export default async function TransactionsPage() {
+    const session = await getServerSession(authOptions);
+    const userRole = (session?.user as any)?.role;
+    if (!["ADMIN", "SUPER_ADMIN", "STAFF"].includes(userRole)) {
+        redirect("/admin");
+    }
+
     const transactions = await prisma.transaction.findMany({
         orderBy: { createdAt: "desc" },
         include: { user: { select: { name: true, email: true } } },

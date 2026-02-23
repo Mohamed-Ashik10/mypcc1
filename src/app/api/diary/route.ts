@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 // GET all diary entries (paginated)
 export async function GET(request: NextRequest) {
@@ -20,8 +22,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ entries, total, page, limit });
 }
 
-// POST create a new diary entry
+// POST create a new diary entry (ADMIN / STAFF only)
 export async function POST(request: NextRequest) {
+    const session = await getServerSession(authOptions);
+    const role = (session?.user as any)?.role;
+    if (!session) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+    if (!["ADMIN", "STAFF"].includes(role))
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     try {
         const body = await request.json();
         const { date, title, readingOne, readingTwo, readingThree, theme } = body;

@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET() {
     const announcements = await prisma.announcement.findMany({ orderBy: { createdAt: "desc" } });
     return NextResponse.json(announcements);
 }
 
+// POST create announcement (ADMIN / STAFF only)
 export async function POST(request: NextRequest) {
+    const session = await getServerSession(authOptions);
+    const role = (session?.user as any)?.role;
+    if (!session) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+    if (!["ADMIN", "STAFF"].includes(role))
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
     try {
         const body = await request.json();
         const { title, content, isActive } = body;

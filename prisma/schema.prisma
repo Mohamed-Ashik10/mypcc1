@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,25 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ==========================================
-// Authentication & Users
-// ==========================================
 model User {
-  id            String    @id @default(cuid())
+  id            String         @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?        @unique
   password      String?
   emailVerified DateTime?
   image         String?
-  role          Role      @default(MEMBER)
-  
-  // Relations
+  role          User_role      @default(MEMBER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   sessions      Session[]
   subscriptions Subscription[]
   transactions  Transaction[]
-
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
 }
 
 model Session {
@@ -37,97 +28,96 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "Session_userId_fkey")
 }
 
-enum Role {
-  ADMIN
-  STAFF
-  MEMBER
-}
-
-// ==========================================
-// Content Engine
-// ==========================================
 model Hymn {
   id        String   @id @default(cuid())
   number    Int      @unique
   title     String
   lyrics    String   @db.Text
-  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model DiaryEntry {
-  id          String   @id @default(cuid())
-  date        DateTime @unique
-  title       String?
-  readingOne  String
-  readingTwo  String?
+  id           String   @id @default(cuid())
+  date         DateTime @unique
+  title        String?
+  readingOne   String
+  readingTwo   String?
   readingThree String?
-  theme       String?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  theme        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model TheEchoIssue {
-  id          String   @id @default(cuid())
-  title       String
-  issueMonth  DateTime
-  pdfUrl      String
-  coverUrl    String?
-  isFree      Boolean  @default(true)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  title      String
+  issueMonth DateTime
+  pdfUrl     String
+  coverUrl   String?
+  isFree     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Devotional {
-  id          String   @id @default(cuid())
-  title       String
-  date        DateTime
-  content     String   @db.Text
-  author      String?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  title     String
+  date      DateTime
+  content   String   @db.Text
+  author    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Announcement {
-  id          String   @id @default(cuid())
-  title       String
-  content     String   @db.Text
-  isActive    Boolean  @default(true)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PccInfo {
-  id          String   @id @default(cuid())
-  section     String   @unique
-  content     String   @db.Text
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-// ==========================================
-// Commerce
-// ==========================================
-model Subscription {
   id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  type      SubscriptionType
-  status    SubscriptionStatus @default(ACTIVE)
-  startDate DateTime @default(now())
-  endDate   DateTime
-  
+  section   String   @unique
+  content   String   @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Subscription {
+  id        String             @id @default(cuid())
+  userId    String
+  type      SubscriptionType
+  status    SubscriptionStatus @default(ACTIVE)
+  startDate DateTime           @default(now())
+  endDate   DateTime
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "Subscription_userId_fkey")
+}
+
+model Transaction {
+  id            String            @id @default(cuid())
+  userId        String
+  amount        Float
+  currency      String            @default("XAF")
+  paymentMethod PaymentMethod
+  status        TransactionStatus @default(PENDING)
+  reference     String            @unique
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  user          User              @relation(fields: [userId], references: [id])
+
+  @@index([userId], map: "Transaction_userId_fkey")
 }
 
 enum SubscriptionType {
@@ -142,21 +132,6 @@ enum SubscriptionStatus {
   CANCELLED
 }
 
-model Transaction {
-  id            String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id])
-  
-  amount        Float
-  currency      String   @default("XAF")
-  paymentMethod PaymentMethod
-  status        TransactionStatus @default(PENDING)
-  reference     String   @unique
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
 enum PaymentMethod {
   MOBILE_MONEY
   VISA
@@ -167,4 +142,10 @@ enum TransactionStatus {
   PENDING
   COMPLETED
   FAILED
+}
+
+enum User_role {
+  ADMIN
+  STAFF
+  MEMBER
 }

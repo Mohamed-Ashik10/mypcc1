@@ -22,8 +22,8 @@ export const authOptions: NextAuthOptions = {
                     },
                 });
 
-                if (!user || user.role === "MEMBER") { // We don't want members logging into Admin dashboard
-                    throw new Error("Access Denied");
+                if (!user) {
+                    throw new Error("No user found with this email");
                 }
 
                 // Verify password using bcrypt
