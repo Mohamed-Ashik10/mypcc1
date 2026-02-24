@@ -19,15 +19,15 @@ export default async function AnnouncementsPage() {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h2 className="text-3xl font-bold text-foreground">📢 Announcements</h2>
-                    <p className="text-muted-foreground mt-1">{announcements.length} announcements</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-foreground">📢 Announcements</h2>
+                    <p className="text-muted-foreground mt-1 text-sm">{announcements.length} announcements</p>
                 </div>
                 {canModify && (
                     <Link
                         href="/admin/announcements/new"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-blue-500 transition-all active:scale-95"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-blue-500 transition-all active:scale-95 whitespace-nowrap"
                     >
                         📢 New Announcement
                     </Link>

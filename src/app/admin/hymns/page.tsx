@@ -39,15 +39,15 @@ export default async function HymnsPage({
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h2 className="text-3xl font-bold text-foreground">🎵 Hymns</h2>
-                    <p className="text-muted-foreground mt-1">{total} hymns in the database</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-foreground">🎵 Hymns</h2>
+                    <p className="text-muted-foreground mt-1 text-sm">{total} hymns in the database</p>
                 </div>
                 {canModify && (
                     <Link
                         href="/admin/hymns/new"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-blue-500 transition-all active:scale-95"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-blue-500 transition-all active:scale-95 whitespace-nowrap"
                     >
                         ➕ Add Hymn
                     </Link>
@@ -81,33 +81,35 @@ export default async function HymnsPage({
                 </div>
             ) : (
                 <div className="bg-card text-card-foreground rounded-2xl shadow-md overflow-hidden border border-border">
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/50 text-xs text-muted-foreground uppercase tracking-wide">
-                            <tr>
-                                <th className="px-6 py-3 text-left w-20">No.</th>
-                                <th className="px-6 py-3 text-left">Title</th>
-                                <th className="px-6 py-3 text-left">First Line</th>
-                                {canModify && <th className="px-6 py-3 text-right">Actions</th>}
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border">
-                            {hymns.map((hymn) => (
-                                <tr key={hymn.id} className="hover:bg-muted/30 transition-colors">
-                                    <td className="px-6 py-4 font-bold text-blue-600 dark:text-blue-400">{hymn.number}</td>
-                                    <td className="px-6 py-4 font-medium text-foreground">{hymn.title}</td>
-                                    <td className="px-6 py-4 text-muted-foreground/60 max-w-xs truncate">{hymn.lyrics.split("\n")[0]}</td>
-                                    {canModify && (
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-3">
-                                                <Link href={`/admin/hymns/${hymn.id}/edit`} className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition">Edit</Link>
-                                                <HymnDeleteButton id={hymn.id} />
-                                            </div>
-                                        </td>
-                                    )}
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm min-w-[600px]">
+                            <thead className="bg-muted/50 text-xs text-muted-foreground uppercase tracking-wide">
+                                <tr>
+                                    <th className="px-6 py-3 text-left w-20">No.</th>
+                                    <th className="px-6 py-3 text-left">Title</th>
+                                    <th className="px-6 py-3 text-left">First Line</th>
+                                    {canModify && <th className="px-6 py-3 text-right">Actions</th>}
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-border">
+                                {hymns.map((hymn) => (
+                                    <tr key={hymn.id} className="hover:bg-muted/30 transition-colors">
+                                        <td className="px-6 py-4 font-bold text-blue-600 dark:text-blue-400">{hymn.number}</td>
+                                        <td className="px-6 py-4 font-medium text-foreground">{hymn.title}</td>
+                                        <td className="px-6 py-4 text-muted-foreground/60 max-w-xs truncate">{hymn.lyrics.split("\n")[0]}</td>
+                                        {canModify && (
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex items-center justify-end gap-3">
+                                                    <Link href={`/admin/hymns/${hymn.id}/edit`} className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition">Edit</Link>
+                                                    <HymnDeleteButton id={hymn.id} />
+                                                </div>
+                                            </td>
+                                        )}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 

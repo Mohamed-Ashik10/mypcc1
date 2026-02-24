@@ -84,7 +84,7 @@ function LoginForm() {
     }
 
     return (
-        <div className="w-full max-w-md space-y-8 bg-slate-900/40 backdrop-blur-2xl p-8 rounded-[40px] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-white/10 animate-in fade-in zoom-in duration-700 z-10">
+        <div className="w-full max-w-md space-y-8 bg-slate-900/40 backdrop-blur-2xl p-6 sm:p-8 rounded-[40px] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-white/10 animate-in fade-in zoom-in duration-700 z-10">
             <div className="text-center">
                 <div className="flex justify-center mb-6">
                     <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-4xl font-bold shadow-2xl ring-4 ring-blue-600/20 transform hover:scale-110 transition-transform cursor-default">

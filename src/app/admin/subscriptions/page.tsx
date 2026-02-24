@@ -25,9 +25,11 @@ export default async function SubscriptionsPage() {
 
         return (
             <div>
-                <div className="mb-8">
-                    <h2 className="text-3xl font-bold text-foreground">💳 Subscriptions Management</h2>
-                    <p className="text-muted-foreground mt-1">{subscriptions.length} total across the platform</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                    <div>
+                        <h2 className="text-2xl sm:text-3xl font-bold text-foreground">💳 Subscriptions Management</h2>
+                        <p className="text-muted-foreground mt-1 text-sm">{subscriptions.length} total across the platform</p>
+                    </div>
                 </div>
 
                 {subscriptions.length === 0 ? (
@@ -37,35 +39,37 @@ export default async function SubscriptionsPage() {
                     </div>
                 ) : (
                     <div className="bg-card text-card-foreground rounded-2xl shadow-md overflow-hidden border border-border">
-                        <table className="w-full text-sm">
-                            <thead className="bg-muted/50 text-xs text-muted-foreground uppercase tracking-wide">
-                                <tr>
-                                    <th className="px-6 py-3 text-left">Member</th>
-                                    <th className="px-6 py-3 text-left">Type</th>
-                                    <th className="px-6 py-3 text-left">Status</th>
-                                    <th className="px-6 py-3 text-left">Start</th>
-                                    <th className="px-6 py-3 text-left">End</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-border">
-                                {subscriptions.map((sub) => (
-                                    <tr key={sub.id} className="hover:bg-muted/30 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <p className="font-medium text-foreground">{sub.user.name ?? "—"}</p>
-                                            <p className="text-xs text-muted-foreground/60">{sub.user.email}</p>
-                                        </td>
-                                        <td className="px-6 py-4 text-muted-foreground">{sub.type.replace(/_/g, " ")}</td>
-                                        <td className="px-6 py-4">
-                                            <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${statusBadge[sub.status]} ${sub.status === 'ACTIVE' ? 'dark:bg-green-900/30 dark:text-green-400' : ''}`}>
-                                                {sub.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-muted-foreground/60 whitespace-nowrap">{new Date(sub.startDate).toLocaleDateString("en-GB")}</td>
-                                        <td className="px-6 py-4 text-muted-foreground/60 whitespace-nowrap">{new Date(sub.endDate).toLocaleDateString("en-GB")}</td>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm min-w-[700px]">
+                                <thead className="bg-muted/50 text-xs text-muted-foreground uppercase tracking-wide">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left">Member</th>
+                                        <th className="px-6 py-3 text-left">Type</th>
+                                        <th className="px-6 py-3 text-left">Status</th>
+                                        <th className="px-6 py-3 text-left">Start</th>
+                                        <th className="px-6 py-3 text-left">End</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="divide-y divide-border">
+                                    {subscriptions.map((sub) => (
+                                        <tr key={sub.id} className="hover:bg-muted/30 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <p className="font-medium text-foreground">{sub.user.name ?? "—"}</p>
+                                                <p className="text-xs text-muted-foreground/60">{sub.user.email}</p>
+                                            </td>
+                                            <td className="px-6 py-4 text-muted-foreground">{sub.type.replace(/_/g, " ")}</td>
+                                            <td className="px-6 py-4">
+                                                <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${statusBadge[sub.status]} ${sub.status === 'ACTIVE' ? 'dark:bg-green-900/30 dark:text-green-400' : ''}`}>
+                                                    {sub.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-muted-foreground/60 whitespace-nowrap">{new Date(sub.startDate).toLocaleDateString("en-GB")}</td>
+                                            <td className="px-6 py-4 text-muted-foreground/60 whitespace-nowrap">{new Date(sub.endDate).toLocaleDateString("en-GB")}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
             </div>
@@ -107,10 +111,10 @@ export default async function SubscriptionsPage() {
     ];
 
     return (
-        <div className="max-w-4xl mx-auto space-y-10 py-4">
+        <div className="max-w-4xl mx-auto space-y-10 py-4 px-4 sm:px-0">
             <div className="text-center space-y-3">
-                <h2 className="text-4xl font-black text-foreground tracking-tight">Support PCC Ministry</h2>
-                <p className="text-muted-foreground text-lg max-w-xl mx-auto font-medium">
+                <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight leading-tight">Support PCC Ministry</h2>
+                <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto font-medium">
                     Subscribe to unlock premium content like The Echo archives and support our digital mission.
                 </p>
             </div>
@@ -146,7 +150,7 @@ export default async function SubscriptionsPage() {
             </div>
 
             {/* Plans Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {plans.map((plan) => (
                     <div
                         key={plan.type}

@@ -75,9 +75,11 @@ export default async function DiaryManagementPage({
     if (!isAdmin) {
         return (
             <div className="max-w-4xl mx-auto space-y-8">
-                <div>
-                    <h2 className="text-3xl font-bold text-foreground">📖 Church Diary</h2>
-                    <p className="text-muted-foreground mt-1">Daily scripture readings for your spiritual journey</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                    <div>
+                        <h2 className="text-2xl sm:text-3xl font-bold text-foreground">📖 Church Diary</h2>
+                        <p className="text-muted-foreground mt-1 text-sm">Daily scripture readings for your spiritual journey</p>
+                    </div>
                 </div>
 
                 {/* Month Selector */}
@@ -173,14 +175,14 @@ export default async function DiaryManagementPage({
     // ── ADMIN VIEW ───────────────────────────────────────────────────────────
     return (
         <div>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h2 className="text-3xl font-bold text-foreground">📖 Church Diary</h2>
-                    <p className="text-muted-foreground mt-1">{total} entries total across the year</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-foreground">📖 Church Diary</h2>
+                    <p className="text-muted-foreground mt-1 text-sm">{total} entries total across the year</p>
                 </div>
                 <Link
                     href="/admin/diary/new"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-blue-500 transition-all active:scale-95"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-blue-500 transition-all active:scale-95 whitespace-nowrap"
                 >
                     ➕ Add Entry
                 </Link>
@@ -201,42 +203,46 @@ export default async function DiaryManagementPage({
                             <div className="bg-muted px-6 py-3 border-b border-border">
                                 <h3 className="text-base font-semibold text-foreground">{month}</h3>
                             </div>
-                            <table className="w-full text-sm">
-                                <thead className="bg-muted/50 text-xs text-muted-foreground uppercase tracking-wide">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left">Date</th>
-                                        <th className="px-6 py-3 text-left">Title / Theme</th>
-                                        <th className="px-6 py-3 text-left">Reading 1</th>
-                                        <th className="px-6 py-3 text-left">Reading 2</th>
-                                        <th className="px-6 py-3 text-left">Reading 3</th>
-                                        <th className="px-6 py-3 text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-border">
-                                    {monthEntries.map((entry) => (
-                                        <tr key={entry.id} className="hover:bg-muted/30 transition-colors">
-                                            <td className="px-6 py-4 font-medium text-foreground whitespace-nowrap">
-                                                {new Date(entry.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
-                                            </td>
-                                            <td className="px-6 py-4 text-muted-foreground">
-                                                {entry.title ?? <span className="text-muted-foreground/40 italic">—</span>}
-                                                {entry.theme && (
-                                                    <span className="ml-2 inline-block text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-1.5 py-0.5 rounded">{entry.theme}</span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4 text-muted-foreground">{entry.readingOne}</td>
-                                            <td className="px-6 py-4 text-muted-foreground/60">{entry.readingTwo ?? "—"}</td>
-                                            <td className="px-6 py-4 text-muted-foreground/60">{entry.readingThree ?? "—"}</td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <Link href={`/admin/diary/${entry.id}/edit`} className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">Edit</Link>
-                                                    <DiaryDeleteButton id={entry.id} />
-                                                </div>
-                                            </td>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm min-w-[800px]">
+                                    <thead className="bg-muted/50 text-xs text-muted-foreground uppercase tracking-wide">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left">Date</th>
+                                            <th className="px-6 py-3 text-left">Title / Theme</th>
+                                            <th className="px-6 py-3 text-left">Reading 1</th>
+                                            <th className="px-6 py-3 text-left">Reading 2</th>
+                                            <th className="px-6 py-3 text-left">Reading 3</th>
+                                            {isAdmin && <th className="px-6 py-3 text-right">Actions</th>}
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody className="divide-y divide-border">
+                                        {monthEntries.map((entry) => (
+                                            <tr key={entry.id} className="hover:bg-muted/30 transition-colors">
+                                                <td className="px-6 py-4 font-medium text-foreground whitespace-nowrap">
+                                                    {new Date(entry.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                                                </td>
+                                                <td className="px-6 py-4 text-muted-foreground">
+                                                    {entry.title ?? <span className="text-muted-foreground/40 italic">—</span>}
+                                                    {entry.theme && (
+                                                        <span className="ml-2 inline-block text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-1.5 py-0.5 rounded">{entry.theme}</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 text-muted-foreground">{entry.readingOne}</td>
+                                                <td className="px-6 py-4 text-muted-foreground/60">{entry.readingTwo ?? "—"}</td>
+                                                <td className="px-6 py-4 text-muted-foreground/60">{entry.readingThree ?? "—"}</td>
+                                                {isAdmin && (
+                                                    <td className="px-6 py-4 text-right">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <Link href={`/admin/diary/${entry.id}/edit`} className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">Edit</Link>
+                                                            <DiaryDeleteButton id={entry.id} />
+                                                        </div>
+                                                    </td>
+                                                )}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     ))}
                 </div>

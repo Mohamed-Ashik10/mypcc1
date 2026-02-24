@@ -28,9 +28,11 @@ export default async function TheEchoPage() {
     if (isMember) {
         return (
             <div className="max-w-4xl mx-auto space-y-8">
-                <div>
-                    <h2 className="text-3xl font-bold text-foreground">📰 The Echo</h2>
-                    <p className="text-muted-foreground mt-1">The official newsletter of the Presbyterian Church in Cameroon</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                    <div>
+                        <h2 className="text-2xl sm:text-3xl font-bold text-foreground">📰 The Echo</h2>
+                        <p className="text-muted-foreground mt-1 text-sm">The official newsletter of the Presbyterian Church in Cameroon</p>
+                    </div>
                 </div>
 
                 {/* Latest Free Issue Hero */}
@@ -148,14 +150,14 @@ export default async function TheEchoPage() {
     // ── ADMIN VIEW ───────────────────────────────────────────────────────────
     return (
         <div>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h2 className="text-3xl font-bold text-foreground">📰 The Echo</h2>
-                    <p className="text-muted-foreground mt-1">{issues.length} issues published</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-foreground">📰 The Echo</h2>
+                    <p className="text-muted-foreground mt-1 text-sm">{issues.length} issues published</p>
                 </div>
                 <Link
                     href="/admin/the-echo/new"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-blue-500 transition-all active:scale-95"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-blue-500 transition-all active:scale-95 whitespace-nowrap"
                 >
                     📤 Upload Issue
                 </Link>
