@@ -17,9 +17,11 @@ export default async function PccInfoPage() {
 
     return (
         <div>
-            <div className="mb-8">
-                <h2 className="text-3xl font-bold text-foreground">ℹ️ PCC Information</h2>
-                <p className="text-muted-foreground mt-1">Manage public-facing information about the Presbyterian Church in Cameroon.</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-foreground">ℹ️ PCC Information</h2>
+                    <p className="text-muted-foreground mt-1 text-sm">Manage public-facing information about the Presbyterian Church in Cameroon.</p>
+                </div>
             </div>
 
             {sections.length === 0 ? (
