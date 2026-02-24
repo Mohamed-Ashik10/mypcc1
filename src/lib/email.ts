@@ -1,33 +1,35 @@
 import nodemailer from "nodemailer";
 
-// Transporter will be initialized once
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: process.env.SMTP_SECURE === "true",
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-});
-
 export const sendResetPasswordEmail = async (email: string, token: string) => {
-  // Diagnostic check for environment variables (moved inside function for better consistency in serverless)
-  console.log("Email Config Check:", {
-    hasUser: !!process.env.SMTP_USER,
-    userLength: process.env.SMTP_USER?.length || 0,
-    hasPass: !!process.env.SMTP_PASSWORD,
-    passLength: process.env.SMTP_PASSWORD?.length || 0,
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: process.env.SMTP_PORT || "587",
-    secure: process.env.SMTP_SECURE,
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASSWORD;
+  const host = process.env.SMTP_HOST || "smtp.gmail.com";
+  const port = parseInt(process.env.SMTP_PORT || "587");
+
+  // Diagnostic check for environment variables
+  console.log("Email Config Check (Live):", {
+    hasUser: !!user,
+    userValue: user ? `${user.substring(0, 3)}...` : "MISSING",
+    hasPass: !!pass,
+    passLength: pass?.length || 0,
+    host,
+    port,
     nextAuthUrl: !!process.env.NEXTAUTH_URL
+  });
+
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: process.env.SMTP_SECURE === "true",
+    auth: {
+      user,
+      pass,
+    },
   });
 
   const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`;
 
   try {
-    // Explicitly verify the transporter before sending
     await transporter.verify();
     console.log("SMTP Transporter verified successfully");
   } catch (verifyError) {
@@ -36,11 +38,11 @@ export const sendResetPasswordEmail = async (email: string, token: string) => {
   }
 
   const mailOptions = {
-    from: `"My PCC Support" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+    from: `"My PCC Support" <${process.env.SMTP_FROM || user}>`,
     to: email,
     subject: "Reset Your Password - My PCC",
     html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; rounded: 12px;">
+      <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
         <h2 style="color: #2563eb; text-align: center;">My PCC Admin Dashboard</h2>
         <p>Hello,</p>
         <p>We received a request to reset your password. Click the button below to choose a new one:</p>
