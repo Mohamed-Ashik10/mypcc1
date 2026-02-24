@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 
+// Transporter will be initialized once
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
   port: parseInt(process.env.SMTP_PORT || "587"),
@@ -10,18 +11,29 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Diagnostic check for environment variables
-console.log("Email Config Check:", {
-  hasUser: !!process.env.SMTP_USER,
-  userLength: process.env.SMTP_USER?.length || 0,
-  hasPass: !!process.env.SMTP_PASSWORD,
-  passLength: process.env.SMTP_PASSWORD?.length || 0,
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: process.env.SMTP_PORT || "587"
-});
-
 export const sendResetPasswordEmail = async (email: string, token: string) => {
+  // Diagnostic check for environment variables (moved inside function for better consistency in serverless)
+  console.log("Email Config Check:", {
+    hasUser: !!process.env.SMTP_USER,
+    userLength: process.env.SMTP_USER?.length || 0,
+    hasPass: !!process.env.SMTP_PASSWORD,
+    passLength: process.env.SMTP_PASSWORD?.length || 0,
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
+    port: process.env.SMTP_PORT || "587",
+    secure: process.env.SMTP_SECURE,
+    nextAuthUrl: !!process.env.NEXTAUTH_URL
+  });
+
   const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`;
+
+  try {
+    // Explicitly verify the transporter before sending
+    await transporter.verify();
+    console.log("SMTP Transporter verified successfully");
+  } catch (verifyError) {
+    console.error("SMTP Transporter verification failed:", verifyError);
+    throw verifyError;
+  }
 
   const mailOptions = {
     from: `"My PCC Support" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
