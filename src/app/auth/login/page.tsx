@@ -72,6 +72,8 @@ function LoginForm() {
                 body: JSON.stringify({ email }),
             })
 
+            console.log("Server Response Status:", res.status);
+
             if (res.ok) {
                 setForgotPasswordMsg("A password reset link has been sent to your email address")
                 setError("")

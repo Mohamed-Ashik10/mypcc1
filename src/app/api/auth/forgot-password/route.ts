@@ -4,11 +4,14 @@ import crypto from "crypto";
 import { sendResetPasswordEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
-    console.log("--- Forgot Password API Hit ---");
+    console.log("*****************************************");
+    console.log("!!! FORGOT PASSWORD API TRIGGERED !!!");
+    console.log("Time:", new Date().toISOString());
+    console.log("*****************************************");
     try {
         const body = await req.json();
         const { email } = body;
-        console.log("Request email:", email);
+        console.log("Searching for email:", email);
 
         if (!email) {
             return NextResponse.json(
