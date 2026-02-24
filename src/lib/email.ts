@@ -1,23 +1,33 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: parseInt(process.env.SMTP_PORT || "587"),
-    secure: process.env.SMTP_SECURE === "true",
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
-    },
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: parseInt(process.env.SMTP_PORT || "587"),
+  secure: process.env.SMTP_SECURE === "true",
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+});
+
+// Diagnostic check for environment variables
+console.log("Email Config Check:", {
+  hasUser: !!process.env.SMTP_USER,
+  userLength: process.env.SMTP_USER?.length || 0,
+  hasPass: !!process.env.SMTP_PASSWORD,
+  passLength: process.env.SMTP_PASSWORD?.length || 0,
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: process.env.SMTP_PORT || "587"
 });
 
 export const sendResetPasswordEmail = async (email: string, token: string) => {
-    const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`;
+  const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`;
 
-    const mailOptions = {
-        from: `"My PCC Support" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
-        to: email,
-        subject: "Reset Your Password - My PCC",
-        html: `
+  const mailOptions = {
+    from: `"My PCC Support" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+    to: email,
+    subject: "Reset Your Password - My PCC",
+    html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; rounded: 12px;">
         <h2 style="color: #2563eb; text-align: center;">My PCC Admin Dashboard</h2>
         <p>Hello,</p>
@@ -30,7 +40,7 @@ export const sendResetPasswordEmail = async (email: string, token: string) => {
         <p style="font-size: 12px; color: #64748b; text-align: center;">© ${new Date().getFullYear()} Presbyterian Church in Cameroon</p>
       </div>
     `,
-    };
+  };
 
-    await transporter.sendMail(mailOptions);
+  await transporter.sendMail(mailOptions);
 };
