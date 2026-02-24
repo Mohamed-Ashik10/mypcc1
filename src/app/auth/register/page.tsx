@@ -46,7 +46,7 @@ export default function RegisterPage() {
         <div className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8 relative overflow-hidden">
             <VantaBackground />
 
-            <div className="w-full max-w-md space-y-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white/20 dark:border-slate-800/50 animate-in fade-in zoom-in duration-500 z-10">
+            <div className="w-full max-w-md space-y-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 sm:p-8 rounded-3xl shadow-2xl border border-white/20 dark:border-slate-800/50 animate-in fade-in zoom-in duration-500 z-10">
                 <div className="text-center">
                     <div className="flex justify-center mb-4">
                         <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-3xl font-bold shadow-lg ring-4 ring-blue-600/10">

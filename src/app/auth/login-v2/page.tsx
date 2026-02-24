@@ -21,20 +21,20 @@ export default function LoginV2Page() {
     return (
         <div className="min-h-screen bg-[#1e2a3a] flex items-center justify-center p-6 overflow-hidden select-none">
             {/* Animated Ring Container */}
-            <div className="relative w-[400px] h-[400px] flex items-center justify-center">
-                <div className="absolute inset-0 animate-[spin_20s_linear_infinite]">
+            <div className="relative w-full max-w-[400px] aspect-square flex items-center justify-center">
+                <div className="absolute inset-0 animate-[spin_20s_linear_infinite] scale-[0.8] sm:scale-100">
                     {[...Array(numBars)].map((_, i) => {
                         const isActive = (activeBars >= i && activeBars < i + 8) || (activeBars + numBars < i + 8)
                         return (
                             <div
                                 key={i}
-                                className={`absolute w-[6px] h-[30px] rounded-full left-1/2 -ml-[3px] transition-all duration-300 ${isActive
-                                        ? "bg-gradient-to-b from-orange-400 to-orange-600 shadow-[0_0_15px_rgba(251,146,60,0.8)] scale-y-110"
-                                        : "bg-slate-700 opacity-30"
+                                className={`absolute w-[4px] sm:w-[6px] h-[20px] sm:h-[30px] rounded-full left-1/2 -ml-[2px] sm:-ml-[3px] transition-all duration-300 ${isActive
+                                    ? "bg-gradient-to-b from-orange-400 to-orange-600 shadow-[0_0_15px_rgba(251,146,60,0.8)] scale-y-110"
+                                    : "bg-slate-700 opacity-30"
                                     }`}
                                 style={{
-                                    transformOrigin: 'center 200px',
-                                    transform: `rotate(${(360 / numBars) * i}deg) translateY(-170px)`
+                                    transformOrigin: 'center 50%',
+                                    transform: `rotate(${(360 / numBars) * i}deg) translateY(-140px) sm:translateY(-170px)`
                                 }}
                             />
                         )
@@ -42,7 +42,7 @@ export default function LoginV2Page() {
                 </div>
 
                 {/* Login Card */}
-                <div className="relative z-10 w-full max-w-[420px] bg-[#1e2a3a]/95 backdrop-blur-md p-10 rounded-[30px] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-white/10">
+                <div className="relative z-10 w-full bg-[#1e2a3a]/95 backdrop-blur-md p-6 sm:p-10 rounded-[30px] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-white/10">
                     <h2 className="text-center text-[#ffa500] text-3xl font-bold uppercase tracking-[4px] mb-8">
                         Login
                     </h2>
