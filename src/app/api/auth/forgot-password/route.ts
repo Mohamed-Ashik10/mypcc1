@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import crypto from "crypto";
+import { sendResetPasswordEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
     try {
@@ -17,12 +19,32 @@ export async function POST(req: Request) {
             where: { email },
         });
 
-        // For security, even if user doesn't exist, we can return success
-        // but for this demo/local env, let's just log it
-        console.log(`[SIMULATION] Verification code sent to: ${email}`);
+        if (user) {
+            // Generate a secure random token
+            const token = crypto.randomBytes(32).toString("hex");
+            const expiry = new Date(Date.now() + 3600000); // 1 hour from now
 
-        // In a real app, you would generate a code, save it in DB with expiry, and email it.
+            // Save token and expiry to user
+            await prisma.user.update({
+                where: { email },
+                data: {
+                    resetToken: token,
+                    resetTokenExpiry: expiry,
+                },
+            });
 
+            // Send actual email (swallow errors to prevent info leakage, but log locally)
+            try {
+                await sendResetPasswordEmail(email, token);
+                console.log(`[SUCCESS] Reset email sent to: ${email}`);
+            } catch (emailError) {
+                console.error("Email sending failed:", emailError);
+            }
+        } else {
+            console.log(`[SECURITY] Forgot password attempt for non-existent email: ${email}`);
+        }
+
+        // For security, always return success even if user doesn't exist
         return NextResponse.json(
             { message: "A password reset link has been sent to your email address" },
             { status: 200 }

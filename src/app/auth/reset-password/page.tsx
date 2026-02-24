@@ -27,9 +27,22 @@ function ResetPasswordForm() {
         setError("")
 
         try {
-            // Mock API call
-            await new Promise(resolve => setTimeout(resolve, 1500))
-            setSuccess(true)
+            const res = await fetch("/api/auth/reset-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    token: searchParams.get("token"),
+                    password
+                }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setSuccess(true)
+            } else {
+                setError(data.error || "Failed to reset password")
+            }
         } catch (err) {
             setError("Something went wrong")
         } finally {

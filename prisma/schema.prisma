@@ -17,6 +17,8 @@ model User {
   role          User_role      @default(MEMBER)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  resetToken       String?
+  resetTokenExpiry DateTime?
   sessions      Session[]
   subscriptions Subscription[]
   transactions  Transaction[]
