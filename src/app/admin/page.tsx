@@ -37,8 +37,8 @@ export default async function AdminDashboardPage() {
         return (
             <div className="space-y-10">
                 <div>
-                    <h2 className="text-3xl font-black text-foreground tracking-tight">Overview</h2>
-                    <p className="text-muted-foreground mt-1 font-medium">Welcome back, {userName}! Here's the state of the platform.</p>
+                    <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">Overview</h2>
+                    <p className="text-sm sm:text-base text-muted-foreground mt-1 font-medium">Welcome back, {userName}! Here's the state of the platform.</p>
                 </div>
 
                 {/* Stats Grid */}
@@ -67,11 +67,11 @@ export default async function AdminDashboardPage() {
                 <div className="bg-slate-900 border border-white/5 rounded-[40px] shadow-2xl p-8 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 group">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full -translate-y-32 translate-x-32 blur-3xl" />
                     <div className="z-10 text-center md:text-left">
-                        <p className="text-xs font-black text-blue-400 uppercase tracking-[0.3em] mb-2">Platform Revenue</p>
-                        <p className="text-5xl font-black tracking-tighter">
+                        <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-2">Platform Revenue</p>
+                        <p className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter">
                             {stats.totalRevenue.toLocaleString("fr-CM", { style: "currency", currency: "XAF" })}
                         </p>
-                        <p className="text-blue-100/40 text-sm mt-2 font-medium">Accumulated from completed internal transactions</p>
+                        <p className="text-blue-100/40 text-xs sm:text-sm mt-2 font-medium">Accumulated from completed internal transactions</p>
                     </div>
                     <div className="z-10 bg-white/5 backdrop-blur-md rounded-3xl p-6 border border-white/10 text-center min-w-[200px] group-hover:scale-105 transition-transform">
                         <p className="text-xs font-black text-blue-200 uppercase tracking-widest mb-1">Growth</p>
@@ -119,10 +119,10 @@ export default async function AdminDashboardPage() {
         <div className="space-y-10">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <h2 className="text-4xl font-black text-foreground tracking-tight italic">Shalom, {userName.split(' ')[0]}!</h2>
-                    <p className="text-muted-foreground mt-1 text-lg font-medium">Welcome to your My PCC spiritual portal.</p>
+                    <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight italic">Shalom, {userName.split(' ')[0]}!</h2>
+                    <p className="text-sm sm:text-base text-muted-foreground mt-1 text-lg font-medium">Welcome to your My PCC spiritual portal.</p>
                 </div>
-                <div className="flex items-center gap-3 bg-card border border-border px-4 py-2 rounded-2xl shadow-sm">
+                <div className="flex items-center gap-3 bg-card border border-border px-4 py-2 rounded-2xl shadow-sm self-start md:self-auto">
                     <span className="text-2xl animate-pulse">📅</span>
                     <div>
                         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">Today is</p>
@@ -144,11 +144,11 @@ export default async function AdminDashboardPage() {
                         <div className="relative z-10 space-y-4">
                             {todayReading ? (
                                 <>
-                                    <h3 className="text-3xl font-black leading-tight italic">"{todayReading.title || "Daily Word"}"</h3>
-                                    {todayReading.theme && <p className="text-blue-100/60 font-medium italic">Theme: {todayReading.theme}</p>}
-                                    <div className="flex flex-wrap gap-3 pt-4">
+                                    <h3 className="text-2xl sm:text-3xl font-black leading-tight italic">"{todayReading.title || "Daily Word"}"</h3>
+                                    {todayReading.theme && <p className="text-blue-100/60 text-sm sm:text-base font-medium italic">Theme: {todayReading.theme}</p>}
+                                    <div className="flex flex-wrap gap-2 sm:gap-3 pt-4">
                                         {[todayReading.readingOne, todayReading.readingTwo, todayReading.readingThree].filter(Boolean).map((r, i) => (
-                                            <div key={i} className="bg-white/10 backdrop-blur-md rounded-2xl px-5 py-3 border border-white/20 font-bold text-sm">
+                                            <div key={i} className="bg-white/10 backdrop-blur-md rounded-2xl px-3 py-2 sm:px-5 sm:py-3 border border-white/20 font-bold text-xs sm:text-sm">
                                                 📜 {r}
                                             </div>
                                         ))}

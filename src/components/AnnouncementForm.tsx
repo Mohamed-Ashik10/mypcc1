@@ -63,7 +63,7 @@ export default function AnnouncementForm({ initialData, mode }: Props) {
         "block w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all";
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 bg-card text-card-foreground rounded-2xl shadow-lg p-8 max-w-2xl border border-border">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-card text-card-foreground rounded-2xl shadow-lg p-5 sm:p-8 max-w-2xl border border-border">
             <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5 ml-1">Title <span className="text-destructive">*</span></label>
                 <input type="text" name="title" required value={form.title} onChange={handleChange} placeholder="e.g. Youth Camp Registration Open" className={inputCls} />
