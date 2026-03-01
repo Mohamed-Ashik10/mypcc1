@@ -103,7 +103,18 @@
         filterHymns();
     }
 
+    // ══ TTS STATE ══
+    let _ttsHymn = null;
+    let _ttsSpeaking = false;
+    let _ttsPaused = false;
+
     function openHymn(h) {
+        // Stop any ongoing speech when opening a new/different hymn
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        _ttsHymn = h;
+        _ttsSpeaking = false;
+        _ttsPaused = false;
+
         document.getElementById('m-eyebrow').textContent = 'Hymn No. ' + h.num;
         document.getElementById('m-title').textContent = h.title;
         document.getElementById('m-author').textContent = h.author;
@@ -115,9 +126,88 @@
         document.getElementById('m-lyrics').innerHTML = lyricsHTML;
         buildWave('modalWave', 22);
         document.getElementById('hymnModal').classList.add('open');
+        // Reset play button
+        const btn = document.querySelector('.modal-play-btn');
+        if (btn) btn.textContent = '▶ Play';
     }
-    function closeModal() { document.getElementById('hymnModal').classList.remove('open'); }
-    function togglePlay(btn) { btn.textContent = btn.textContent.includes('▶') ? '⏸ Pause' : '▶ Play'; }
+
+    function closeModal() {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        _ttsSpeaking = false; _ttsPaused = false;
+        document.getElementById('hymnModal').classList.remove('open');
+    }
+
+    function togglePlay(btn) {
+        if (!window.speechSynthesis) {
+            alert('Text-to-speech is not supported in your browser.');
+            return;
+        }
+        const synth = window.speechSynthesis;
+
+        // ── PAUSE ──
+        if (_ttsSpeaking && !_ttsPaused) {
+            synth.pause();
+            _ttsPaused = true;
+            btn.textContent = '▶ Play';
+            _setWaveState(false);
+            return;
+        }
+
+        // ── RESUME ──
+        if (_ttsSpeaking && _ttsPaused) {
+            synth.resume();
+            _ttsPaused = false;
+            btn.textContent = '⏸ Pause';
+            _setWaveState(true);
+            return;
+        }
+
+        // ── FRESH START ──
+        if (!_ttsHymn) return;
+        synth.cancel();
+
+        // Build one utterance per stanza/refrain for natural pacing
+        const parts = [];
+        parts.push(_ttsHymn.title + ', by ' + _ttsHymn.author);
+        _ttsHymn.lyrics.forEach((l, idx) => {
+            const label = l.type === 'refrain' ? 'Refrain. ' : ('Verse ' + (idx + 1) + '. ');
+            parts.push(label + l.text.replace(/\n/g, ', '));
+        });
+
+        let partIdx = 0;
+        function speakNext() {
+            if (partIdx >= parts.length) {
+                _ttsSpeaking = false; _ttsPaused = false;
+                btn.textContent = '▶ Play';
+                _setWaveState(false);
+                return;
+            }
+            const utt = new SpeechSynthesisUtterance(parts[partIdx++]);
+            utt.rate = 0.88;   // slightly slower, reverent pace
+            utt.pitch = 1.05;
+            utt.lang = 'en-GB';
+            // Pick a nice voice if available
+            const voices = synth.getVoices();
+            const preferred = voices.find(v => /samantha|google uk|daniel|karen|victoria/i.test(v.name));
+            if (preferred) utt.voice = preferred;
+            utt.onend = speakNext;
+            utt.onerror = () => { _ttsSpeaking = false; btn.textContent = '▶ Play'; _setWaveState(false); };
+            synth.speak(utt);
+        }
+
+        _ttsSpeaking = true; _ttsPaused = false;
+        btn.textContent = '⏸ Pause';
+        _setWaveState(true);
+        speakNext();
+    }
+
+    function _setWaveState(playing) {
+        const wave = document.getElementById('modalWave');
+        if (!wave) return;
+        wave.querySelectorAll('.pw-bar').forEach(b => {
+            b.style.animationPlayState = playing ? 'running' : 'paused';
+        });
+    }
 
     function buildWave(id, count) {
         const el = document.getElementById(id);

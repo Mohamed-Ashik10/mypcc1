@@ -319,7 +319,7 @@ export default function LandingPageClient({
                         <p className="player-label">Listen Now</p>
                         <div className="player-wave" id="modalWave"></div>
                         <div className="player-controls">
-                            <button className="pc-btn" onClick={(e) => (window as any).togglePlay(e.currentTarget)}>▶ Play</button>
+                            <button className="pc-btn modal-play-btn" onClick={(e) => (window as any).togglePlay(e.currentTarget)}>▶ Play</button>
                             <button className="pc-btn pc-save">♡ Save to Diary</button>
                         </div>
                     </div>

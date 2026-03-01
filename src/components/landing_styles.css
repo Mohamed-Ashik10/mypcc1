@@ -2145,35 +2145,136 @@ nav {
 -------------------------------------- */
 
 @media screen and (max-width: 1024px) {
-  .hero-h1 { font-size: clamp(3rem, 7vw, 5.5rem); }
-  .diary-layout { grid-template-columns: 280px 1fr; }
-  .sticky-section { flex-direction: column; }
-  .sticky-left { position: relative; top: 0; width: 100%; padding-bottom: 24px; }
-  .sticky-right { width: 100%; margin-top: 24px; }
+  .hero-h1 {
+    font-size: clamp(3rem, 7vw, 5.5rem);
+  }
+
+  .diary-layout {
+    grid-template-columns: 280px 1fr;
+  }
+
+  .sticky-section {
+    flex-direction: column;
+  }
+
+  .sticky-left {
+    position: relative;
+    top: 0;
+    width: 100%;
+    padding-bottom: 24px;
+  }
+
+  .sticky-right {
+    width: 100%;
+    margin-top: 24px;
+  }
 }
 
 @media screen and (max-width: 768px) {
-  nav { padding: 0 24px; }
-  .nav-tabs { display: none; }
-  .hero-h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); }
-  .hymns-hero { padding: 100px 24px 60px; }
-  .hymns-grid, .echo-grid, .devo-archive-grid { grid-template-columns: 1fr; padding: 0 24px; }
-  .diary-layout { grid-template-columns: 1fr; display: flex; flex-direction: column; }
-  .diary-sidebar { border-right: none; border-bottom: 1px solid var(--border); padding: 24px; height: auto; max-height: 40vh; overflow-y: auto; }
-  .diary-main { padding: 32px 24px; }
-  .hymn-search-wrap { padding: 0 24px; }
-  .hymn-search { flex-direction: column; }
-  .hymn-search button { width: 100%; }
-  footer > div { grid-template-columns: 1fr; gap: 32px; }
+  nav {
+    padding: 0 24px;
+  }
+
+  .nav-tabs {
+    display: none;
+  }
+
+  .hero-h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .hymns-hero {
+    padding: 100px 24px 60px;
+  }
+
+  .hymns-grid,
+  .echo-grid,
+  .devo-archive-grid {
+    grid-template-columns: 1fr;
+    padding: 0 24px;
+  }
+
+  .diary-layout {
+    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .diary-sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 24px;
+    height: auto;
+    max-height: 40vh;
+    overflow-y: auto;
+  }
+
+  .diary-main {
+    padding: 32px 24px;
+  }
+
+  .hymn-search-wrap {
+    padding: 0 24px;
+  }
+
+  .hymn-search {
+    flex-direction: column;
+  }
+
+  .hymn-search button {
+    width: 100%;
+  }
+
+  footer>div {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
 }
 
 @media screen and (max-width: 480px) {
-  .nav-right { gap: 8px; }
-  .nav-join { padding: 6px 12px; font-size: 0.65rem; }
-  .hero-h1 { font-size: 2.8rem; }
-  .hero-sub { font-size: 1rem; padding: 0 16px; }
-  #announcementsList { grid-template-columns: 1fr; }
-  .sub-plans { grid-template-columns: 1fr; }
-  .hymn-modal { padding: 32px 24px; }
-  .modal-title { font-size: 1.6rem; }
+  .nav-right {
+    gap: 8px;
+  }
+
+  .nav-join {
+    padding: 6px 12px;
+    font-size: 0.65rem;
+  }
+
+  .hero-h1 {
+    font-size: 2.8rem;
+  }
+
+  .hero-sub {
+    font-size: 1rem;
+    padding: 0 16px;
+  }
+
+  #announcementsList {
+    grid-template-columns: 1fr;
+  }
+
+  .sub-plans {
+    grid-template-columns: 1fr;
+  }
+
+  .hymn-modal {
+    padding: 32px 24px;
+  }
+
+  .modal-title {
+    font-size: 1.6rem;
+  }
+}
+
+@keyframes wave {
+
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  50% {
+    transform: scaleY(1.5);
+  }
 }
