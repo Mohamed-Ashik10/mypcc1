@@ -21,7 +21,6 @@ async function getAdminStats() {
     }
 }
 
-
 export default async function AdminDashboardPage() {
     const session = await getServerSession(authOptions);
     const userRole = (session?.user as any)?.role || "USER";
@@ -34,46 +33,72 @@ export default async function AdminDashboardPage() {
         const stats = await getAdminStats();
 
         const statCards = [
-            { label: "Total Members", key: "users", icon: "👥", color: "from-blue-500 to-blue-600", href: "/admin/users" },
-            { label: "Total Hymns", key: "hymns", icon: "🎵", color: "from-purple-500 to-purple-600", href: "/admin/hymns" },
-            { label: "Diary Entries", key: "diaryEntries", icon: "📖", color: "from-emerald-500 to-emerald-600", href: "/admin/diary" },
-            { label: "Active Subs", key: "subscriptions", icon: "💳", color: "from-orange-500 to-orange-600", href: "/admin/subscriptions" },
+            { label: "Total Members", key: "users", icon: "👥", gradient: "from-[#6c47ff] to-[#a855f7]", glow: "rgba(108,71,255,0.3)", href: "/admin/users" },
+            { label: "Total Hymns", key: "hymns", icon: "🎵", gradient: "from-[#a855f7] to-[#c084fc]", glow: "rgba(168,85,247,0.3)", href: "/admin/hymns" },
+            { label: "Diary Entries", key: "diaryEntries", icon: "📖", gradient: "from-[#06b6d4] to-[#0284c7]", glow: "rgba(6,182,212,0.3)", href: "/admin/diary" },
+            { label: "Active Subs", key: "subscriptions", icon: "💳", gradient: "from-[#f59e0b] to-[#d97706]", glow: "rgba(245,158,11,0.3)", href: "/admin/subscriptions" },
+        ];
+
+        const quickActions = [
+            { label: "Add Hymn", href: "/admin/hymns/new", icon: "🎵" },
+            { label: "New Diary Entry", href: "/admin/diary/new", icon: "✍️" },
+            { label: "Upload Echo", href: "/admin/the-echo/new", icon: "📰" },
+            { label: "Announcement", href: "/admin/announcements/new", icon: "📢" },
         ];
 
         return (
-            <div className="space-y-10">
-                <div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">Overview</h2>
-                    <p className="text-sm sm:text-base text-muted-foreground mt-1 font-medium">Welcome back, {userName}! Here's the state of the platform.</p>
+            <div className="space-y-8">
+
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h2 className="text-2xl font-bold text-white tracking-tight">Dashboard Overview</h2>
+                        <p className="text-sm text-white/40 mt-1">
+                            Welcome back, <span className="text-[#a855f7] font-semibold">{userName}</span>! Here&apos;s the state of the platform.
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2 px-4 py-1.5 bg-[#10b981]/10 border border-[#10b981]/20 rounded-full">
+                        <div className="w-2 h-2 bg-[#10b981] rounded-full animate-pulse" />
+                        <span className="text-[11px] font-semibold text-[#10b981] tracking-widest uppercase">System Live</span>
+                    </div>
                 </div>
 
                 {/* DB Error Banner */}
                 {stats.error && (
-                    <div className="bg-red-900/30 border border-red-500/40 text-red-300 rounded-2xl px-6 py-4 text-sm font-medium flex items-start gap-3">
+                    <div className="bg-red-900/20 border border-red-500/30 text-red-300 rounded-2xl px-6 py-4 text-sm font-medium flex items-start gap-3">
                         <span className="text-xl">⚠️</span>
                         <div>
-                            <p className="font-black text-red-200">Database Unavailable</p>
-                            <p className="text-red-300/70 text-xs mt-1">Cannot reach the database server. Stats below show cached zeros. Check your database connection.<br /><span className="opacity-50 font-mono">{stats.error}</span></p>
+                            <p className="font-bold text-red-200">Database Unavailable</p>
+                            <p className="text-red-300/70 text-xs mt-1">Cannot reach the database server. Stats show cached zeros.<br /><span className="opacity-50 font-mono">{stats.error}</span></p>
                         </div>
                     </div>
                 )}
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Stat Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                     {statCards.map((card) => (
                         <Link key={card.key} href={card.href}>
-                            <div className="bg-card text-card-foreground rounded-3xl shadow-sm p-6 flex items-center gap-5 hover:shadow-xl hover:translate-y-[-4px] transition-all cursor-pointer border border-border group relative overflow-hidden">
-                                <div className={`bg-gradient-to-br ${card.color} text-white text-3xl p-4 rounded-2xl shadow-lg ring-4 ring-white/10 dark:ring-black/10 group-hover:scale-110 transition-transform`}>
+                            <div
+                                className="relative overflow-hidden rounded-2xl border border-white/[0.08] p-5 cursor-pointer group transition-all hover:-translate-y-1 hover:border-white/15"
+                                style={{ background: "rgba(17,17,39,0.9)" }}
+                            >
+                                {/* Glow */}
+                                <div
+                                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl"
+                                    style={{ background: `radial-gradient(ellipse at top right, ${card.glow} 0%, transparent 65%)` }}
+                                />
+                                {/* Icon */}
+                                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center text-lg mb-4 shadow-lg`}>
                                     {card.icon}
                                 </div>
-                                <div className="z-10">
-                                    <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">{card.label}</p>
-                                    <p className="text-3xl font-black text-foreground mt-0.5">
-                                        {(stats as any)[card.key].toLocaleString()}
-                                    </p>
-                                </div>
-                                <div className="absolute -right-4 -bottom-4 opacity-[0.03] text-8xl group-hover:scale-125 transition-transform">
-                                    {card.icon}
+                                {/* Value */}
+                                <p className="text-2xl font-bold text-white mb-1">
+                                    {(stats as any)[card.key].toLocaleString()}
+                                </p>
+                                <p className="text-xs font-medium text-white/40 uppercase tracking-widest">{card.label}</p>
+                                {/* Bottom bar */}
+                                <div className="mt-4 h-[2px] bg-white/5 rounded-full overflow-hidden">
+                                    <div className={`h-full bg-gradient-to-r ${card.gradient} rounded-full`} style={{ width: "70%" }} />
                                 </div>
                             </div>
                         </Link>
@@ -81,48 +106,86 @@ export default async function AdminDashboardPage() {
                 </div>
 
                 {/* Revenue Banner */}
-                <div className="bg-slate-900 border border-white/5 rounded-[40px] shadow-2xl p-8 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full -translate-y-32 translate-x-32 blur-3xl" />
-                    <div className="z-10 text-center md:text-left">
-                        <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-2">Platform Revenue</p>
-                        <p className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter">
+                <div
+                    className="relative overflow-hidden rounded-2xl border border-white/[0.08] p-7 flex flex-col md:flex-row items-center justify-between gap-6"
+                    style={{ background: "linear-gradient(135deg,#0f0f22 0%,#1a1333 100%)" }}
+                >
+                    {/* Glow orb */}
+                    <div className="absolute -top-20 -right-20 w-72 h-72 bg-[#6c47ff]/10 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute -bottom-20 -left-10 w-56 h-56 bg-[#06b6d4]/8 rounded-full blur-3xl pointer-events-none" />
+
+                    <div className="z-10">
+                        <p className="text-[10px] font-bold text-[#a855f7] uppercase tracking-[0.3em] mb-2">Platform Revenue (Total)</p>
+                        <p className="text-4xl md:text-5xl font-black text-white tracking-tight">
                             {stats.totalRevenue.toLocaleString("fr-CM", { style: "currency", currency: "XAF" })}
                         </p>
-                        <p className="text-blue-100/40 text-xs sm:text-sm mt-2 font-medium">Accumulated from completed internal transactions</p>
+                        <p className="text-white/30 text-sm mt-2">Accumulated from completed transactions</p>
                     </div>
-                    <div className="z-10 bg-white/5 backdrop-blur-md rounded-3xl p-6 border border-white/10 text-center min-w-[200px] group-hover:scale-105 transition-transform">
-                        <p className="text-xs font-black text-blue-200 uppercase tracking-widest mb-1">Growth</p>
-                        <p className="text-3xl font-black text-blue-400">Stable</p>
-                        <p className="text-[10px] text-blue-100/40 italic">Last 30 Days</p>
+                    <div
+                        className="z-10 rounded-xl px-8 py-5 text-center border border-white/10 min-w-[180px] group-hover:scale-105 transition-transform"
+                        style={{ background: "rgba(108,71,255,0.12)" }}
+                    >
+                        <p className="text-[10px] font-bold text-[#a855f7] uppercase tracking-widest mb-1">Status</p>
+                        <p className="text-2xl font-black text-white">Stable</p>
+                        <p className="text-[10px] text-white/30 mt-1">Last 30 days</p>
                     </div>
                 </div>
 
-                {/* Quick Actions */}
-                <div>
-                    <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest mb-6 ml-1">Admin Quick Actions</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                        {[
-                            { label: "Add Hymn", href: "/admin/hymns/new", icon: "🎵", color: "text-purple-500" },
-                            { label: "New Diary Entry", href: "/admin/diary/new", icon: "📝", color: "text-emerald-500" },
-                            { label: "Upload Echo", href: "/admin/the-echo/new", icon: "📰", color: "text-blue-500" },
-                            { label: "Announcement", href: "/admin/announcements/new", icon: "📢", color: "text-orange-500" },
-                        ].map((action) => (
-                            <Link key={action.href} href={action.href}>
-                                <div className="bg-card border-2 border-dashed border-border rounded-3xl p-6 text-center hover:border-blue-500 hover:bg-blue-500/[0.02] hover:shadow-lg transition-all cursor-pointer group">
-                                    <div className={`${action.color} text-4xl mb-3 group-hover:scale-110 group-hover:rotate-6 transition-transform text-center flex justify-center`}>
-                                        <span dangerouslySetInnerHTML={{ __html: action.icon === "📝" ? "✍️" : action.icon }} />
+                {/* Quick Actions + Activity Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    {/* Quick Actions */}
+                    <div
+                        className="rounded-2xl border border-white/[0.08] p-6"
+                        style={{ background: "rgba(17,17,39,0.9)" }}
+                    >
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/25 mb-4">Quick Actions</p>
+                        <div className="grid grid-cols-2 gap-3">
+                            {quickActions.map((action) => (
+                                <Link key={action.href} href={action.href}>
+                                    <div className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-white/[0.07] bg-white/[0.02] hover:bg-[#6c47ff]/10 hover:border-[#6c47ff]/30 transition-all cursor-pointer group">
+                                        <span className="text-2xl group-hover:scale-110 transition-transform">{action.icon}</span>
+                                        <span className="text-xs font-semibold text-white/50 group-hover:text-white/90 transition-colors text-center">{action.label}</span>
                                     </div>
-                                    <p className="text-sm font-black text-muted-foreground group-hover:text-foreground">{action.label}</p>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Role Breakdown */}
+                    <div
+                        className="rounded-2xl border border-white/[0.08] p-6"
+                        style={{ background: "rgba(17,17,39,0.9)" }}
+                    >
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/25 mb-4">Platform Summary</p>
+                        <div className="space-y-4">
+                            {[
+                                { label: "Members", value: stats.users, max: Math.max(stats.users, 1), color: "from-[#6c47ff] to-[#a855f7]" },
+                                { label: "Hymns Published", value: stats.hymns, max: Math.max(stats.hymns, 1), color: "from-[#a855f7] to-[#c084fc]" },
+                                { label: "Diary Entries", value: stats.diaryEntries, max: Math.max(stats.diaryEntries, 1), color: "from-[#06b6d4] to-[#22d3ee]" },
+                                { label: "Active Subscriptions", value: stats.subscriptions, max: Math.max(stats.subscriptions, 1), color: "from-[#f59e0b] to-[#fbbf24]" },
+                            ].map((item) => (
+                                <div key={item.label}>
+                                    <div className="flex justify-between mb-1.5">
+                                        <span className="text-xs text-white/50">{item.label}</span>
+                                        <span className="text-xs font-bold text-white">{item.value.toLocaleString()}</span>
+                                    </div>
+                                    <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                        <div
+                                            className={`h-full bg-gradient-to-r ${item.color} rounded-full transition-all duration-700`}
+                                            style={{ width: `${Math.min((item.value / item.max) * 100, 100)}%` }}
+                                        />
+                                    </div>
                                 </div>
-                            </Link>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 </div>
+
             </div>
         );
     }
 
-    // ── MEMBER VIEW ──────────────────────────────────────────────────────────
+    // ── MEMBER VIEW ────────────────────────────────────────────────────────
     let todayReading = null;
     let activeSub = null;
     try {
@@ -139,123 +202,114 @@ export default async function AdminDashboardPage() {
     }
 
     return (
-        <div className="space-y-10">
+        <div className="space-y-8">
+            {/* Greeting */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight italic">Shalom, {userName.split(' ')[0]}!</h2>
-                    <p className="text-sm sm:text-base text-muted-foreground mt-1 text-lg font-medium">Welcome to your My PCC spiritual portal.</p>
+                    <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight italic">Shalom, {userName.split(' ')[0]}!</h2>
+                    <p className="text-sm text-white/40 mt-1">Welcome to your My PCC spiritual portal.</p>
                 </div>
-                <div className="flex items-center gap-3 bg-card border border-border px-4 py-2 rounded-2xl shadow-sm self-start md:self-auto">
+                <div className="flex items-center gap-3 px-4 py-2 rounded-xl border border-white/[0.08] self-start md:self-auto" style={{ background: "rgba(17,17,39,0.9)" }}>
                     <span className="text-2xl animate-pulse">📅</span>
                     <div>
-                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">Today is</p>
-                        <p className="text-sm font-bold text-foreground">{new Date().toLocaleDateString("en-GB", { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                        <p className="text-[10px] font-black text-white/30 uppercase tracking-widest leading-none">Today is</p>
+                        <p className="text-sm font-bold text-white">{new Date().toLocaleDateString("en-GB", { weekday: 'long', day: 'numeric', month: 'long' })}</p>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left: Spiritual Food */}
-                <div className="lg:col-span-2 space-y-8">
-                    {/* Today's Reading Card */}
-                    <div className="bg-gradient-to-br from-blue-600 to-indigo-800 rounded-[40px] p-8 text-white shadow-2xl relative overflow-hidden min-h-[300px] flex flex-col justify-end">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left: Spiritual Content */}
+                <div className="lg:col-span-2 space-y-6">
+                    {/* Today's Reading */}
+                    <div className="relative overflow-hidden rounded-2xl p-8 text-white min-h-[280px] flex flex-col justify-end border border-white/10"
+                        style={{ background: "linear-gradient(135deg,#3b1fa8 0%,#1e1080 100%)" }}>
                         <div className="absolute top-8 left-8">
-                            <span className="text-xs font-black uppercase tracking-[0.3em] text-blue-200 py-1 px-3 border border-blue-200/30 rounded-full">Daily Spiritual Bread</span>
+                            <span className="text-xs font-black uppercase tracking-[0.3em] text-[#a855f7]/80 py-1 px-3 border border-[#a855f7]/30 rounded-full">Daily Spiritual Bread</span>
                         </div>
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32 blur-3xl" />
-
+                        <div className="absolute -top-10 -right-10 w-48 h-48 bg-white/5 rounded-full blur-3xl pointer-events-none" />
                         <div className="relative z-10 space-y-4">
                             {todayReading ? (
                                 <>
-                                    <h3 className="text-2xl sm:text-3xl font-black leading-tight italic">"{todayReading.title || "Daily Word"}"</h3>
-                                    {todayReading.theme && <p className="text-blue-100/60 text-sm sm:text-base font-medium italic">Theme: {todayReading.theme}</p>}
-                                    <div className="flex flex-wrap gap-2 sm:gap-3 pt-4">
+                                    <h3 className="text-2xl sm:text-3xl font-black leading-tight italic">&ldquo;{todayReading.title || "Daily Word"}&rdquo;</h3>
+                                    {todayReading.theme && <p className="text-[#c084fc]/70 text-sm font-medium italic">Theme: {todayReading.theme}</p>}
+                                    <div className="flex flex-wrap gap-2 pt-2">
                                         {[todayReading.readingOne, todayReading.readingTwo, todayReading.readingThree].filter(Boolean).map((r, i) => (
-                                            <div key={i} className="bg-white/10 backdrop-blur-md rounded-2xl px-3 py-2 sm:px-5 sm:py-3 border border-white/20 font-bold text-xs sm:text-sm">
+                                            <div key={i} className="bg-white/10 backdrop-blur-md rounded-xl px-4 py-2 border border-white/20 font-bold text-xs">
                                                 📜 {r}
                                             </div>
                                         ))}
                                     </div>
-                                    <Link
-                                        href="/admin/diary"
-                                        className="inline-flex items-center gap-2 mt-6 font-black text-sm text-blue-200 hover:text-white transition-colors"
-                                    >
+                                    <Link href="/admin/diary" className="inline-flex items-center gap-2 mt-4 font-bold text-sm text-[#c084fc] hover:text-white transition-colors">
                                         Read Full Scripture →
                                     </Link>
                                 </>
                             ) : (
-                                <div className="text-center py-12">
-                                    <p className="text-2xl font-bold opacity-60">Seek and ye shall find...</p>
-                                    <p className="text-sm opacity-40 mt-1">No reading scheduled for today. Check the diary for more.</p>
-                                    <Link href="/admin/diary" className="mt-4 inline-block text-blue-200 underline text-sm">Open Church Diary</Link>
+                                <div className="text-center py-8">
+                                    <p className="text-xl font-bold opacity-60">Seek and ye shall find...</p>
+                                    <p className="text-sm opacity-40 mt-1">No reading scheduled for today.</p>
+                                    <Link href="/admin/diary" className="mt-4 inline-block text-[#c084fc] underline text-sm">Open Church Diary</Link>
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    {/* Quick Access Grid */}
-                    <div className="grid grid-cols-2 gap-6">
-                        <Link href="/admin/hymns">
-                            <div className="bg-card border border-border rounded-3xl p-6 hover:shadow-xl hover:translate-y-[-4px] transition-all group overflow-hidden relative">
-                                <span className="text-4xl block mb-3 group-hover:scale-110 transition-transform">🎵</span>
-                                <h4 className="font-black text-foreground">Hymn Book</h4>
-                                <p className="text-xs text-muted-foreground mt-1 font-medium">Lyrics & Praise</p>
-                                <div className="absolute -right-4 -bottom-4 opacity-[0.02] text-7xl font-black italic">SING</div>
-                            </div>
-                        </Link>
-                        <Link href="/admin/the-echo">
-                            <div className="bg-card border border-border rounded-3xl p-6 hover:shadow-xl hover:translate-y-[-4px] transition-all group overflow-hidden relative">
-                                <span className="text-4xl block mb-3 group-hover:scale-110 transition-transform">📰</span>
-                                <h4 className="font-black text-foreground">The Echo</h4>
-                                <p className="text-xs text-muted-foreground mt-1 font-medium">Church News</p>
-                                <div className="absolute -right-4 -bottom-4 opacity-[0.02] text-7xl font-black italic">NEWS</div>
-                            </div>
-                        </Link>
+                    {/* Quick Nav */}
+                    <div className="grid grid-cols-2 gap-4">
+                        {[
+                            { href: "/admin/hymns", icon: "🎵", title: "Hymn Book", sub: "Lyrics & Praise" },
+                            { href: "/admin/the-echo", icon: "📰", title: "The Echo", sub: "Church News" },
+                        ].map(item => (
+                            <Link key={item.href} href={item.href}>
+                                <div className="rounded-2xl p-6 border border-white/[0.08] hover:-translate-y-1 hover:border-[#6c47ff]/30 transition-all cursor-pointer group relative overflow-hidden"
+                                    style={{ background: "rgba(17,17,39,0.9)" }}>
+                                    <span className="text-3xl block mb-3 group-hover:scale-110 transition-transform">{item.icon}</span>
+                                    <h4 className="font-black text-white">{item.title}</h4>
+                                    <p className="text-xs text-white/40 mt-1">{item.sub}</p>
+                                </div>
+                            </Link>
+                        ))}
                     </div>
                 </div>
 
-                {/* Right: Membership & Info */}
-                <div className="space-y-8">
-                    {/* Subscription Widget */}
-                    <div className={`rounded-[32px] p-8 space-y-6 shadow-xl relative overflow-hidden transition-all hover:shadow-2xl ${activeSub ? "bg-emerald-600 text-white" : "bg-orange-600 text-white"}`}>
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16 blur-2xl" />
-                        <h3 className="text-xs font-black uppercase tracking-[0.3em] opacity-60">Membership Status</h3>
-
+                {/* Right: Membership */}
+                <div className="space-y-5">
+                    {/* Subscription */}
+                    <div className={`rounded-2xl p-6 space-y-5 border relative overflow-hidden ${activeSub ? "border-[#10b981]/20" : "border-[#f59e0b]/20"}`}
+                        style={{ background: activeSub ? "rgba(16,185,129,0.08)" : "rgba(245,158,11,0.08)" }}>
+                        <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl pointer-events-none"
+                            style={{ background: activeSub ? "rgba(16,185,129,0.2)" : "rgba(245,158,11,0.2)" }} />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Membership Status</h3>
                         <div>
                             {activeSub ? (
                                 <>
-                                    <p className="text-3xl font-black leading-none">{activeSub.type.replace(/_/g, ' ')}</p>
-                                    <p className="text-xs font-bold text-emerald-100/60 mt-2 uppercase tracking-widest flex items-center gap-2">
-                                        <span className="w-2 h-2 bg-emerald-200 rounded-full animate-pulse" />
-                                        Valid until {new Date(activeSub.endDate).toLocaleDateString("en-GB", { month: 'short', year: 'numeric' })}
+                                    <p className="text-3xl font-black text-white leading-none">{activeSub.type.replace(/_/g, ' ')}</p>
+                                    <p className="text-xs font-bold text-[#10b981]/70 mt-2 uppercase tracking-widest flex items-center gap-2">
+                                        <span className="w-2 h-2 bg-[#10b981] rounded-full animate-pulse" />
+                                        Until {new Date(activeSub.endDate).toLocaleDateString("en-GB", { month: 'short', year: 'numeric' })}
                                     </p>
                                 </>
                             ) : (
                                 <>
-                                    <p className="text-3xl font-black leading-none">FREE</p>
-                                    <p className="text-xs font-bold text-orange-100/60 mt-3 leading-relaxed">
-                                        Upgrade to Premium to access all Echo news and exclusive content.
-                                    </p>
+                                    <p className="text-3xl font-black text-white leading-none">FREE</p>
+                                    <p className="text-xs text-white/40 mt-2 leading-relaxed">Upgrade to Premium for exclusive Echo content.</p>
                                 </>
                             )}
                         </div>
-
-                        <Link
-                            href="/admin/subscriptions"
-                            className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center block shadow-lg transition-all active:scale-95 ${activeSub ? "bg-white text-emerald-600" : "bg-white text-orange-600"}`}
-                        >
+                        <Link href="/admin/subscriptions"
+                            className={`w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-center block transition-all active:scale-95 ${activeSub ? "bg-[#10b981] text-white" : "bg-[#f59e0b] text-white"}`}>
                             {activeSub ? "Manage Subscription" : "Upgrade to Premium"}
                         </Link>
                     </div>
 
-                    {/* Announcement Tip */}
-                    <div className="bg-card border border-border rounded-[32px] p-6 space-y-4">
-                        <div className="flex items-center gap-3">
-                            <span className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-xl">📢</span>
-                            <h4 className="font-black text-foreground">Announcements</h4>
+                    {/* Announcements */}
+                    <div className="rounded-2xl p-5 border border-white/[0.08]" style={{ background: "rgba(17,17,39,0.9)" }}>
+                        <div className="flex items-center gap-3 mb-3">
+                            <span className="w-9 h-9 bg-[#6c47ff]/15 rounded-xl flex items-center justify-center text-lg">📢</span>
+                            <h4 className="font-black text-white">Announcements</h4>
                         </div>
-                        <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                            Check the <Link href="/admin/announcements" className="text-blue-600 dark:text-blue-400 font-bold hover:underline">Announcements</Link> section for important church updates and events.
+                        <p className="text-sm text-white/40 leading-relaxed">
+                            Check <Link href="/admin/announcements" className="text-[#a855f7] font-bold hover:text-[#c084fc] transition-colors">Announcements</Link> for important church updates and events.
                         </p>
                     </div>
                 </div>
