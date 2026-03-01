@@ -19,7 +19,7 @@ export default async function EditDiaryEntryPage({ params }: { params: Promise<{
         date: entry.date.toISOString(),
         title: entry.title ?? "",
         theme: entry.theme ?? "",
-        readingOne: entry.readingOne,
+        readingOne: entry.readingOne ?? "",
         readingTwo: entry.readingTwo ?? "",
         readingThree: entry.readingThree ?? "",
     };
