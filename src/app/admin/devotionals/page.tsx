@@ -1,4 +1,6 @@
 import prisma from "@/lib/prisma";
+import Link from "next/link";
+import DevotionalDeleteButton from "@/components/DevotionalDeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -7,9 +9,17 @@ export default async function DevotionalsPage() {
 
     return (
         <div>
-            <div className="mb-8">
-                <h2 className="text-3xl font-bold text-foreground">🙏 Devotionals</h2>
-                <p className="text-muted-foreground mt-1">{devotionals.length} devotionals</p>
+            <div className="flex items-center justify-between mb-8">
+                <div>
+                    <h2 className="text-3xl font-bold text-foreground">🙏 Devotionals</h2>
+                    <p className="text-muted-foreground mt-1">{devotionals.length} devotionals</p>
+                </div>
+                <Link
+                    href="/admin/devotionals/new"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-blue-500 transition-all active:scale-95 whitespace-nowrap"
+                >
+                    ➕ New Devotional
+                </Link>
             </div>
 
             {devotionals.length === 0 ? (
@@ -29,6 +39,9 @@ export default async function DevotionalsPage() {
                                         {d.author && <> · By <span className="text-muted-foreground">{d.author}</span></>}
                                     </p>
                                     <p className="text-muted-foreground mt-3 text-sm line-clamp-3">{d.content}</p>
+                                </div>
+                                <div className="ml-4">
+                                    <DevotionalDeleteButton id={d.id} />
                                 </div>
                             </div>
                         </div>

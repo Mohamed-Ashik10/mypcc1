@@ -4,38 +4,46 @@ import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
     try {
-        const { token, password } = await req.json();
+        const body = await req.json();
+        const { token, newPassword } = body;
 
-        if (!token || !password) {
+        if (!token || !newPassword) {
             return NextResponse.json(
-                { error: "Token and password are required" },
+                { error: "Token and new password are required" },
                 { status: 400 }
             );
         }
 
-        // Find user with valid token and not expired
+        if (newPassword.length < 6) {
+            return NextResponse.json(
+                { error: "Password must be at least 6 characters long" },
+                { status: 400 }
+            );
+        }
+
+        // Find user by token
         const user = await prisma.user.findFirst({
             where: {
                 resetToken: token,
                 resetTokenExpiry: {
-                    gt: new Date(),
+                    gt: new Date(), // Token must not be expired
                 },
             },
         });
 
-        if (!user || !user.email) {
+        if (!user) {
             return NextResponse.json(
-                { error: "Invalid or expired token" },
+                { error: "Invalid or expired reset token" },
                 { status: 400 }
             );
         }
 
         // Hash the new password
-        const hashedPassword = await bcrypt.hash(password, 12);
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        // Update user password and clear reset fields
+        // Update the user's password and clear the reset tokens
         await prisma.user.update({
-            where: { email: user.email },
+            where: { id: user.id },
             data: {
                 password: hashedPassword,
                 resetToken: null,
@@ -44,13 +52,13 @@ export async function POST(req: Request) {
         });
 
         return NextResponse.json(
-            { message: "Password updated successfully" },
+            { message: "Password has been successfully reset" },
             { status: 200 }
         );
     } catch (error) {
         console.error("Reset password error:", error);
         return NextResponse.json(
-            { error: "An error occurred" },
+            { error: "Could not reset password at this time" },
             { status: 500 }
         );
     }

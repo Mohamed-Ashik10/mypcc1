@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 
 export default async function AnnouncementsPage() {
     const session = await getServerSession(authOptions);
-    const userRole = (session?.user as any)?.role || "MEMBER";
-    const canModify = ["ADMIN", "STAFF"].includes(userRole);
+    const userRole = (session?.user as any)?.role || "USER";
+    const canModify = ["ADMIN", "SUPER_ADMIN", "STAFF", "EDITOR"].includes(userRole);
 
     const where = canModify ? {} : { isActive: true };
     const announcements = await prisma.announcement.findMany({

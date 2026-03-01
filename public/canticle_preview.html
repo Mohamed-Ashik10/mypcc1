@@ -1,0 +1,3359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canticle — Faith, Song & Community</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@200;300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cream: #f7f3ec;
+            --warm: #fdfaf5;
+            --gold: #b8935a;
+            --gold-l: #d4b07a;
+            --gold-d: #8a6e3e;
+            --ink: #1a1510;
+            --ink2: #2e2820;
+            --muted: #7a7060;
+            --muted2: #a09585;
+            --border: rgba(184, 147, 90, 0.18);
+            --border2: rgba(184, 147, 90, 0.08);
+            --red: #c0392b;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Jost', sans-serif;
+            background: var(--warm);
+            color: var(--ink);
+            overflow-x: hidden;
+        }
+
+        /* NOISE */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+            opacity: .45;
+        }
+
+        /* ══ NAV ══ */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 48px;
+            height: 64px;
+            background: rgba(253, 250, 245, 0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            animation: fadeDown .7s ease both;
+        }
+
+        .logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.35rem;
+            font-weight: 400;
+            letter-spacing: .08em;
+            color: var(--ink);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--gold);
+            font-style: italic;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-tab {
+            padding: 7px 16px;
+            font-size: .7rem;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            font-weight: 300;
+            color: var(--muted);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all .25s;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            color: var(--ink);
+        }
+
+        .nav-tab.active {
+            color: var(--gold);
+            background: rgba(184, 147, 90, .08);
+        }
+
+        .nav-tab .dot {
+            width: 4px;
+            height: 4px;
+            background: var(--gold);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity .25s;
+        }
+
+        .nav-tab.active .dot {
+            opacity: 1;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-sign {
+            font-size: .7rem;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            font-weight: 300;
+            color: var(--muted);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: color .25s;
+        }
+
+        .nav-sign:hover {
+            color: var(--ink);
+        }
+
+        .nav-join {
+            font-size: .7rem;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            font-weight: 300;
+            padding: 8px 20px;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            background: transparent;
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .nav-join:hover {
+            background: var(--gold);
+            color: var(--warm);
+        }
+
+        /* ══ PAGES ══ */
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding-top: 64px;
+            animation: pageIn .5s ease both;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes pageIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* ══════════════════════════════════════
+   PAGE 1 — HYMNS
+══════════════════════════════════════ */
+        .hymns-hero {
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 80px 32px 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hymns-hero-bg {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid var(--border2);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .ring:nth-child(1) {
+            width: 280px;
+            height: 280px;
+            animation: breathe 5s ease-in-out infinite;
+        }
+
+        .ring:nth-child(2) {
+            width: 480px;
+            height: 480px;
+            animation: breathe 5s 1s ease-in-out infinite;
+        }
+
+        .ring:nth-child(3) {
+            width: 680px;
+            height: 680px;
+            animation: breathe 5s 2s ease-in-out infinite;
+        }
+
+        .ring:nth-child(4) {
+            width: 880px;
+            height: 880px;
+            animation: breathe 5s 3s ease-in-out infinite;
+        }
+
+        .hero-eyebrow {
+            font-size: .68rem;
+            letter-spacing: .3em;
+            text-transform: uppercase;
+            font-weight: 300;
+            color: var(--gold);
+            margin-bottom: 20px;
+            animation: fadeUp .8s .2s ease both;
+        }
+
+        .hero-h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 8vw, 7rem);
+            font-weight: 300;
+            line-height: 1;
+            animation: fadeUp .8s .4s ease both;
+        }
+
+        .hero-h1 em {
+            font-style: italic;
+            color: var(--gold);
+        }
+
+        .hero-sub {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            font-style: italic;
+            font-weight: 300;
+            color: var(--muted);
+            margin-top: 16px;
+            animation: fadeUp .8s .6s ease both;
+        }
+
+        /* Search bar */
+        .hymn-search-wrap {
+            padding: 0 48px 0;
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeUp .8s .8s ease both;
+        }
+
+        .hymn-search {
+            display: flex;
+            border: 1px solid var(--border);
+            background: var(--warm);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .hymn-search input {
+            flex: 1;
+            padding: 14px 20px;
+            font-family: 'Jost', sans-serif;
+            font-size: .85rem;
+            font-weight: 300;
+            border: none;
+            background: transparent;
+            outline: none;
+            color: var(--ink);
+        }
+
+        .hymn-search input::placeholder {
+            color: var(--muted2);
+        }
+
+        .hymn-search button {
+            padding: 14px 24px;
+            background: var(--gold);
+            color: var(--warm);
+            border: none;
+            cursor: pointer;
+            font-size: .72rem;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            font-weight: 300;
+            transition: background .3s;
+        }
+
+        .hymn-search button:hover {
+            background: var(--gold-d);
+        }
+
+        .hymn-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 48px;
+        }
+
+        .filter-btn {
+            padding: 6px 16px;
+            font-size: .65rem;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            font-weight: 300;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .25s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--ink);
+            color: var(--cream);
+            border-color: var(--ink);
+        }
+
+        /* Hymn grid */
+        .hymns-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            max-width: 1100px;
+            margin: 0 auto 80px;
+            padding: 0 48px;
+        }
+
+        .hymn-card {
+            background: var(--warm);
+            padding: 32px 28px;
+            cursor: pointer;
+            transition: background .3s, transform .3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hymn-card::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--gold);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform .4s;
+        }
+
+        .hymn-card:hover {
+            background: var(--cream);
+            transform: translateY(-2px);
+        }
+
+        .hymn-card:hover::after {
+            transform: scaleX(1);
+        }
+
+        .hymn-num {
+            font-size: .6rem;
+            letter-spacing: .25em;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 300;
+            margin-bottom: 14px;
+        }
+
+        .hymn-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .hymn-author {
+            font-size: .72rem;
+            color: var(--muted);
+            font-weight: 300;
+            margin-bottom: 16px;
+        }
+
+        .hymn-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .htag {
+            font-size: .58rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border: 1px solid var(--border);
+            color: var(--muted2);
+        }
+
+        .hymn-play {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .7rem;
+            color: var(--gold);
+            transition: all .3s;
+        }
+
+        .hymn-card:hover .hymn-play {
+            background: var(--gold);
+            color: var(--warm);
+            border-color: var(--gold);
+        }
+
+        /* Hymn modal */
+        .hymn-modal-bg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(26, 21, 16, .7);
+            backdrop-filter: blur(6px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hymn-modal-bg.open {
+            display: flex;
+        }
+
+        .hymn-modal {
+            background: var(--warm);
+            max-width: 600px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            padding: 48px;
+            position: relative;
+            animation: modalIn .4s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(.95)
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1)
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--muted);
+            cursor: pointer;
+            transition: color .2s;
+        }
+
+        .modal-close:hover {
+            color: var(--ink);
+        }
+
+        .modal-eyebrow {
+            font-size: .62rem;
+            letter-spacing: .25em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 12px;
+        }
+
+        .modal-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 400;
+            margin-bottom: 6px;
+        }
+
+        .modal-author {
+            font-size: .78rem;
+            color: var(--muted);
+            margin-bottom: 28px;
+        }
+
+        .modal-divider {
+            height: 1px;
+            background: var(--border);
+            margin-bottom: 28px;
+        }
+
+        .modal-lyrics {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            line-height: 2;
+            font-weight: 300;
+            color: var(--ink2);
+        }
+
+        .modal-lyrics .stanza {
+            margin-bottom: 24px;
+        }
+
+        .modal-lyrics .refrain {
+            font-style: italic;
+            color: var(--gold-d);
+            border-left: 2px solid var(--gold);
+            padding-left: 16px;
+            margin-bottom: 24px;
+        }
+
+        .modal-player {
+            margin-top: 32px;
+            padding: 20px;
+            background: var(--cream);
+            border: 1px solid var(--border);
+        }
+
+        .player-label {
+            font-size: .62rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 12px;
+        }
+
+        .player-wave {
+            display: flex;
+            gap: 2px;
+            align-items: center;
+            height: 28px;
+            margin-bottom: 8px;
+        }
+
+        .pw-bar {
+            width: 3px;
+            border-radius: 2px;
+            background: var(--gold);
+            animation: wave 1s ease-in-out infinite;
+        }
+
+        .player-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .pc-btn {
+            padding: 6px 16px;
+            font-size: .65rem;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            font-weight: 300;
+            background: var(--ink);
+            color: var(--cream);
+            border: none;
+            cursor: pointer;
+            transition: background .3s;
+        }
+
+        .pc-btn:hover {
+            background: var(--gold);
+        }
+
+        .pc-save {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        .pc-save:hover {
+            background: transparent;
+            color: var(--gold);
+            border-color: var(--gold);
+        }
+
+        /* ══════════════════════════════════════
+   PAGE 2 — CHURCH DIARY
+══════════════════════════════════════ */
+        .diary-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 0;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: calc(100vh - 64px);
+        }
+
+        .diary-sidebar {
+            border-right: 1px solid var(--border);
+            padding: 40px 28px;
+        }
+
+        .diary-sidebar-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .diary-sidebar-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+        }
+
+        .new-entry-btn {
+            font-size: .62rem;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            font-weight: 300;
+            padding: 7px 14px;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            background: transparent;
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .new-entry-btn:hover {
+            background: var(--gold);
+            color: var(--warm);
+        }
+
+        .diary-entry-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .diary-entry-item {
+            padding: 18px 16px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all .25s;
+            background: transparent;
+        }
+
+        .diary-entry-item:hover,
+        .diary-entry-item.active {
+            background: var(--cream);
+            border-color: var(--border);
+        }
+
+        .diary-entry-item.active {
+            border-left: 2px solid var(--gold);
+        }
+
+        .dei-date {
+            font-size: .6rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 6px;
+        }
+
+        .dei-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            font-weight: 400;
+            margin-bottom: 4px;
+        }
+
+        .dei-preview {
+            font-size: .72rem;
+            color: var(--muted);
+            font-weight: 300;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .diary-main {
+            padding: 48px 56px;
+        }
+
+        .diary-main-date {
+            font-size: .62rem;
+            letter-spacing: .25em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 16px;
+        }
+
+        .diary-main-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 400;
+            margin-bottom: 8px;
+        }
+
+        .diary-main-sub {
+            font-size: .78rem;
+            color: var(--muted);
+            margin-bottom: 32px;
+        }
+
+        .diary-main-divider {
+            height: 1px;
+            background: var(--border);
+            margin-bottom: 32px;
+        }
+
+        .diary-main-body {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.05rem;
+            line-height: 1.9;
+            font-weight: 300;
+            color: var(--ink2);
+            margin-bottom: 32px;
+        }
+
+        .diary-hymn-ref {
+            padding: 20px 24px;
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .dhr-icon {
+            font-size: 1.4rem;
+            color: var(--gold);
+        }
+
+        .dhr-label {
+            font-size: .6rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+
+        .dhr-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .diary-tags-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .dtag {
+            font-size: .62rem;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        .diary-footer-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .dfr-btn {
+            font-size: .65rem;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            font-weight: 300;
+            padding: 9px 20px;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            background: transparent;
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .dfr-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .dfr-btn.primary {
+            background: var(--ink);
+            color: var(--cream);
+            border-color: var(--ink);
+        }
+
+        .dfr-btn.primary:hover {
+            background: var(--gold);
+            border-color: var(--gold);
+        }
+
+        /* New Entry Form */
+        .new-entry-form {
+            display: none;
+            padding: 48px 56px;
+        }
+
+        .new-entry-form.open {
+            display: block;
+        }
+
+        .nef-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            font-weight: 400;
+            margin-bottom: 32px;
+        }
+
+        .nef-group {
+            margin-bottom: 24px;
+        }
+
+        .nef-label {
+            font-size: .62rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 300;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .nef-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-family: 'Jost', sans-serif;
+            font-size: .85rem;
+            font-weight: 300;
+            border: 1px solid var(--border);
+            background: var(--warm);
+            color: var(--ink);
+            outline: none;
+            transition: border-color .3s;
+        }
+
+        .nef-input:focus {
+            border-color: var(--gold);
+        }
+
+        .nef-textarea {
+            min-height: 160px;
+            resize: vertical;
+        }
+
+        .nef-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nef-submit {
+            font-size: .72rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            font-weight: 300;
+            padding: 12px 32px;
+            background: var(--gold);
+            color: var(--warm);
+            border: none;
+            cursor: pointer;
+            transition: background .3s;
+        }
+
+        .nef-submit:hover {
+            background: var(--gold-d);
+        }
+
+        .nef-cancel {
+            font-size: .72rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            font-weight: 300;
+            padding: 12px 24px;
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .nef-cancel:hover {
+            color: var(--red);
+            border-color: var(--red);
+        }
+
+        /* ══════════════════════════════════════
+   PAGE 3 — THE ECHO
+══════════════════════════════════════ */
+        .echo-hero {
+            padding: 80px 48px 48px;
+            max-width: 1100px;
+            margin: 0 auto;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .echo-hero-label {
+            font-size: .65rem;
+            letter-spacing: .3em;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 300;
+            margin-bottom: 12px;
+        }
+
+        .echo-hero-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 300;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+
+        .echo-hero-sub {
+            font-size: .85rem;
+            color: var(--muted);
+            font-weight: 300;
+            max-width: 520px;
+            line-height: 1.8;
+        }
+
+        .echo-categories {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 24px 48px;
+            max-width: 1100px;
+            margin: 0 auto;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .echo-cat {
+            padding: 6px 18px;
+            font-size: .65rem;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            font-weight: 300;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .25s;
+        }
+
+        .echo-cat:hover,
+        .echo-cat.active {
+            background: var(--ink);
+            color: var(--cream);
+            border-color: var(--ink);
+        }
+
+        .echo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            max-width: 1100px;
+            margin: 0 auto 80px;
+            padding: 0 48px;
+        }
+
+        .echo-card {
+            background: var(--warm);
+            padding: 36px 32px;
+            cursor: pointer;
+            transition: background .3s;
+        }
+
+        .echo-card:hover {
+            background: var(--cream);
+        }
+
+        .echo-card.featured {
+            grid-column: 1/-1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+            padding: 48px;
+        }
+
+        .echo-card-cat {
+            font-size: .6rem;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 300;
+            margin-bottom: 14px;
+        }
+
+        .echo-card-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            font-weight: 400;
+            line-height: 1.3;
+            margin-bottom: 12px;
+        }
+
+        .echo-card.featured .echo-card-title {
+            font-size: 2rem;
+        }
+
+        .echo-card-excerpt {
+            font-size: .78rem;
+            color: var(--muted);
+            font-weight: 300;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .echo-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .echo-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .65rem;
+            color: var(--warm);
+        }
+
+        .echo-author {
+            font-size: .7rem;
+            color: var(--muted2);
+            font-weight: 300;
+        }
+
+        .echo-date {
+            font-size: .65rem;
+            color: var(--muted2);
+            font-weight: 300;
+        }
+
+        .echo-read {
+            font-size: .65rem;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 300;
+            margin-top: 16px;
+            display: inline-block;
+            transition: letter-spacing .3s;
+        }
+
+        .echo-card:hover .echo-read {
+            letter-spacing: .22em;
+        }
+
+        .echo-img-placeholder {
+            background: linear-gradient(135deg, var(--cream), var(--border));
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--border);
+        }
+
+        /* ══════════════════════════════════════
+   PAGE 4 — DEVOTIONALS
+══════════════════════════════════════ */
+        .devo-hero {
+            padding: 80px 48px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .devo-hero::before {
+            content: '"';
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 40vw;
+            color: rgba(184, 147, 90, .04);
+            position: absolute;
+            top: -10%;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+            line-height: 1;
+        }
+
+        .devo-day-label {
+            font-size: .65rem;
+            letter-spacing: .3em;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 300;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .devo-today-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 300;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .devo-verse-box {
+            max-width: 680px;
+            margin: 0 auto 64px;
+            padding: 36px;
+            border: 1px solid var(--border);
+            background: var(--cream);
+            position: relative;
+        }
+
+        .devo-verse-box::before {
+            content: '❝';
+            font-family: 'Cormorant Garamond', serif;
+            position: absolute;
+            top: -18px;
+            left: 32px;
+            font-size: 2rem;
+            color: var(--gold);
+            background: var(--warm);
+            padding: 0 8px;
+        }
+
+        .devo-verse-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.25rem;
+            font-style: italic;
+            font-weight: 300;
+            line-height: 1.8;
+            color: var(--ink2);
+            margin-bottom: 12px;
+        }
+
+        .devo-verse-ref {
+            font-size: .68rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+
+        .devo-reflection {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 48px 64px;
+        }
+
+        .devo-reflection-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .devo-reflection-body {
+            font-size: .9rem;
+            line-height: 1.95;
+            color: var(--ink2);
+            font-weight: 300;
+            margin-bottom: 28px;
+        }
+
+        .devo-prayer {
+            background: var(--ink);
+            color: var(--cream);
+            padding: 36px 40px;
+            margin-bottom: 36px;
+        }
+
+        .devo-prayer-label {
+            font-size: .62rem;
+            letter-spacing: .25em;
+            text-transform: uppercase;
+            color: var(--gold-l);
+            margin-bottom: 16px;
+        }
+
+        .devo-prayer-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            font-style: italic;
+            font-weight: 300;
+            line-height: 1.9;
+            color: rgba(247, 243, 236, .85);
+        }
+
+        .devo-hymn-link {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            padding: 24px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: background .3s;
+            margin-bottom: 48px;
+        }
+
+        .devo-hymn-link:hover {
+            background: var(--cream);
+        }
+
+        .dhl-icon {
+            font-size: 2rem;
+            color: var(--gold);
+        }
+
+        .dhl-label {
+            font-size: .6rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+
+        .dhl-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .dhl-arrow {
+            margin-left: auto;
+            font-size: 1.2rem;
+            color: var(--muted2);
+        }
+
+        .devo-archive {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 48px 80px;
+        }
+
+        .devo-archive-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            font-weight: 400;
+            margin-bottom: 32px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+        }
+
+        .devo-archive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1px;
+            background: var(--border);
+        }
+
+        .devo-arc-card {
+            background: var(--warm);
+            padding: 28px 24px;
+            cursor: pointer;
+            transition: background .3s;
+        }
+
+        .devo-arc-card:hover {
+            background: var(--cream);
+        }
+
+        .dac-date {
+            font-size: .6rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+
+        .dac-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.05rem;
+            font-weight: 400;
+            margin-bottom: 6px;
+        }
+
+        .dac-ref {
+            font-size: .72rem;
+            color: var(--muted);
+            font-weight: 300;
+        }
+
+        /* ══════════════════════════════════════
+   PAGE 5 — SUBSCRIPTIONS
+══════════════════════════════════════ */
+        .sub-hero {
+            padding: 80px 48px 56px;
+            text-align: center;
+        }
+
+        .sub-hero-label {
+            font-size: .65rem;
+            letter-spacing: .3em;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 300;
+            margin-bottom: 12px;
+        }
+
+        .sub-hero-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 300;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+
+        .sub-hero-sub {
+            font-size: .85rem;
+            color: var(--muted);
+            font-weight: 300;
+            max-width: 480px;
+            margin: 0 auto 48px;
+            line-height: 1.8;
+        }
+
+        .sub-toggle {
+            display: inline-flex;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-bottom: 64px;
+        }
+
+        .sub-toggle-btn {
+            padding: 10px 28px;
+            font-size: .7rem;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            font-weight: 300;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .sub-toggle-btn.active {
+            background: var(--ink);
+            color: var(--cream);
+        }
+
+        .sub-plans {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            max-width: 960px;
+            margin: 0 auto 80px;
+        }
+
+        .sub-plan {
+            background: var(--warm);
+            padding: 48px 36px;
+            position: relative;
+            transition: background .3s;
+        }
+
+        .sub-plan:hover {
+            background: var(--cream);
+        }
+
+        .sub-plan.popular {
+            background: var(--ink);
+            color: var(--cream);
+        }
+
+        .sub-plan.popular:hover {
+            background: var(--ink2);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -1px;
+            right: 32px;
+            font-size: .58rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            padding: 5px 14px;
+            background: var(--gold);
+            color: var(--warm);
+        }
+
+        .sub-plan-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 8px;
+        }
+
+        .sub-plan-price {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3rem;
+            font-weight: 300;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .sub-plan-price span {
+            font-size: 1rem;
+            vertical-align: super;
+            font-family: 'Jost', sans-serif;
+            font-weight: 300;
+        }
+
+        .sub-plan-period {
+            font-size: .7rem;
+            letter-spacing: .1em;
+            color: var(--muted2);
+            margin-bottom: 28px;
+        }
+
+        .sub-plan.popular .sub-plan-period {
+            color: rgba(248, 245, 239, .5);
+        }
+
+        .sub-divider {
+            height: 1px;
+            background: var(--border);
+            margin-bottom: 28px;
+        }
+
+        .sub-plan.popular .sub-divider {
+            background: rgba(255, 255, 255, .1);
+        }
+
+        .sub-features-list {
+            list-style: none;
+            margin-bottom: 36px;
+        }
+
+        .sub-features-list li {
+            font-size: .82rem;
+            font-weight: 300;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border2);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            line-height: 1.5;
+        }
+
+        .sub-plan.popular .sub-features-list li {
+            border-color: rgba(255, 255, 255, .06);
+        }
+
+        .sub-features-list li::before {
+            content: '✦';
+            color: var(--gold);
+            font-size: .6rem;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
+        .sub-features-list li.off {
+            opacity: .4;
+        }
+
+        .sub-features-list li.off::before {
+            content: '—';
+            color: var(--muted2);
+        }
+
+        .sub-cta-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: .72rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            font-weight: 300;
+            background: var(--ink);
+            color: var(--cream);
+            border: none;
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .sub-cta-btn:hover {
+            background: var(--gold);
+        }
+
+        .sub-plan.popular .sub-cta-btn {
+            background: var(--gold);
+            color: var(--warm);
+        }
+
+        .sub-plan.popular .sub-cta-btn:hover {
+            background: var(--gold-d);
+        }
+
+        .sub-trust {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 0 48px 80px;
+            text-align: center;
+        }
+
+        .sub-trust-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            font-weight: 400;
+            margin-bottom: 20px;
+        }
+
+        .sub-trust-row {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+        }
+
+        .str-item {
+            text-align: center;
+        }
+
+        .str-num {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: var(--gold);
+        }
+
+        .str-label {
+            font-size: .65rem;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 300;
+        }
+
+        /* ══ SCROLL REVEAL SYSTEM ══ */
+        .reveal {
+            opacity: 0;
+            transition: opacity .7s ease, transform .7s ease;
+        }
+
+        .reveal.from-bottom {
+            transform: translateY(48px);
+        }
+
+        .reveal.from-left {
+            transform: translateX(-48px);
+        }
+
+        .reveal.from-right {
+            transform: translateX(48px);
+        }
+
+        .reveal.scale-in {
+            transform: scale(.92);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* stagger delays */
+        .reveal.d1 {
+            transition-delay: .1s;
+        }
+
+        .reveal.d2 {
+            transition-delay: .2s;
+        }
+
+        .reveal.d3 {
+            transition-delay: .3s;
+        }
+
+        .reveal.d4 {
+            transition-delay: .4s;
+        }
+
+        .reveal.d5 {
+            transition-delay: .5s;
+        }
+
+        /* ══ SCROLL PROGRESS BAR ══ */
+        #scrollBar {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            height: 2px;
+            width: 0%;
+            background: linear-gradient(90deg, var(--gold-d), var(--gold), var(--gold-l));
+            z-index: 1001;
+            transition: width .1s linear;
+            pointer-events: none;
+        }
+
+        /* ══ PARALLAX CROSS ══ */
+        #parallaxCross {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 0;
+            opacity: .025;
+            font-size: 80vw;
+            font-family: 'Cormorant Garamond', serif;
+            color: var(--gold);
+            transition: transform .05s linear;
+            user-select: none;
+            line-height: 1;
+        }
+
+        /* ══ FLOATING ICONS (Reasonal-style) ══ */
+        .float-icon {
+            position: absolute;
+            font-size: 1.6rem;
+            opacity: .18;
+            animation: floatDrift 6s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+            filter: grayscale(.3);
+        }
+
+        @keyframes floatDrift {
+            0% {
+                transform: translateY(0) rotate(-4deg);
+            }
+
+            33% {
+                transform: translateY(-18px) rotate(3deg);
+            }
+
+            66% {
+                transform: translateY(-8px) rotate(-2deg);
+            }
+
+            100% {
+                transform: translateY(0) rotate(-4deg);
+            }
+        }
+
+        /* ══ MARQUEE TICKER (Reasonal-style infinite scroll) ══ */
+        .marquee-wrap {
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .marquee-track {
+            display: flex;
+            gap: 12px;
+            width: max-content;
+            animation: marqueeLeft 28s linear infinite;
+        }
+
+        .marquee-track.marquee-reverse {
+            animation: marqueeRight 32s linear infinite;
+        }
+
+        .marquee-item {
+            padding: 10px 24px;
+            border: 1px solid rgba(184, 147, 90, .22);
+            font-size: .78rem;
+            font-weight: 300;
+            letter-spacing: .08em;
+            white-space: nowrap;
+            color: var(--ink);
+            background: var(--warm);
+            cursor: default;
+            transition: background .25s, border-color .25s;
+        }
+
+        .marquee-item:hover {
+            background: var(--cream);
+            border-color: var(--gold);
+        }
+
+        .marquee-item.dark {
+            background: var(--cream);
+            border-color: rgba(184, 147, 90, .15);
+            color: var(--muted);
+        }
+
+        .marquee-item.dark:hover {
+            background: #ede8df;
+            border-color: var(--gold);
+        }
+
+        @keyframes marqueeLeft {
+            from {
+                transform: translateX(0)
+            }
+
+            to {
+                transform: translateX(-50%)
+            }
+        }
+
+        @keyframes marqueeRight {
+            from {
+                transform: translateX(-50%)
+            }
+
+            to {
+                transform: translateX(0)
+            }
+        }
+
+        /* ══ STICKY SCROLL SECTION (Reasonal-style pinned reveal) ══ */
+        .sticky-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 400vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 48px;
+        }
+
+        .sticky-left {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px 48px 80px 0;
+        }
+
+        .sticky-panel {
+            display: none;
+            animation: fadeUp .6s ease both;
+        }
+
+        .sticky-panel.active {
+            display: block;
+        }
+
+        .sticky-label {
+            font-size: .65rem;
+            letter-spacing: .28em;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 300;
+            margin-bottom: 16px;
+        }
+
+        .sticky-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 4vw, 3.8rem);
+            font-weight: 300;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+
+        .sticky-title em {
+            font-style: italic;
+            color: var(--gold);
+        }
+
+        .sticky-body {
+            font-size: .88rem;
+            font-weight: 300;
+            line-height: 1.9;
+            color: var(--muted);
+            max-width: 400px;
+            margin-bottom: 32px;
+        }
+
+        .sticky-btn {
+            padding: 12px 28px;
+            background: var(--ink);
+            color: var(--cream);
+            border: none;
+            cursor: pointer;
+            font-size: .7rem;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            font-weight: 300;
+            transition: background .3s;
+        }
+
+        .sticky-btn:hover {
+            background: var(--gold);
+        }
+
+        .sticky-right {
+            padding: 160px 0 160px 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            gap: 0;
+        }
+
+        .sticky-cards-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .sticky-card {
+            padding: 32px 28px;
+            border: 1px solid var(--border);
+            background: var(--warm);
+            opacity: .35;
+            transform: scale(.96);
+            transition: all .5s ease;
+        }
+
+        .sticky-card.active {
+            opacity: 1;
+            transform: scale(1);
+            box-shadow: 0 12px 40px rgba(184, 147, 90, .1);
+            border-color: rgba(184, 147, 90, .35);
+        }
+
+        .sc-icon {
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+        }
+
+        .sc-num {
+            font-size: .6rem;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        .sc-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin-bottom: 4px;
+        }
+
+        .sc-sub {
+            font-size: .72rem;
+            color: var(--muted);
+            font-weight: 300;
+            margin-bottom: 12px;
+        }
+
+        .sc-bar {
+            height: 3px;
+            background: var(--border);
+            margin-bottom: 12px;
+            border-radius: 2px;
+        }
+
+        .sc-bar-fill {
+            height: 100%;
+            width: 65%;
+            background: var(--gold);
+            border-radius: 2px;
+            animation: barFill 2s ease both;
+        }
+
+        @keyframes barFill {
+            from {
+                width: 0
+            }
+
+            to {
+                width: 65%
+            }
+        }
+
+        .sc-body {
+            font-size: .78rem;
+            font-weight: 300;
+            color: var(--muted);
+            font-style: italic;
+            line-height: 1.7;
+        }
+
+        .sc-tag {
+            font-size: .62rem;
+            letter-spacing: .12em;
+            color: var(--muted2);
+        }
+
+        .sc-badge {
+            font-size: .58rem;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        /* ══ HOME FEATURE CARDS ══ */
+        .home-feat-card {
+            background: var(--warm);
+            padding: 40px 32px;
+            cursor: pointer;
+            transition: background .3s, transform .3s;
+            border-right: none;
+        }
+
+        .home-feat-card:hover {
+            background: var(--cream);
+            transform: translateY(-3px);
+        }
+
+        /* ══ BUTTONS ══ */
+        .btn-primary {
+            display: inline-block;
+            padding: 14px 36px;
+            background: var(--ink);
+            color: var(--cream);
+            font-size: .72rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            font-weight: 300;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background .3s;
+        }
+
+        .btn-primary:hover {
+            background: var(--gold);
+        }
+
+        .btn-ghost {
+            display: inline-block;
+            padding: 14px 36px;
+            background: transparent;
+            color: var(--ink);
+            font-size: .72rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            font-weight: 300;
+            border: 1px solid rgba(28, 24, 18, .22);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all .3s;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        /* ══ HERO SCROLL ══ */
+        .hero-scroll {
+            position: absolute;
+            bottom: 36px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+            font-size: .62rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+        }
+
+        .scroll-line {
+            width: 1px;
+            height: 40px;
+            background: var(--gold);
+            animation: scrollPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes scrollPulse {
+
+            0%,
+            100% {
+                transform: scaleY(1);
+                opacity: 1
+            }
+
+            50% {
+                transform: scaleY(.5);
+                opacity: .4
+            }
+        }
+
+        /* ══ KEYFRAMES ══ */
+        @keyframes rotateSlow {
+            from {
+                transform: rotate(0deg)
+            }
+
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-14px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
+                opacity: .8;
+                transform: translate(-50%, -50%) scale(1)
+            }
+
+            50% {
+                opacity: .3;
+                transform: translate(-50%, -50%) scale(1.05)
+            }
+        }
+
+        @keyframes wave {
+
+            0%,
+            100% {
+                transform: scaleY(.25)
+            }
+
+            50% {
+                transform: scaleY(1)
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-8px)
+            }
+        }
+
+        /* ══ RESPONSIVE ══ */
+        @media(max-width:768px) {
+            nav {
+                padding: 0 20px;
+            }
+
+            .nav-tabs {
+                display: none;
+            }
+
+            .diary-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .diary-sidebar {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .hymns-grid,
+            .echo-grid,
+            .sub-plans,
+            .devo-archive-grid {
+                padding: 0 20px;
+            }
+
+            .echo-card.featured {
+                grid-template-columns: 1fr;
+            }
+
+            .echo-hero,
+            .echo-categories,
+            .hymn-search-wrap,
+            .devo-reflection,
+            .devo-archive,
+            .sub-hero,
+            .sub-trust {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .diary-main,
+            .new-entry-form {
+                padding: 32px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ══ NAV ══ -->
+    <div id="scrollBar"></div>
+    <div id="parallaxCross">✝</div>
+    <nav>
+        <a class="logo" href="#">Canti<span>cle</span></a>
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showPage('home',this)">🏠 Home<div class="dot"></div></button>
+            <button class="nav-tab" onclick="showPage('hymns',this)">🎵 Hymns<div class="dot"></div></button>
+            <button class="nav-tab" onclick="showPage('diary',this)">📖 Church Diary<div class="dot"></div></button>
+            <button class="nav-tab" onclick="showPage('echo',this)">📰 The Echo<div class="dot"></div></button>
+            <button class="nav-tab" onclick="showPage('devo',this)">🙏 Devotionals<div class="dot"></div></button>
+            <button class="nav-tab" onclick="showPage('subs',this)">💳 Subscriptions<div class="dot"></div></button>
+        </div>
+        <div class="nav-right">
+            <button class="nav-sign">Sign In</button>
+            <button class="nav-join">Join Free</button>
+        </div>
+    </nav>
+
+    <!-- ══════════════════════════════════
+     PAGE: HOME
+══════════════════════════════════════ -->
+    <div class="page active" id="page-home">
+
+        <!-- HERO with floating icons -->
+        <section class="hymns-hero" style="min-height:100vh;">
+            <div class="hymns-hero-bg">
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <svg style="position:absolute;opacity:.04;animation:rotateSlow 80s linear infinite;" width="700"
+                    height="700" viewBox="0 0 700 700">
+                    <line x1="350" y1="0" x2="350" y2="700" stroke="#b8935a" stroke-width="1" />
+                    <line x1="0" y1="233" x2="700" y2="233" stroke="#b8935a" stroke-width="1" />
+                </svg>
+            </div>
+            <div class="float-icon" style="top:14%;left:8%;animation-delay:0s;">&#127925;</div>
+            <div class="float-icon" style="top:22%;right:9%;animation-delay:.8s;font-size:2rem;">&#10013;</div>
+            <div class="float-icon" style="top:65%;left:5%;animation-delay:1.4s;">&#128214;</div>
+            <div class="float-icon" style="top:70%;right:7%;animation-delay:.4s;">&#128591;</div>
+            <div class="float-icon" style="top:38%;left:3%;animation-delay:2s;font-size:1.2rem;">&#9835;</div>
+            <div class="float-icon" style="top:42%;right:4%;animation-delay:1.1s;font-size:1.2rem;">&#10022;</div>
+            <div class="float-icon" style="top:80%;left:18%;animation-delay:.6s;font-size:1.4rem;">&#128240;</div>
+            <div class="float-icon" style="top:12%;right:22%;animation-delay:1.7s;font-size:1.4rem;">&#128179;</div>
+            <p class="hero-eyebrow" style="animation:fadeUp .8s .2s ease both;position:relative;z-index:2;">A sacred
+                space for every believer</p>
+            <h1 class="hero-h1" style="animation:fadeUp .8s .4s ease both;position:relative;z-index:2;">Sing.
+                Listen.<br><em>Remember.</em></h1>
+            <p class="hero-sub" style="max-width:500px;animation:fadeUp .8s .6s ease both;position:relative;z-index:2;">
+                Read beloved hymns, keep a personal church diary, stay connected through The Echo, and grow daily with
+                morning devotionals.</p>
+            <div
+                style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;animation:fadeUp .8s .8s ease both;margin-top:8px;position:relative;z-index:2;">
+                <button onclick="showPage('hymns',document.querySelectorAll('.nav-tab')[1])" class="btn-primary">Explore
+                    Hymns &rarr;</button>
+                <button onclick="showPage('subs',document.querySelectorAll('.nav-tab')[5])" class="btn-ghost">View
+                    Plans</button>
+            </div>
+            <div class="hero-scroll" style="animation:fadeUp .8s 1.1s ease both;">
+                <div class="scroll-line"></div><span>Scroll</span>
+            </div>
+        </section>
+
+        <!-- VERSE STRIP -->
+        <div style="background:#1a1510;padding:28px 48px;text-align:center;overflow:hidden;" class="reveal from-bottom">
+            <p id="verseText"
+                style="font-family:'Cormorant Garamond',serif;font-size:clamp(.95rem,2vw,1.15rem);font-weight:300;font-style:italic;letter-spacing:.04em;line-height:1.8;color:#f7f3ec;transition:opacity .8s;">
+                &ldquo;Sing to the Lord a new song; sing to the Lord, all the earth.&rdquo;</p>
+            <p id="verseRef"
+                style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:#b8935a;margin-top:8px;font-weight:300;transition:opacity .8s;">
+                Psalm 96:1</p>
+        </div>
+
+        <!-- MARQUEE TICKER -->
+        <div style="padding:64px 0;overflow:hidden;background:var(--warm);border-bottom:1px solid rgba(184,147,90,.12);"
+            class="reveal from-bottom">
+            <p
+                style="font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:#b8935a;text-align:center;margin-bottom:32px;font-weight:300;">
+                From the hymn library</p>
+            <div class="marquee-wrap" style="margin-bottom:12px;">
+                <div class="marquee-track">
+                    <div class="marquee-item">&#127925; Amazing Grace</div>
+                    <div class="marquee-item">&#10013; How Great Thou Art</div>
+                    <div class="marquee-item">&#128591; It Is Well With My Soul</div>
+                    <div class="marquee-item">&#9835; Be Thou My Vision</div>
+                    <div class="marquee-item">&#127925; Holy, Holy, Holy</div>
+                    <div class="marquee-item">&#10022; Blessed Assurance</div>
+                    <div class="marquee-item">&#127925; Great Is Thy Faithfulness</div>
+                    <div class="marquee-item">&#9835; Be Still, My Soul</div>
+                    <div class="marquee-item">&#10013; Crown Him With Many Crowns</div>
+                    <div class="marquee-item">&#128591; To God Be The Glory</div>
+                    <div class="marquee-item">&#127925; Amazing Grace</div>
+                    <div class="marquee-item">&#10013; How Great Thou Art</div>
+                    <div class="marquee-item">&#128591; It Is Well With My Soul</div>
+                    <div class="marquee-item">&#9835; Be Thou My Vision</div>
+                    <div class="marquee-item">&#127925; Holy, Holy, Holy</div>
+                    <div class="marquee-item">&#10022; Blessed Assurance</div>
+                    <div class="marquee-item">&#127925; Great Is Thy Faithfulness</div>
+                    <div class="marquee-item">&#9835; Be Still, My Soul</div>
+                    <div class="marquee-item">&#10013; Crown Him With Many Crowns</div>
+                    <div class="marquee-item">&#128591; To God Be The Glory</div>
+                </div>
+            </div>
+            <div class="marquee-wrap">
+                <div class="marquee-track marquee-reverse">
+                    <div class="marquee-item dark">&#128214; Praise My Soul the King of Heaven</div>
+                    <div class="marquee-item dark">&#127925; All Creatures of Our God</div>
+                    <div class="marquee-item dark">&#10013; Come Thou Fount</div>
+                    <div class="marquee-item dark">&#9835; Abide With Me</div>
+                    <div class="marquee-item dark">&#128591; O Sacred Head Now Wounded</div>
+                    <div class="marquee-item dark">&#10022; Joyful Joyful We Adore Thee</div>
+                    <div class="marquee-item dark">&#127925; When I Survey The Wondrous Cross</div>
+                    <div class="marquee-item dark">&#9835; The Old Rugged Cross</div>
+                    <div class="marquee-item dark">&#128214; Praise My Soul the King of Heaven</div>
+                    <div class="marquee-item dark">&#127925; All Creatures of Our God</div>
+                    <div class="marquee-item dark">&#10013; Come Thou Fount</div>
+                    <div class="marquee-item dark">&#9835; Abide With Me</div>
+                    <div class="marquee-item dark">&#128591; O Sacred Head Now Wounded</div>
+                    <div class="marquee-item dark">&#10022; Joyful Joyful We Adore Thee</div>
+                    <div class="marquee-item dark">&#127925; When I Survey The Wondrous Cross</div>
+                    <div class="marquee-item dark">&#9835; The Old Rugged Cross</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STICKY SCROLL SECTION -->
+        <section class="sticky-section">
+            <div class="sticky-left">
+                <div class="sticky-panel" data-panel="0">
+                    <p class="sticky-label">&#127925; Hymns</p>
+                    <h2 class="sticky-title">Ancient words,<br><em>ever new</em></h2>
+                    <p class="sticky-body">Hundreds of classic and contemporary hymns, beautifully typeset. Search by
+                        theme, scripture or season. Every word carries centuries of faith.</p>
+                    <button onclick="showPage('hymns',document.querySelectorAll('.nav-tab')[1])"
+                        class="sticky-btn">Browse Hymns &rarr;</button>
+                </div>
+                <div class="sticky-panel" data-panel="1">
+                    <p class="sticky-label">&#128214; Church Diary</p>
+                    <h2 class="sticky-title">Your faith,<br><em>written down</em></h2>
+                    <p class="sticky-body">Every time a hymn moves you, write it down. Over time your diary becomes a
+                        testimony &mdash; a sacred record of how God spoke through music.</p>
+                    <button onclick="showPage('diary',document.querySelectorAll('.nav-tab')[2])" class="sticky-btn">Open
+                        Diary &rarr;</button>
+                </div>
+                <div class="sticky-panel" data-panel="2">
+                    <p class="sticky-label">&#128240; The Echo</p>
+                    <h2 class="sticky-title">Stories that<br><em>resonate</em></h2>
+                    <p class="sticky-body">Testimonies, church news, and community voices. The Echo carries the stories
+                        of believers from around the world.</p>
+                    <button onclick="showPage('echo',document.querySelectorAll('.nav-tab')[3])" class="sticky-btn">Read
+                        The Echo &rarr;</button>
+                </div>
+                <div class="sticky-panel" data-panel="3">
+                    <p class="sticky-label">&#128591; Devotionals</p>
+                    <h2 class="sticky-title">Morning by<br><em>morning</em></h2>
+                    <p class="sticky-body">365 daily devotionals &mdash; scripture, reflection and prayer. Start every
+                        day grounded in God&rsquo;s word, with a companion hymn to carry you through.</p>
+                    <button onclick="showPage('devo',document.querySelectorAll('.nav-tab')[4])"
+                        class="sticky-btn">Today&rsquo;s Devotional &rarr;</button>
+                </div>
+            </div>
+            <div class="sticky-right">
+                <div class="sticky-cards-wrap">
+                    <div class="sticky-card active" data-card="0">
+                        <div class="sc-icon">&#127925;</div>
+                        <p class="sc-num">850+ Hymns</p>
+                        <p class="sc-title">Amazing Grace</p>
+                        <p class="sc-sub">John Newton &middot; 1779</p>
+                        <div class="sc-bar">
+                            <div class="sc-bar-fill"></div>
+                        </div>
+                        <p class="sc-tag">Grace &middot; Faith &middot; Salvation</p>
+                    </div>
+                    <div class="sticky-card" data-card="1">
+                        <div class="sc-icon">&#128214;</div>
+                        <p class="sc-num">Diary Entry &middot; Feb 25</p>
+                        <p class="sc-title">Morning of Quiet Grace</p>
+                        <p class="sc-sub">Great Is Thy Faithfulness</p>
+                        <p class="sc-body">&ldquo;The second verse felt like a letter written directly to me...&rdquo;
+                        </p>
+                        <div style="display:flex;gap:6px;margin-top:16px;flex-wrap:wrap;">
+                            <span class="sc-badge">Gratitude</span><span class="sc-badge">Faithfulness</span>
+                        </div>
+                    </div>
+                    <div class="sticky-card" data-card="2">
+                        <div class="sc-icon">&#128240;</div>
+                        <p class="sc-num">The Echo &middot; Latest</p>
+                        <p class="sc-title">From Doubt to Devotion</p>
+                        <p class="sc-sub">Sarah M. &middot; Feb 22, 2026</p>
+                        <p class="sc-body">&ldquo;Then one Sunday morning, a single hymn changed
+                            everything&hellip;&rdquo;</p>
+                        <span class="sc-badge" style="margin-top:16px;display:inline-block;">Testimony</span>
+                    </div>
+                    <div class="sticky-card" data-card="3">
+                        <div class="sc-icon">&#128591;</div>
+                        <p class="sc-num">Today&rsquo;s Devotional</p>
+                        <p class="sc-title">Still Waters</p>
+                        <p class="sc-sub">Psalm 23:2&ndash;3</p>
+                        <p class="sc-body">&ldquo;He leads me beside quiet waters, he refreshes my soul.&rdquo;</p>
+                        <span class="sc-badge" style="margin-top:16px;display:inline-block;">Peace &middot; Rest</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5 FEATURE CARDS -->
+
+        <!-- STATS STRIP -->
+        <div style="background:#f7f3ec;padding:60px 48px;border-top:1px solid rgba(184,147,90,.15);border-bottom:1px solid rgba(184,147,90,.15);"
+            class="reveal scale-in">
+            <div
+                style="max-width:900px;margin:0 auto;display:flex;justify-content:space-around;flex-wrap:wrap;gap:32px;text-align:center;">
+                <div>
+                    <p
+                        style="font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:#b8935a;line-height:1;">
+                        850+</p>
+                    <p
+                        style="font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:#7a7060;margin-top:6px;">
+                        Hymns</p>
+                </div>
+                <div>
+                    <p
+                        style="font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:#b8935a;line-height:1;">
+                        12k+</p>
+                    <p
+                        style="font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:#7a7060;margin-top:6px;">
+                        Members</p>
+                </div>
+                <div>
+                    <p
+                        style="font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:#b8935a;line-height:1;">
+                        365</p>
+                    <p
+                        style="font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:#7a7060;margin-top:6px;">
+                        Devotionals</p>
+                </div>
+                <div>
+                    <p
+                        style="font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:#b8935a;line-height:1;">
+                        ∞</p>
+                    <p
+                        style="font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:#7a7060;margin-top:6px;">
+                        Diary Entries</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA BANNER -->
+        <section style="background:#1a1510;padding:100px 48px;text-align:center;position:relative;overflow:hidden;"
+            class="reveal from-bottom">
+            <div
+                style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+                <span
+                    style="font-size:40vw;color:rgba(255,255,255,.015);font-family:'Cormorant Garamond',serif;line-height:1;">✝</span>
+            </div>
+            <p
+                style="font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:#b8935a;font-weight:300;margin-bottom:16px;">
+                Begin today</p>
+            <h2
+                style="font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:300;color:#f7f3ec;line-height:1.2;margin-bottom:20px;">
+                Your sacred practice<br><em style="font-style:italic;color:#b8935a;">starts here.</em></h2>
+            <p style="font-size:.82rem;font-weight:300;color:rgba(247,243,236,.45);margin-bottom:44px;">Free to join. No
+                commitment required. Just you and the music of faith.</p>
+            <button onclick="showPage('subs',document.querySelectorAll('.nav-tab')[5])"
+                style="padding:14px 40px;background:#b8935a;color:#fdfaf5;border:none;cursor:pointer;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;font-weight:300;transition:background .3s;"
+                onmouseover="this.style.background='#8a6e3e'" onmouseout="this.style.background='#b8935a'">Join Free
+                Today</button>
+        </section>
+
+        <!-- FOOTER -->
+        <footer
+            style="background:#1a1510;color:#f7f3ec;padding:56px 48px 0;border-top:1px solid rgba(255,255,255,.06);">
+            <div
+                style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:56px;padding-bottom:48px;border-bottom:1px solid rgba(255,255,255,.07);">
+
+                <!-- Brand -->
+                <div>
+                    <div
+                        style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;margin-bottom:14px;">
+                        Canti<span style="color:#b8935a;font-style:italic;">cle</span></div>
+                    <p
+                        style="font-size:.8rem;font-weight:300;line-height:1.9;color:rgba(247,243,236,.5);max-width:260px;margin-bottom:28px;">
+                        A sacred digital space for believers to read hymns, keep a spiritual diary, and grow daily in
+                        faith.</p>
+                    <div style="display:flex;gap:10px;">
+                        <a href="#"
+                            style="width:34px;height:34px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;color:rgba(247,243,236,.45);font-size:.72rem;text-decoration:none;transition:all .3s;"
+                            onmouseover="this.style.borderColor='#b8935a';this.style.color='#b8935a'"
+                            onmouseout="this.style.borderColor='rgba(255,255,255,.12)';this.style.color='rgba(247,243,236,.45)'">f</a>
+                        <a href="#"
+                            style="width:34px;height:34px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;color:rgba(247,243,236,.45);font-size:.72rem;text-decoration:none;transition:all .3s;"
+                            onmouseover="this.style.borderColor='#b8935a';this.style.color='#b8935a'"
+                            onmouseout="this.style.borderColor='rgba(255,255,255,.12)';this.style.color='rgba(247,243,236,.45)'">in</a>
+                        <a href="#"
+                            style="width:34px;height:34px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;color:rgba(247,243,236,.45);font-size:.72rem;text-decoration:none;transition:all .3s;"
+                            onmouseover="this.style.borderColor='#b8935a';this.style.color='#b8935a'"
+                            onmouseout="this.style.borderColor='rgba(255,255,255,.12)';this.style.color='rgba(247,243,236,.45)'">yt</a>
+                        <a href="#"
+                            style="width:34px;height:34px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;color:rgba(247,243,236,.45);font-size:.72rem;text-decoration:none;transition:all .3s;"
+                            onmouseover="this.style.borderColor='#b8935a';this.style.color='#b8935a'"
+                            onmouseout="this.style.borderColor='rgba(255,255,255,.12)';this.style.color='rgba(247,243,236,.45)'">✕</a>
+                    </div>
+                </div>
+
+                <!-- Nav Links -->
+                <div>
+                    <p
+                        style="font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:#b8935a;margin-bottom:18px;">
+                        Explore</p>
+                    <ul style="list-style:none;display:flex;flex-direction:column;gap:11px;">
+                        <li><a href="#" onclick="showPage('hymns',document.querySelectorAll('.nav-tab')[1])"
+                                style="font-size:.78rem;font-weight:300;color:rgba(247,243,236,.5);text-decoration:none;"
+                                onmouseover="this.style.color='#b8935a'"
+                                onmouseout="this.style.color='rgba(247,243,236,.5)'">🎵 Hymns</a></li>
+                        <li><a href="#" onclick="showPage('diary',document.querySelectorAll('.nav-tab')[2])"
+                                style="font-size:.78rem;font-weight:300;color:rgba(247,243,236,.5);text-decoration:none;"
+                                onmouseover="this.style.color='#b8935a'"
+                                onmouseout="this.style.color='rgba(247,243,236,.5)'">📖 Church Diary</a></li>
+                        <li><a href="#" onclick="showPage('echo',document.querySelectorAll('.nav-tab')[3])"
+                                style="font-size:.78rem;font-weight:300;color:rgba(247,243,236,.5);text-decoration:none;"
+                                onmouseover="this.style.color='#b8935a'"
+                                onmouseout="this.style.color='rgba(247,243,236,.5)'">📰 The Echo</a></li>
+                        <li><a href="#" onclick="showPage('devo',document.querySelectorAll('.nav-tab')[4])"
+                                style="font-size:.78rem;font-weight:300;color:rgba(247,243,236,.5);text-decoration:none;"
+                                onmouseover="this.style.color='#b8935a'"
+                                onmouseout="this.style.color='rgba(247,243,236,.5)'">🙏 Devotionals</a></li>
+                        <li><a href="#" onclick="showPage('subs',document.querySelectorAll('.nav-tab')[5])"
+                                style="font-size:.78rem;font-weight:300;color:rgba(247,243,236,.5);text-decoration:none;"
+                                onmouseover="this.style.color='#b8935a'"
+                                onmouseout="this.style.color='rgba(247,243,236,.5)'">💳 Subscriptions</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <p
+                        style="font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:#b8935a;margin-bottom:18px;">
+                        Contact</p>
+                    <div style="display:flex;flex-direction:column;gap:15px;">
+                        <div style="display:flex;gap:10px;align-items:flex-start;">
+                            <span style="color:#b8935a;">✉</span>
+                            <a href="mailto:hello@canticle.app"
+                                style="font-size:.78rem;font-weight:300;color:rgba(247,243,236,.55);text-decoration:none;"
+                                onmouseover="this.style.color='#b8935a'"
+                                onmouseout="this.style.color='rgba(247,243,236,.55)'">hello@canticle.app</a>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:flex-start;">
+                            <span style="color:#b8935a;">☎</span>
+                            <a href="tel:+1234567890"
+                                style="font-size:.78rem;font-weight:300;color:rgba(247,243,236,.55);text-decoration:none;"
+                                onmouseover="this.style.color='#b8935a'"
+                                onmouseout="this.style.color='rgba(247,243,236,.55)'">+1 (234) 567-890</a>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:flex-start;">
+                            <span style="color:#b8935a;">⌖</span>
+                            <p
+                                style="font-size:.78rem;font-weight:300;color:rgba(247,243,236,.55);line-height:1.7;margin:0;">
+                                123 Grace Street<br>Faith City, FC 10001</p>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:flex-start;">
+                            <span style="color:#b8935a;">◷</span>
+                            <p
+                                style="font-size:.78rem;font-weight:300;color:rgba(247,243,236,.55);line-height:1.7;margin:0;">
+                                Mon–Fri: 9am–6pm<br>Sat: 10am–2pm</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Newsletter -->
+            <div
+                style="max-width:1100px;margin:0 auto;padding:36px 0;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap;">
+                <div>
+                    <p
+                        style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:300;margin-bottom:5px;">
+                        Stay connected with the community</p>
+                    <p style="font-size:.73rem;font-weight:300;color:rgba(247,243,236,.4);">Weekly devotionals, new
+                        hymns and Echo stories in your inbox.</p>
+                </div>
+                <div style="display:flex;">
+                    <input type="email" placeholder="Your email address"
+                        style="padding:11px 18px;font-family:'Jost',sans-serif;font-size:.78rem;font-weight:300;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-right:none;color:#f7f3ec;outline:none;width:240px;"
+                        onfocus="this.style.borderColor='#b8935a'"
+                        onblur="this.style.borderColor='rgba(255,255,255,.1)'">
+                    <button
+                        style="padding:11px 20px;background:#b8935a;color:#fdfaf5;border:none;cursor:pointer;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;font-weight:300;"
+                        onmouseover="this.style.background='#8a6e3e'"
+                        onmouseout="this.style.background='#b8935a'">Subscribe</button>
+                </div>
+            </div>
+
+            <!-- Bottom bar -->
+            <div
+                style="max-width:1100px;margin:0 auto;padding:22px 0 30px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+                <p style="font-size:.62rem;font-weight:300;color:rgba(247,243,236,.25);">© 2026 Canticle · All rights
+                    reserved</p>
+                <p
+                    style="font-size:.62rem;font-weight:300;color:rgba(247,243,236,.18);font-family:'Cormorant Garamond',serif;font-style:italic;">
+                    "Sing to the Lord a new song" · Psalm 96:1</p>
+            </div>
+        </footer>
+
+    </div><!-- end page-home -->
+
+    <!-- ══════════════════════════════════
+     PAGE: HYMNS
+══════════════════════════════════════ -->
+    <div class="page" id="page-hymns">
+        <section class="hymns-hero">
+            <div class="hymns-hero-bg">
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+            </div>
+            <p class="hero-eyebrow">Ancient words, ever new</p>
+            <h1 class="hero-h1">The Hymn <em>Library</em></h1>
+            <p class="hero-sub">Read, listen and be moved by centuries of sacred song</p>
+        </section>
+
+        <div class="hymn-search-wrap">
+            <div class="hymn-search">
+                <input type="text" id="hymnSearch" placeholder="Search by title, author or scripture…"
+                    oninput="filterHymns()">
+                <button>Search</button>
+            </div>
+            <div class="hymn-filters">
+                <button class="filter-btn active" onclick="setFilter(this,'all')">All</button>
+                <button class="filter-btn" onclick="setFilter(this,'praise')">Praise</button>
+                <button class="filter-btn" onclick="setFilter(this,'grace')">Grace</button>
+                <button class="filter-btn" onclick="setFilter(this,'faith')">Faith</button>
+                <button class="filter-btn" onclick="setFilter(this,'comfort')">Comfort</button>
+                <button class="filter-btn" onclick="setFilter(this,'advent')">Advent</button>
+            </div>
+        </div>
+
+        <div class="hymns-grid" id="hymnsGrid"></div>
+    </div>
+
+    <!-- Hymn Modal -->
+    <div class="hymn-modal-bg" id="hymnModal">
+        <div class="hymn-modal">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <p class="modal-eyebrow" id="m-eyebrow"></p>
+            <h2 class="modal-title" id="m-title"></h2>
+            <p class="modal-author" id="m-author"></p>
+            <div class="modal-divider"></div>
+            <div class="modal-lyrics" id="m-lyrics"></div>
+            <div class="modal-player">
+                <p class="player-label">Listen Now</p>
+                <div class="player-wave" id="modalWave"></div>
+                <div class="player-controls">
+                    <button class="pc-btn" onclick="togglePlay(this)">▶ Play</button>
+                    <button class="pc-btn pc-save">♡ Save to Diary</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+     PAGE: CHURCH DIARY
+══════════════════════════════════════ -->
+    <div class="page" id="page-diary">
+        <div class="diary-layout">
+            <aside class="diary-sidebar">
+                <div class="diary-sidebar-head">
+                    <h2 class="diary-sidebar-title">My Diary</h2>
+                    <button class="new-entry-btn" onclick="showNewEntry()">+ New</button>
+                </div>
+                <div class="diary-entry-list" id="diaryList"></div>
+            </aside>
+            <main id="diaryMain">
+                <div class="diary-main" id="diaryMainContent"></div>
+                <div class="new-entry-form" id="newEntryForm">
+                    <h2 class="nef-title">New Diary Entry</h2>
+                    <div class="nef-group">
+                        <label class="nef-label">Title</label>
+                        <input class="nef-input" type="text" placeholder="Give this moment a name…">
+                    </div>
+                    <div class="nef-group">
+                        <label class="nef-label">Hymn (optional)</label>
+                        <input class="nef-input" type="text" placeholder="Which hymn moved you today?">
+                    </div>
+                    <div class="nef-group">
+                        <label class="nef-label">Your Reflection</label>
+                        <textarea class="nef-input nef-textarea"
+                            placeholder="Write what God placed on your heart…"></textarea>
+                    </div>
+                    <div class="nef-group">
+                        <label class="nef-label">Tags</label>
+                        <input class="nef-input" type="text" placeholder="e.g. gratitude, healing, answered prayer">
+                    </div>
+                    <div style="display:flex;gap:12px;margin-top:8px;">
+                        <button class="nef-submit">Save Entry</button>
+                        <button class="nef-cancel" onclick="cancelNewEntry()">Cancel</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+     PAGE: THE ECHO
+══════════════════════════════════════ -->
+    <div class="page" id="page-echo">
+        <div class="echo-hero">
+            <p class="echo-hero-label">Community & Stories</p>
+            <h1 class="echo-hero-title">The <em
+                    style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--gold)">Echo</em></h1>
+            <p class="echo-hero-sub">Stories of faith, testimonies, church news and the voices that echo across our
+                community.</p>
+        </div>
+        <div class="echo-categories">
+            <button class="echo-cat active" onclick="setEchoCat(this,'all')">All</button>
+            <button class="echo-cat" onclick="setEchoCat(this,'testimony')">Testimonies</button>
+            <button class="echo-cat" onclick="setEchoCat(this,'news')">Church News</button>
+            <button class="echo-cat" onclick="setEchoCat(this,'music')">Music & Worship</button>
+            <button class="echo-cat" onclick="setEchoCat(this,'community')">Community</button>
+        </div>
+        <div class="echo-grid" id="echoGrid"></div>
+    </div>
+
+    <!-- ══════════════════════════════════
+     PAGE: DEVOTIONALS
+══════════════════════════════════════ -->
+    <div class="page" id="page-devo">
+        <div class="devo-hero">
+            <p class="devo-day-label">Today's Devotional · February 25, 2026</p>
+            <h1 class="devo-today-title">Still Waters</h1>
+        </div>
+        <div style="max-width:720px;margin:0 auto;padding:0 48px;">
+            <div class="devo-verse-box">
+                <p class="devo-verse-text">"He makes me lie down in green pastures, he leads me beside quiet waters, he
+                    refreshes my soul."</p>
+                <p class="devo-verse-ref">Psalm 23:2–3</p>
+            </div>
+        </div>
+        <div class="devo-reflection">
+            <h3 class="devo-reflection-title">Reflection</h3>
+            <p class="devo-reflection-body">
+                There are moments when the world demands more than we have to give. The noise becomes deafening —
+                obligations pile up, anxieties whisper, and the pace of life never seems to slow. It is into precisely
+                this moment that the Shepherd speaks: <em>lie down</em>.
+            </p>
+            <p class="devo-reflection-body">
+                The invitation to still waters is not passive surrender — it is an act of trust. To rest in God's
+                provision is to declare, with your body and your breath, that He is enough. That today's worries are
+                held. That you are known and guided.
+            </p>
+            <p class="devo-reflection-body">
+                Where in your life are you resisting rest? Where is God calling you to lay something down and simply be
+                led?
+            </p>
+            <div class="devo-prayer">
+                <p class="devo-prayer-label">Prayer</p>
+                <p class="devo-prayer-text">Lord, still the rushing waters of my mind today. Let me hear Your voice
+                    above the noise. Lead me to the quiet places where my soul is restored, and remind me that in Your
+                    presence, I lack nothing. Amen.</p>
+            </div>
+            <div class="devo-hymn-link" onclick="showPage('hymns', document.querySelector('.nav-tab'))">
+                <div class="dhl-icon">♪</div>
+                <div>
+                    <p class="dhl-label">Today's Companion Hymn</p>
+                    <p class="dhl-name">Be Still, My Soul</p>
+                </div>
+                <span class="dhl-arrow">→</span>
+            </div>
+        </div>
+        <div class="devo-archive">
+            <h3 class="devo-archive-title">Past Devotionals</h3>
+            <div class="devo-archive-grid" id="devoArchive"></div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+     PAGE: SUBSCRIPTIONS
+══════════════════════════════════════ -->
+    <div class="page" id="page-subs">
+        <div class="sub-hero">
+            <p class="sub-hero-label">Plans & Pricing</p>
+            <h1 class="sub-hero-title">Support the work.<br><em
+                    style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--gold)">Deepen your
+                    faith.</em></h1>
+            <p class="sub-hero-sub">Every plan includes access to the core Canticle experience. Upgrade to unlock the
+                full depth of what we offer.</p>
+            <div class="sub-toggle">
+                <button class="sub-toggle-btn active" onclick="setBilling(this,'monthly')">Monthly</button>
+                <button class="sub-toggle-btn" onclick="setBilling(this,'annual')">Annual · Save 30%</button>
+            </div>
+            <div class="sub-plans" id="subPlans"></div>
+        </div>
+        <div class="sub-trust">
+            <h3 class="sub-trust-title">Trusted by believers worldwide</h3>
+            <div class="sub-trust-row">
+                <div class="str-item">
+                    <div class="str-num">12k+</div>
+                    <div class="str-label">Active members</div>
+                </div>
+                <div class="str-item">
+                    <div class="str-num">850+</div>
+                    <div class="str-label">Hymns available</div>
+                </div>
+                <div class="str-item">
+                    <div class="str-num">365</div>
+                    <div class="str-label">Daily devotionals</div>
+                </div>
+                <div class="str-item">
+                    <div class="str-num">∞</div>
+                    <div class="str-label">Diary entries</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- ══ MOBILE NAV ══ -->
+    <div style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;
+  background:rgba(253,250,245,.95);backdrop-filter:blur(12px);
+  border-top:1px solid var(--border);padding:8px 0;" id="mobileNav">
+        <div style="display:flex;justify-content:space-around;">
+            <button onclick="showPage('home',this)" style="background:none;border:none;
+      font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+      cursor:pointer;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                🏠<span>Home</span></button>
+            <button onclick="showPage('hymns',this)" style="background:none;border:none;
+      font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+      cursor:pointer;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                🎵<span>Hymns</span></button>
+            <button onclick="showPage('diary',this)" style="background:none;border:none;
+      font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+      cursor:pointer;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                📖<span>Diary</span></button>
+            <button onclick="showPage('echo',this)" style="background:none;border:none;
+      font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+      cursor:pointer;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                📰<span>Echo</span></button>
+            <button onclick="showPage('devo',this)" style="background:none;border:none;
+      font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+      cursor:pointer;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                🙏<span>Devotionals</span></button>
+            <button onclick="showPage('subs',this)" style="background:none;border:none;
+      font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+      cursor:pointer;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                💳<span>Plans</span></button>
+        </div>
+    </div>
+
+    <script>
+        // ══ PAGE SWITCHING ══
+        function showPage(id, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + id).classList.add('active');
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            if (btn && btn.classList && btn.classList.contains('nav-tab')) btn.classList.add('active');
+        }
+
+        // ══ HYMNS DATA ══
+        const hymns = [
+            {
+                num: '001', title: 'Amazing Grace', author: 'John Newton · 1779', tags: ['grace', 'faith'],
+                lyrics: [
+                    { type: 'stanza', text: 'Amazing grace! How sweet the sound\nThat saved a wretch like me!\nI once was lost, but now am found;\nWas blind, but now I see.' },
+                    { type: 'stanza', text: 'Twas grace that taught my heart to fear,\nAnd grace my fears relieved;\nHow precious did that grace appear\nThe hour I first believed.' },
+                    { type: 'refrain', text: 'My chains are gone, I have been set free\nMy God, my Savior has ransomed me\nAnd like a flood His mercy rains\nUnending love, Amazing Grace' },
+                    { type: 'stanza', text: "Through many dangers, toils and snares,\nI have already come;\n'Tis grace hath brought me safe thus far,\nAnd grace will lead me home." },
+                ]
+            },
+            {
+                num: '012', title: 'It Is Well With My Soul', author: 'Horatio Spafford · 1873', tags: ['comfort', 'peace', 'faith'],
+                lyrics: [
+                    { type: 'stanza', text: 'When peace like a river attendeth my way,\nWhen sorrows like sea billows roll;\nWhatever my lot, Thou hast taught me to say,\nIt is well, it is well with my soul.' },
+                    { type: 'refrain', text: 'It is well (it is well)\nWith my soul (with my soul)\nIt is well, it is well with my soul.' },
+                    { type: 'stanza', text: 'Though Satan should buffet, though trials should come,\nLet this blest assurance control;\nThat Christ hath regarded my helpless estate,\nAnd hath shed His own blood for my soul.' },
+                ]
+            },
+            {
+                num: '034', title: 'How Great Thou Art', author: 'Carl Boberg · 1885', tags: ['praise', 'wonder'],
+                lyrics: [
+                    { type: 'stanza', text: 'O Lord my God, when I in awesome wonder\nConsider all the worlds Thy hands have made;\nI see the stars, I hear the rolling thunder,\nThy power throughout the universe displayed.' },
+                    { type: 'refrain', text: 'Then sings my soul, my Savior God, to Thee;\nHow great Thou art, how great Thou art!\nThen sings my soul, my Savior God, to Thee;\nHow great Thou art, how great Thou art!' },
+                ]
+            },
+            {
+                num: '047', title: 'Be Thou My Vision', author: 'Irish Hymn · 8th Century', tags: ['faith', 'devotion'],
+                lyrics: [
+                    { type: 'stanza', text: 'Be Thou my vision, O Lord of my heart;\nNought be all else to me, save that Thou art;\nThou my best thought by day or by night,\nWaking or sleeping, Thy presence my light.' },
+                    { type: 'stanza', text: 'Be Thou my wisdom, and Thou my true word;\nI ever with Thee and Thou with me, Lord;\nThou my great Father, and I Thy true son,\nThou in me dwelling, and I with Thee one.' },
+                ]
+            },
+            {
+                num: '058', title: 'Holy, Holy, Holy', author: 'Reginald Heber · 1826', tags: ['praise', 'advent'],
+                lyrics: [
+                    { type: 'stanza', text: 'Holy, holy, holy! Lord God Almighty!\nEarly in the morning our song shall rise to Thee;\nHoly, holy, holy! Merciful and mighty!\nGod in three Persons, blessed Trinity!' },
+                    { type: 'stanza', text: 'Holy, holy, holy! All the saints adore Thee,\nCasting down their golden crowns around the glassy sea;\nCherubim and seraphim falling down before Thee,\nWho wert and art and evermore shalt be.' },
+                ]
+            },
+            {
+                num: '071', title: 'Blessed Assurance', author: 'Fanny Crosby · 1873', tags: ['comfort', 'grace'],
+                lyrics: [
+                    { type: 'stanza', text: 'Blessed assurance, Jesus is mine!\nO what a foretaste of glory divine!\nHeir of salvation, purchase of God,\nBorn of His Spirit, washed in His blood.' },
+                    { type: 'refrain', text: 'This is my story, this is my song,\nPraising my Savior all the day long;\nThis is my story, this is my song,\nPraising my Savior all the day long.' },
+                ]
+            },
+            {
+                num: '085', title: 'Great Is Thy Faithfulness', author: 'Thomas O. Chisholm · 1923', tags: ['faith', 'praise'],
+                lyrics: [
+                    { type: 'stanza', text: 'Great is Thy faithfulness, O God my Father,\nThere is no shadow of turning with Thee;\nThou changest not, Thy compassions, they fail not;\nAs Thou hast been, Thou forever wilt be.' },
+                    { type: 'refrain', text: 'Great is Thy faithfulness! Great is Thy faithfulness!\nMorning by morning new mercies I see;\nAll I have needed Thy hand hath provided;\nGreat is Thy faithfulness, Lord, unto me!' },
+                ]
+            },
+            {
+                num: '093', title: 'Be Still, My Soul', author: 'Katharina von Schlegel · 1752', tags: ['comfort', 'peace', 'advent'],
+                lyrics: [
+                    { type: 'stanza', text: 'Be still, my soul: the Lord is on thy side;\nBear patiently the cross of grief or pain;\nLeave to thy God to order and provide;\nIn every change He faithful will remain.' },
+                ]
+            },
+        ];
+
+        let activeFilter = 'all';
+        function renderHymns(list) {
+            const grid = document.getElementById('hymnsGrid');
+            grid.innerHTML = '';
+            list.forEach((h, i) => {
+                const card = document.createElement('div');
+                card.className = 'hymn-card';
+                card.style.animationDelay = (i * 0.05) + 's';
+                card.innerHTML = `
+      <div class="hymn-play">▶</div>
+      <p class="hymn-num">No. ${h.num}</p>
+      <h3 class="hymn-name">${h.title}</h3>
+      <p class="hymn-author">${h.author}</p>
+      <div class="hymn-tags">${h.tags.map(t => `<span class="htag">${t}</span>`).join('')}</div>`;
+                card.onclick = () => openHymn(h);
+                grid.appendChild(card);
+            });
+        }
+
+        function filterHymns() {
+            const q = document.getElementById('hymnSearch').value.toLowerCase();
+            let list = hymns;
+            if (activeFilter !== 'all') list = list.filter(h => h.tags.includes(activeFilter));
+            if (q) list = list.filter(h => h.title.toLowerCase().includes(q) || h.author.toLowerCase().includes(q));
+            renderHymns(list);
+        }
+
+        function setFilter(btn, f) {
+            activeFilter = f;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterHymns();
+        }
+
+        function openHymn(h) {
+            document.getElementById('m-eyebrow').textContent = 'Hymn No. ' + h.num;
+            document.getElementById('m-title').textContent = h.title;
+            document.getElementById('m-author').textContent = h.author;
+            let lyricsHTML = '';
+            h.lyrics.forEach(l => {
+                const cls = l.type === 'refrain' ? 'refrain' : 'stanza';
+                lyricsHTML += `<div class="${cls}">${l.text.replace(/\n/g, '<br>')}</div>`;
+            });
+            document.getElementById('m-lyrics').innerHTML = lyricsHTML;
+            buildWave('modalWave', 22);
+            document.getElementById('hymnModal').classList.add('open');
+        }
+        function closeModal() { document.getElementById('hymnModal').classList.remove('open'); }
+        function togglePlay(btn) { btn.textContent = btn.textContent.includes('▶') ? '⏸ Pause' : '▶ Play'; }
+
+        function buildWave(id, count) {
+            const el = document.getElementById(id);
+            el.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const b = document.createElement('div');
+                b.className = 'pw-bar';
+                const h = Math.random() * 22 + 6;
+                b.style.cssText = `height:${h}px;animation-delay:${(i * 0.06).toFixed(2)}s`;
+                el.appendChild(b);
+            }
+        }
+
+        // ══ DIARY DATA ══
+        const diaryEntries = [
+            {
+                id: 1, date: 'Feb 25, 2026', title: 'Morning of Quiet Grace', hymn: 'Great Is Thy Faithfulness',
+                body: 'This morning I woke before sunrise and sat with this hymn for nearly an hour. The second verse felt like a letter written directly to me — "strength for today and bright hope for tomorrow." I have been carrying so much anxiety about the future, and those words settled something deep in me.',
+                tags: ['gratitude', 'faithfulness', 'morning prayer']
+            },
+            {
+                id: 2, date: 'Feb 20, 2026', title: 'A Song in the Valley', hymn: 'It Is Well With My Soul',
+                body: 'After receiving difficult news this week, I found myself returning to this hymn over and over. Spafford wrote it after losing his daughters — and yet those words. How can a man write "it is well" in that moment? I am beginning to understand.',
+                tags: ['comfort', 'grief', 'trust']
+            },
+            {
+                id: 3, date: 'Feb 14, 2026', title: 'Valentines Day Worship', hymn: 'Be Thou My Vision',
+                body: 'We sang this at the special service today. The ancient simplicity of it moved me to tears - that a prayer so old can still be so entirely mine. Thou my best thought by day or by night. Yes. That.',
+                tags: ['worship', 'devotion', 'church']
+            },
+        ];
+
+        function renderDiary(active = 0) {
+            const list = document.getElementById('diaryList');
+            list.innerHTML = diaryEntries.map((e, i) => `
+    <div class="diary-entry-item ${i === active ? 'active' : ''}" onclick="selectEntry(${i})">
+      <p class="dei-date">${e.date}</p>
+      <p class="dei-title">${e.title}</p>
+      <p class="dei-preview">${e.body.substring(0, 60)}…</p>
+    </div>`).join('');
+            selectEntry(active);
+        }
+
+        function selectEntry(i) {
+            const e = diaryEntries[i];
+            document.querySelectorAll('.diary-entry-item').forEach((el, j) =>
+                el.classList.toggle('active', j === i));
+            document.getElementById('newEntryForm').classList.remove('open');
+            const mc = document.getElementById('diaryMainContent');
+            mc.style.display = 'block';
+            mc.innerHTML = `
+    <p class="diary-main-date">${e.date}</p>
+    <h2 class="diary-main-title">${e.title}</h2>
+    <p class="diary-main-sub">Personal reflection</p>
+    <div class="diary-main-divider"></div>
+    <p class="diary-main-body">${e.body}</p>
+    <div class="diary-hymn-ref">
+      <span class="dhr-icon">♪</span>
+      <div><p class="dhr-label">Companion Hymn</p><p class="dhr-name">${e.hymn}</p></div>
+    </div>
+    <div class="diary-tags-row">${e.tags.map(t => `<span class="dtag">${t}</span>`).join('')}</div>
+    <div class="diary-footer-row">
+      <button class="dfr-btn primary">Edit Entry</button>
+      <button class="dfr-btn">Share</button>
+    </div>`;
+        }
+
+        function showNewEntry() {
+            document.getElementById('diaryMainContent').style.display = 'none';
+            document.getElementById('newEntryForm').classList.add('open');
+        }
+        function cancelNewEntry() {
+            document.getElementById('newEntryForm').classList.remove('open');
+            document.getElementById('diaryMainContent').style.display = 'block';
+        }
+
+        // ══ ECHO DATA ══
+        const echoArticles = [
+            {
+                cat: 'testimony', title: 'From Doubt to Devotion: My Journey Back to the Church', author: 'Sarah M.', date: 'Feb 22, 2026',
+                excerpt: 'For three years I stayed away. The questions felt too big, the silence too heavy. Then one Sunday morning, a single hymn changed everything…', featured: true,
+                fullText: 'I remember the day vividly. The sanctuary was filled with morning light, and as the congregation stood to sing "Amazing Grace," a profound sense of peace washed over my anxious heart. The hymn spoke of being lost and found, of fear being relieved by grace. It was as if the words were written exactly for me in that moment. Slowly, week by week, I found myself returning to those pews. The church wasn\'t just a building anymore; it was a community that was holding me as I navigated my doubts, gently guiding me back to a devotion I thought I had lost forever.'
+            },
+            {
+                cat: 'music', title: 'Why Ancient Hymns Still Speak to a Digital Generation', author: 'Pastor James L.', date: 'Feb 19, 2026',
+                excerpt: 'In an age of worship anthems and streaming playlists, the old hymns are making a quiet, powerful comeback.',
+                fullText: 'There is something grounding about singing the exact same words that believers sang three hundred years ago. When we sing hymns, we step into a river of worship that spans generations. Our youth are discovering that the rich theology and poetic beauty of these ancient songs offer an anchor in an increasingly chaotic, fast-paced digital world. They provide a vocabulary for sorrow, for awe, and for an enduring hope that transcends the trends of today.'
+            },
+            {
+                cat: 'news', title: 'Community Choir Launches Hymn Recording Project', author: 'Admin', date: 'Feb 15, 2026',
+                excerpt: 'Our beloved choir is preserving 100 classic hymns in studio-quality recordings for the Canticle library.',
+                fullText: 'Over the next six months, the community choir will be gathering weekly in the sanctuary to record. This initiative aims to capture the authentic, reverberating sound of our congregation singing in a cherished space. The recordings will initially be added to the Canticle hymns library, allowing members to listen, practice, and worship along with familiar voices anytime, anywhere.'
+            },
+            {
+                cat: 'community', title: 'Prayer Wall: Stories of Answered Prayer This Month', author: 'Community Team', date: 'Feb 12, 2026',
+                excerpt: 'Seventeen members shared testimonies of answered prayers — from healing to provision to restored relationships.',
+                fullText: 'This month, our digital and physical prayer walls have overflowed with stories of God\'s faithfulness. We\'ve seen families reunited, difficult medical diagnoses turned around, and unexpected financial provisions. One member wrote: "I asked for peace regarding a decision, and the Lord provided not just peace, but a clear, undeniable open door." Let us continue to bear one another\'s burdens and celebrate His continuous grace.'
+            },
+            {
+                cat: 'testimony', title: 'The Hymn That Held Me Through Grief', author: 'Michael T.', date: 'Feb 8, 2026',
+                excerpt: 'When I buried my mother last autumn, I did not know how to pray. But I could sing. And that was enough.',
+                fullText: 'Grief has a way of silencing you. The traditional prayers felt hollow, and my own words wouldn\'t come out. Yet, as I sat alone one evening, the melody of "It Is Well With My Soul" drifted into my mind. I began to hum it, and then to sing the verses softly. The sheer faith required to declare "it is well" amidst devastation gave me a lifeline to hold onto. That hymn didn\'t erase the pain, but it tethered me to a God who understands sorrow, carrying me when I couldn\'t walk myself.'
+            },
+            {
+                cat: 'music', title: '5 Hymns for the Season of Lent', author: 'Worship Team', date: 'Feb 1, 2026',
+                excerpt: 'A curated selection of hymns for reflection, repentance and preparation during this sacred season.',
+                fullText: 'As we enter the Lenten season, our focus shifts toward reflection and the profound sacrifice of the cross. We have curated a list of five hymns—"When I Survey the Wondrous Cross", "Alas! and Did My Savior Bleed", "O Sacred Head, Now Wounded", "Jesus, Keep Me Near the Cross", and "Rock of Ages". We encourage you to spend time with one hymn each week, meditating on the lyrics and allowing the truths of redemption to shape your journey toward Easter morning.'
+            },
+        ];
+
+        function renderEcho(filter = 'all') {
+            const grid = document.getElementById('echoGrid');
+            const list = filter === 'all' ? echoArticles : echoArticles.filter(a => a.cat === filter);
+            grid.innerHTML = list.map((a, i) => `
+    <div class="echo-card ${i === 0 && filter === 'all' ? 'featured' : ''}">
+      ${i === 0 && filter === 'all' ? `<div class="echo-img-placeholder">✝</div>` : ''}
+      <div>
+        <p class="echo-card-cat">${a.cat}</p>
+        <h3 class="echo-card-title">${a.title}</h3>
+        <p class="echo-card-excerpt">${a.excerpt}</p>
+        <div class="echo-full-content" style="display:none; margin-top:12px; font-family:'Cormorant Garamond',serif; font-size:1.05rem; line-height:1.7; color:var(--ink2);">
+          ${a.fullText}
+        </div>
+        <div class="echo-card-meta">
+          <div class="echo-avatar">${a.author[0]}</div>
+          <span class="echo-author">${a.author}</span>
+          <span class="echo-date">· ${a.date}</span>
+        </div>
+        <span class="echo-read" style="cursor:pointer;" onclick="toggleEcho(this)">Read more →</span>
+      </div>
+    </div>`).join('');
+        }
+
+        function toggleEcho(btn) {
+            const container = btn.parentElement;
+            const excerpt = container.querySelector('.echo-card-excerpt');
+            const fullContent = container.querySelector('.echo-full-content');
+
+            if (fullContent.style.display === 'none') {
+                fullContent.style.display = 'block';
+                excerpt.style.display = 'none';
+                btn.innerHTML = 'Read less &uarr;';
+            } else {
+                fullContent.style.display = 'none';
+                excerpt.style.display = 'block';
+                btn.innerHTML = 'Read more &rarr;';
+            }
+        }
+
+        function setEchoCat(btn, cat) {
+            document.querySelectorAll('.echo-cat').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderEcho(cat);
+        }
+
+        // ══ DEVOTIONAL ARCHIVE ══
+        const devoArchive = [
+            { date: 'Feb 24', title: 'A Light Unto My Path', ref: 'Psalm 119:105' },
+            { date: 'Feb 23', title: 'Fear Not, For I Am With You', ref: 'Isaiah 41:10' },
+            { date: 'Feb 22', title: 'The Peace That Passes Understanding', ref: 'Philippians 4:7' },
+            { date: 'Feb 21', title: 'Come to Me, All Who Are Weary', ref: 'Matthew 11:28' },
+            { date: 'Feb 20', title: 'New Every Morning', ref: 'Lamentations 3:22–23' },
+            { date: 'Feb 19', title: 'Delight Yourself in the Lord', ref: 'Psalm 37:4' },
+        ];
+        document.getElementById('devoArchive').innerHTML = devoArchive.map(d => `
+  <div class="devo-arc-card">
+    <p class="dac-date">${d.date}</p>
+    <p class="dac-title">${d.title}</p>
+    <p class="dac-ref">${d.ref}</p>
+  </div>`).join('');
+
+        // ══ SUBSCRIPTIONS ══
+        const plans = [
+            {
+                name: 'Seeker', price: { monthly: 0, annual: 0 }, popular: false,
+                features: ['Access to 100 free hymns', 'Church Diary (5 entries)', 'Daily Devotional', 'The Echo newsletter'],
+                absent: ['Full hymn library (850+)', 'Unlimited diary entries', 'Audio playback', 'Offline access']
+            },
+            {
+                name: 'Pilgrim', price: { monthly: 7, annual: 5 }, popular: true,
+                features: ['Full hymn library (850+)', 'Unlimited diary entries', 'Audio playback', 'Daily devotionals', 'The Echo — full access', 'Scripture cross-references'],
+                absent: ['Offline access']
+            },
+            {
+                name: 'Shepherd', price: { monthly: 18, annual: 12 }, popular: false,
+                features: ['Everything in Pilgrim', 'Offline access', 'Community groups', 'Share diary entries', 'Priority support', 'Exclusive choir recordings']
+            },
+        ];
+
+        let billing = 'monthly';
+        function renderPlans() {
+            document.getElementById('subPlans').innerHTML = plans.map(p => `
+    <div class="sub-plan ${p.popular ? 'popular' : ''}">
+      ${p.popular ? '<div class="popular-badge">Most Popular</div>' : ''}
+      <p class="sub-plan-name">${p.name}</p>
+      <p class="sub-plan-price">${p.price[billing] === 0 ? 'Free' : '<span>$</span>' + p.price[billing]}</p>
+      <p class="sub-plan-period">${p.price[billing] === 0 ? 'Always free' : billing === 'monthly' ? 'per month' : 'per month, billed annually'}</p>
+      <div class="sub-divider"></div>
+      <ul class="sub-features-list">
+        ${p.features.map(f => `<li>${f}</li>`).join('')}
+        ${p.absent ? p.absent.map(f => `<li class="off">${f}</li>`).join('') : ''}
+      </ul>
+      <button class="sub-cta-btn">${p.price[billing] === 0 ? 'Get Started Free' : 'Subscribe Now'}</button>
+    </div>`).join('');
+        }
+
+        function setBilling(btn, b) {
+            billing = b;
+            document.querySelectorAll('.sub-toggle-btn').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+            renderPlans();
+        }
+
+        // ══ INIT ══
+        renderHymns(hymns);
+        renderDiary();
+        renderEcho();
+        renderPlans();
+
+        // ══ STICKY SCROLL — panel + card switching ══
+        function initStickyScroll() {
+            const section = document.querySelector('.sticky-section');
+            if (!section) return;
+            const panels = document.querySelectorAll('.sticky-panel');
+            const cards = document.querySelectorAll('.sticky-card');
+            const total = panels.length;
+
+            window.addEventListener('scroll', () => {
+                const rect = section.getBoundingClientRect();
+                const sectionH = section.offsetHeight;
+                const progress = Math.max(0, Math.min(1, -rect.top / (sectionH - window.innerHeight)));
+                const idx = Math.min(total - 1, Math.floor(progress * total));
+
+                panels.forEach((p, i) => p.classList.toggle('active', i === idx));
+                cards.forEach((c, i) => c.classList.toggle('active', i === idx));
+            });
+        }
+        initStickyScroll();
+
+        // ══ SCROLL ANIMATION ENGINE ══
+
+        // 1. Scroll progress bar
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            document.getElementById('scrollBar').style.width = pct + '%';
+
+            // 2. Parallax cross — subtle drift on scroll
+            const cross = document.getElementById('parallaxCross');
+            cross.style.transform = `translate(-50%, calc(-50% + ${scrollTop * 0.12}px)) rotate(${scrollTop * 0.01}deg)`;
+
+            // 3. Nav shrink on scroll
+            const nav = document.querySelector('nav');
+            if (scrollTop > 60) {
+                nav.style.height = '52px';
+                nav.style.background = 'rgba(253,250,245,0.98)';
+            } else {
+                nav.style.height = '64px';
+                nav.style.background = 'rgba(253,250,245,0.92)';
+            }
+        });
+
+        // 4. Intersection Observer — reveal elements as they enter view
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+        function observeReveals() {
+            document.querySelectorAll('.reveal').forEach(el => {
+                el.classList.remove('visible');
+                revealObserver.observe(el);
+            });
+        }
+        observeReveals();
+
+        // Re-run observer when switching pages so new page elements animate in
+        const _origShowPage = showPage;
+        window.showPage = function (id, btn) {
+            _origShowPage(id, btn);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(observeReveals, 50);
+        };
+        // ══ DAILY PSALM — changes automatically every calendar day ══
+        const dailyPsalms = [
+            { text: "The Lord is my shepherd; I shall not want.", ref: "Psalm 23:1" },
+            { text: "He makes me lie down in green pastures; he leads me beside still waters.", ref: "Psalm 23:2" },
+            { text: "Even though I walk through the valley of the shadow of death, I will fear no evil.", ref: "Psalm 23:4" },
+            { text: "The Lord is my light and my salvation — whom shall I fear?", ref: "Psalm 27:1" },
+            { text: "Wait for the Lord; be strong, and let your heart take courage.", ref: "Psalm 27:14" },
+            { text: "Taste and see that the Lord is good; blessed is the one who takes refuge in him.", ref: "Psalm 34:8" },
+            { text: "The Lord is close to the brokenhearted and saves those who are crushed in spirit.", ref: "Psalm 34:18" },
+            { text: "Delight yourself in the Lord, and he will give you the desires of your heart.", ref: "Psalm 37:4" },
+            { text: "Commit your way to the Lord; trust in him and he will act.", ref: "Psalm 37:5" },
+            { text: "God is our refuge and strength, an ever-present help in trouble.", ref: "Psalm 46:1" },
+            { text: "Be still, and know that I am God.", ref: "Psalm 46:10" },
+            { text: "Create in me a clean heart, O God, and renew a right spirit within me.", ref: "Psalm 51:10" },
+            { text: "Cast your burden on the Lord, and he will sustain you.", ref: "Psalm 55:22" },
+            { text: "In God I trust; I shall not be afraid. What can man do to me?", ref: "Psalm 56:11" },
+            { text: "My soul finds rest in God alone; my salvation comes from him.", ref: "Psalm 62:1" },
+            { text: "You are my God, earnestly I seek you; my soul thirsts for you.", ref: "Psalm 63:1" },
+            { text: "Praise the Lord, all his works everywhere in his dominion.", ref: "Psalm 103:22" },
+            { text: "The Lord is compassionate and gracious, slow to anger, abounding in love.", ref: "Psalm 103:8" },
+            { text: "As far as the east is from the west, so far has he removed our transgressions from us.", ref: "Psalm 103:12" },
+            { text: "Bless the Lord, O my soul, and all that is within me, bless his holy name.", ref: "Psalm 103:1" },
+            { text: "Give thanks to the Lord, for he is good; his love endures forever.", ref: "Psalm 107:1" },
+            { text: "Your word is a lamp to my feet and a light to my path.", ref: "Psalm 119:105" },
+            { text: "I lift up my eyes to the hills. From where does my help come?", ref: "Psalm 121:1" },
+            { text: "My help comes from the Lord, who made heaven and earth.", ref: "Psalm 121:2" },
+            { text: "The Lord will keep your going out and your coming in from this time forth.", ref: "Psalm 121:8" },
+            { text: "I rejoiced when they said to me, let us go to the house of the Lord.", ref: "Psalm 122:1" },
+            { text: "Unless the Lord builds the house, those who build it labor in vain.", ref: "Psalm 127:1" },
+            { text: "Children are a heritage from the Lord, offspring a reward from him.", ref: "Psalm 127:3" },
+            { text: "I praise you because I am fearfully and wonderfully made.", ref: "Psalm 139:14" },
+            { text: "Search me, O God, and know my heart; test me and know my anxious thoughts.", ref: "Psalm 139:23" },
+            { text: "Sing to the Lord a new song; sing to the Lord, all the earth.", ref: "Psalm 96:1" },
+            { text: "The heavens declare the glory of God; the skies proclaim the work of his hands.", ref: "Psalm 19:1" },
+            { text: "The law of the Lord is perfect, refreshing the soul.", ref: "Psalm 19:7" },
+            { text: "May these words of my mouth and this meditation of my heart be pleasing in your sight.", ref: "Psalm 19:14" },
+            { text: "The Lord is my strength and my shield; my heart trusts in him.", ref: "Psalm 28:7" },
+            { text: "Weeping may stay for the night, but rejoicing comes in the morning.", ref: "Psalm 30:5" },
+            { text: "In you, Lord my God, I put my trust.", ref: "Psalm 25:1" },
+            { text: "Show me your ways, Lord, teach me your paths.", ref: "Psalm 25:4" },
+            { text: "The earth is the Lord's and everything in it, the world and all who live in it.", ref: "Psalm 24:1" },
+            { text: "He restores my soul. He leads me in right paths for his name's sake.", ref: "Psalm 23:3" },
+            { text: "Let everything that has breath praise the Lord.", ref: "Psalm 150:6" },
+            { text: "The Lord reigns, let the earth be glad.", ref: "Psalm 97:1" },
+            { text: "Enter his gates with thanksgiving and his courts with praise.", ref: "Psalm 100:4" },
+            { text: "Know that the Lord is God. It is he who made us, and we are his.", ref: "Psalm 100:3" },
+            { text: "His love endures forever and his faithfulness through all generations.", ref: "Psalm 100:5" },
+            { text: "I will extol the Lord at all times; his praise will always be on my lips.", ref: "Psalm 34:1" },
+            { text: "The Lord is near to all who call on him, to all who call on him in truth.", ref: "Psalm 145:18" },
+            { text: "Great is the Lord and most worthy of praise; his greatness no one can fathom.", ref: "Psalm 145:3" },
+            { text: "The Lord upholds all who fall and lifts up all who are bowed down.", ref: "Psalm 145:14" },
+            { text: "Not to us, Lord, not to us but to your name be the glory.", ref: "Psalm 115:1" },
+            { text: "I will lift up the cup of salvation and call on the name of the Lord.", ref: "Psalm 116:13" },
+            { text: "Precious in the sight of the Lord is the death of his faithful servants.", ref: "Psalm 116:15" },
+            { text: "This is the day the Lord has made; let us rejoice and be glad in it.", ref: "Psalm 118:24" },
+            { text: "Give thanks to the Lord, for he is good; his love endures forever.", ref: "Psalm 118:1" },
+            { text: "How can a young person stay on the path of purity? By living according to your word.", ref: "Psalm 119:9" },
+            { text: "I have hidden your word in my heart that I might not sin against you.", ref: "Psalm 119:11" },
+            { text: "Direct my footsteps according to your word; let no sin rule over me.", ref: "Psalm 119:133" },
+            { text: "The unfolding of your words gives light; it gives understanding to the simple.", ref: "Psalm 119:130" },
+            { text: "I wait for the Lord, my whole being waits, and in his word I put my hope.", ref: "Psalm 130:5" },
+            { text: "With the Lord there is unfailing love and with him is full redemption.", ref: "Psalm 130:7" },
+            { text: "My heart is not lifted up; my eyes are not raised too high.", ref: "Psalm 131:1" },
+            { text: "How good and pleasant it is when God's people live together in unity.", ref: "Psalm 133:1" },
+            { text: "I will give you thanks, for you answered me; you have become my salvation.", ref: "Psalm 118:21" },
+            { text: "The Lord is gracious and righteous; our God is full of compassion.", ref: "Psalm 116:5" },
+            { text: "Sing praises to God, sing praises; sing praises to our King, sing praises.", ref: "Psalm 47:6" },
+            { text: "Clap your hands, all you nations; shout to God with cries of joy.", ref: "Psalm 47:1" },
+            { text: "How lovely is your dwelling place, Lord Almighty!", ref: "Psalm 84:1" },
+            { text: "Blessed are those who dwell in your house; they are ever praising you.", ref: "Psalm 84:4" },
+            { text: "Better is one day in your courts than a thousand elsewhere.", ref: "Psalm 84:10" },
+            { text: "For the Lord God is a sun and shield; the Lord bestows favor and honor.", ref: "Psalm 84:11" },
+            { text: "Righteousness and peace kiss each other. Faithfulness springs forth from the earth.", ref: "Psalm 85:10" },
+            { text: "Teach me your way, Lord, that I may rely on your faithfulness.", ref: "Psalm 86:11" },
+            { text: "You are forgiving and good, O Lord, abounding in love to all who call to you.", ref: "Psalm 86:5" },
+            { text: "He who dwells in the shelter of the Most High will rest in the shadow of the Almighty.", ref: "Psalm 91:1" },
+            { text: "He will cover you with his feathers, and under his wings you will find refuge.", ref: "Psalm 91:4" },
+            { text: "For he will command his angels concerning you to guard you in all your ways.", ref: "Psalm 91:11" },
+            { text: "It is good to praise the Lord and make music to your name, O Most High.", ref: "Psalm 92:1" },
+            { text: "The Lord reigns, he is robed in majesty; the Lord is robed in majesty and armed with strength.", ref: "Psalm 93:1" },
+            { text: "Come, let us sing for joy to the Lord; let us shout aloud to the Rock of our salvation.", ref: "Psalm 95:1" },
+            { text: "For the Lord is the great God, the great King above all gods.", ref: "Psalm 95:3" },
+            { text: "Worship the Lord in the splendor of his holiness; tremble before him, all the earth.", ref: "Psalm 96:9" },
+            { text: "The Lord is king; let the nations tremble! He sits enthroned between the cherubim.", ref: "Psalm 99:1" },
+            { text: "Shout for joy to the Lord, all the earth. Worship the Lord with gladness.", ref: "Psalm 100:1-2" },
+            { text: "My eyes will be on the faithful in the land, that they may dwell with me.", ref: "Psalm 101:6" },
+            { text: "Let this be written for a future generation, that a people not yet created may praise the Lord.", ref: "Psalm 102:18" },
+            { text: "From everlasting to everlasting the Lord's love is with those who fear him.", ref: "Psalm 103:17" },
+            { text: "He remembers that we are dust.", ref: "Psalm 103:14" },
+            { text: "O Lord, how many are your works! In wisdom you made them all.", ref: "Psalm 104:24" },
+            { text: "Give praise to the Lord, proclaim his name; make known among the nations what he has done.", ref: "Psalm 105:1" },
+            { text: "He remembers his covenant forever, the promise he made for a thousand generations.", ref: "Psalm 105:8" },
+            { text: "Praise the Lord. Give thanks to the Lord, for he is good.", ref: "Psalm 106:1" },
+            { text: "Let them give thanks to the Lord for his unfailing love and his wonderful deeds.", ref: "Psalm 107:8" },
+            { text: "He lifted the needy out of their affliction and increased their families like flocks.", ref: "Psalm 107:41" },
+            { text: "My heart, O God, is steadfast; I will sing and make music with all my soul.", ref: "Psalm 108:1" },
+            { text: "The Lord says to my lord: Sit at my right hand until I make your enemies a footstool.", ref: "Psalm 110:1" },
+            { text: "Praise the Lord. I will extol the Lord with all my heart.", ref: "Psalm 111:1" },
+            { text: "The fear of the Lord is the beginning of wisdom.", ref: "Psalm 111:10" },
+            { text: "Blessed are those who fear the Lord, who find great delight in his commands.", ref: "Psalm 112:1" },
+            { text: "Light shines in the darkness for the upright, for the gracious and compassionate.", ref: "Psalm 112:4" },
+            { text: "Praise the Lord. Praise him, servants of the Lord, praise the name of the Lord.", ref: "Psalm 113:1" },
+            { text: "Who is like the Lord our God, the One who sits enthroned on high?", ref: "Psalm 113:5" },
+            { text: "He raises the poor from the dust and lifts the needy from the ash heap.", ref: "Psalm 113:7" },
+            { text: "Tremble, earth, at the presence of the Lord.", ref: "Psalm 114:7" },
+            { text: "O house of Israel, trust in the Lord — he is their help and shield.", ref: "Psalm 115:9" },
+            { text: "I love the Lord, for he heard my voice; he heard my cry for mercy.", ref: "Psalm 116:1" },
+            { text: "Praise the Lord, all you nations; extol him, all you peoples.", ref: "Psalm 117:1" },
+            { text: "Great is his love toward us, and the faithfulness of the Lord endures forever.", ref: "Psalm 117:2" },
+        ];
+
+        // Get day of year (0-364) to pick today's psalm
+        function getDayOfYear() {
+            const now = new Date();
+            const start = new Date(now.getFullYear(), 0, 0);
+            const diff = now - start;
+            return Math.floor(diff / (1000 * 60 * 60 * 24)) - 1;
+        }
+
+        const todayIdx = getDayOfYear() % dailyPsalms.length;
+        const todayPsalm = dailyPsalms[todayIdx];
+
+        // Set today's psalm immediately
+        const vt = document.getElementById('verseText');
+        const vr = document.getElementById('verseRef');
+        if (vt && vr) {
+            vt.textContent = '\u201c' + todayPsalm.text + '\u201d';
+            vr.textContent = todayPsalm.ref;
+        }
+
+        // Show today's date label next to the psalm ref
+        const dateLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+        if (vr) vr.textContent = todayPsalm.ref + '  \u00b7  ' + dateLabel;
+
+        // Mobile nav visibility
+        if (window.innerWidth < 768) {
+            document.getElementById('mobileNav').style.display = 'block';
+        }
+
+        // Close modal on bg click
+        document.getElementById('hymnModal').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+</body>
+
+</html>

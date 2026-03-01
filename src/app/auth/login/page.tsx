@@ -48,7 +48,13 @@ function LoginForm() {
                 const session = await getSession()
                 const userRole = (session?.user as any)?.role
 
-                router.push("/admin")
+                // Admins and staff go to the admin dashboard; members/users return to the Canticle landing page
+                const adminRoles = ["admin", "super_admin", "staff", "editor"]
+                if (adminRoles.includes(userRole?.toLowerCase())) {
+                    router.push("/admin")
+                } else {
+                    router.push("/")
+                }
                 router.refresh()
             }
         } catch (err) {
@@ -111,7 +117,7 @@ function LoginForm() {
                         }`}
                 >
                     <User className="w-4 h-4" />
-                    Member
+                    User
                 </button>
                 <button
                     onClick={() => { setLoginType("admin"); setError(""); setSuccess(""); setForgotPasswordMsg(""); }}
@@ -212,7 +218,7 @@ function LoginForm() {
                             Authenticating...
                         </span>
                     ) : (
-                        `Sign in as ${loginType === "admin" ? "Admin" : "Member"}`
+                        `Sign in as ${loginType === "admin" ? "Admin" : "User"}`
                     )}
                 </button>
             </form>
@@ -226,19 +232,18 @@ function LoginForm() {
 
                 <div className="flex justify-center gap-6">
                     {[
-                        { icon: Facebook, color: "hover:bg-[#3b5998] hover:text-white", href: "https://www.facebook.com/login" },
-                        { icon: Twitter, color: "hover:bg-white hover:text-black", href: "https://twitter.com/login" },
-                        { icon: Google, color: "hover:bg-[#db4437] hover:text-white", href: "https://accounts.google.com/signin" }
+                        { icon: Facebook, color: "hover:bg-[#3b5998] hover:text-white", provider: "facebook" },
+                        { icon: Twitter, color: "hover:bg-white hover:text-black", provider: "twitter" },
+                        { icon: Google, color: "hover:bg-[#db4437] hover:text-white", provider: "google" }
                     ].map((social, i) => (
-                        <a
-                            href={social.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <button
                             key={i}
-                            className={`w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-slate-400 transition-all hover:-translate-y-1 hover:shadow-xl ${social.color}`}
+                            type="button"
+                            onClick={() => signIn(social.provider, { callbackUrl: "/" })}
+                            className={`w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-slate-400 transition-all hover:-translate-y-1 hover:shadow-xl cursor-pointer ${social.color}`}
                         >
                             <social.icon className="w-5 h-5" />
-                        </a>
+                        </button>
                     ))}
                 </div>
 

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Lock, Mail, Facebook, Twitter, Chrome as Google } from "lucide-react"
+import { VantaBackground } from "@/components/VantaBackground"
 
 export default function LoginV2Page() {
     const [email, setEmail] = useState("")
@@ -19,7 +20,9 @@ export default function LoginV2Page() {
     }, [])
 
     return (
-        <div className="min-h-screen bg-[#1e2a3a] flex items-center justify-center p-6 overflow-hidden select-none">
+        <div className="min-h-screen flex items-center justify-center p-6 overflow-hidden select-none relative">
+            <VantaBackground />
+
             {/* Animated Ring Container */}
             <div className="relative w-full max-w-[400px] aspect-square flex items-center justify-center">
                 <div className="absolute inset-0 animate-[spin_20s_linear_infinite] scale-[0.8] sm:scale-100">

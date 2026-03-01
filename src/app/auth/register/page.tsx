@@ -31,7 +31,7 @@ export default function RegisterPage() {
             const data = await res.json()
 
             if (res.ok) {
-                router.push("/auth/login?registered=true")
+                router.push("/auth/user-login?registered=true")
             } else {
                 setError(data.error || "Something went wrong")
             }
@@ -150,7 +150,7 @@ export default function RegisterPage() {
 
                 <div className="pt-6 text-center border-t border-slate-200/50 dark:border-slate-800/50 mt-6">
                     <Link
-                        href="/auth/login"
+                        href="/auth/user-login"
                         className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                     >
                         <ArrowLeft className="w-4 h-4" />

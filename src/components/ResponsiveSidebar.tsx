@@ -33,7 +33,7 @@ export function ResponsiveSidebar({ navLinks, userRole }: ResponsiveSidebarProps
                 <div>
                     <h1 className="text-xl font-bold tracking-wide text-white">✝ My PCC</h1>
                     <p className="text-xs text-blue-300 dark:text-slate-400 mt-1">
-                        {userRole === "MEMBER" ? "Member Portal" : "Admin Dashboard"}
+                        {userRole === "USER" ? "User Portal" : "Admin Dashboard"}
                     </p>
                 </div>
                 <button onClick={closeSidebar} className="lg:hidden text-white hover:text-blue-300">
@@ -48,8 +48,8 @@ export function ResponsiveSidebar({ navLinks, userRole }: ResponsiveSidebarProps
                                 href={link.href}
                                 onClick={closeSidebar}
                                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${pathname === link.href
-                                        ? "bg-blue-700 dark:bg-slate-800 text-white shadow-md"
-                                        : "text-blue-100 dark:text-slate-300 hover:bg-blue-700/50 dark:hover:bg-slate-800/50 hover:text-white"
+                                    ? "bg-blue-700 dark:bg-slate-800 text-white shadow-md"
+                                    : "text-blue-100 dark:text-slate-300 hover:bg-blue-700/50 dark:hover:bg-slate-800/50 hover:text-white"
                                     }`}
                             >
                                 <span className="text-base">{link.icon}</span>
@@ -90,7 +90,7 @@ export function ResponsiveSidebar({ navLinks, userRole }: ResponsiveSidebarProps
                     <h1 className="text-lg font-bold tracking-tight">✝ My PCC</h1>
                 </div>
                 <div className="text-xs text-blue-300 dark:text-slate-400 font-medium bg-blue-800/50 dark:bg-slate-800/50 px-3 py-1 rounded-full border border-blue-700 dark:border-slate-700">
-                    {userRole === "MEMBER" ? "Member" : "Admin"}
+                    {userRole === "USER" ? "User" : "Admin"}
                 </div>
             </header>
 

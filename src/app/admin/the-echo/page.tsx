@@ -8,9 +8,9 @@ export const dynamic = "force-dynamic";
 
 export default async function TheEchoPage() {
     const session = await getServerSession(authOptions);
-    const userRole = (session?.user as any)?.role || "MEMBER";
+    const userRole = (session?.user as any)?.role || "USER";
     const userId = (session?.user as any)?.id;
-    const canModify = ["ADMIN", "STAFF"].includes(userRole);
+    const canModify = ["ADMIN", "SUPER_ADMIN", "STAFF", "EDITOR"].includes(userRole);
     const isMember = !canModify;
 
     // Fetch user's active subscription status if they are a member

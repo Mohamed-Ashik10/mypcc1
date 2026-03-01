@@ -6,23 +6,29 @@ import { authOptions } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 
 async function getAdminStats() {
-    const [users, hymns, diaryEntries, subscriptions, transactions] = await Promise.all([
-        prisma.user.count(),
-        prisma.hymn.count(),
-        prisma.diaryEntry.count(),
-        prisma.subscription.count({ where: { status: "ACTIVE" } }),
-        prisma.transaction.aggregate({ _sum: { amount: true }, where: { status: "COMPLETED" } }),
-    ]);
-    return { users, hymns, diaryEntries, subscriptions, totalRevenue: transactions._sum.amount ?? 0 };
+    try {
+        const [users, hymns, diaryEntries, subscriptions, transactions] = await Promise.all([
+            prisma.user.count(),
+            prisma.hymn.count(),
+            prisma.diaryEntry.count(),
+            prisma.subscription.count({ where: { status: "ACTIVE" } }),
+            prisma.transaction.aggregate({ _sum: { amount: true }, where: { status: "COMPLETED" } }),
+        ]);
+        return { users, hymns, diaryEntries, subscriptions, totalRevenue: transactions._sum.amount ?? 0, error: null };
+    } catch (err: any) {
+        console.error("[AdminDashboard] DB error:", err?.message);
+        return { users: 0, hymns: 0, diaryEntries: 0, subscriptions: 0, totalRevenue: 0, error: err?.message ?? "Database unavailable" };
+    }
 }
+
 
 export default async function AdminDashboardPage() {
     const session = await getServerSession(authOptions);
-    const userRole = (session?.user as any)?.role || "MEMBER";
+    const userRole = (session?.user as any)?.role || "USER";
     const userId = (session?.user as any)?.id;
     const userName = session?.user?.name || "Member";
 
-    const isAdmin = ["ADMIN", "SUPER_ADMIN", "STAFF"].includes(userRole);
+    const isAdmin = ["ADMIN", "SUPER_ADMIN", "STAFF", "EDITOR"].includes(userRole.toUpperCase());
 
     if (isAdmin) {
         const stats = await getAdminStats();
@@ -40,6 +46,17 @@ export default async function AdminDashboardPage() {
                     <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">Overview</h2>
                     <p className="text-sm sm:text-base text-muted-foreground mt-1 font-medium">Welcome back, {userName}! Here's the state of the platform.</p>
                 </div>
+
+                {/* DB Error Banner */}
+                {stats.error && (
+                    <div className="bg-red-900/30 border border-red-500/40 text-red-300 rounded-2xl px-6 py-4 text-sm font-medium flex items-start gap-3">
+                        <span className="text-xl">⚠️</span>
+                        <div>
+                            <p className="font-black text-red-200">Database Unavailable</p>
+                            <p className="text-red-300/70 text-xs mt-1">Cannot reach the database server. Stats below show cached zeros. Check your database connection.<br /><span className="opacity-50 font-mono">{stats.error}</span></p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -106,14 +123,20 @@ export default async function AdminDashboardPage() {
     }
 
     // ── MEMBER VIEW ──────────────────────────────────────────────────────────
-    const [todayReading, activeSub] = await Promise.all([
-        prisma.diaryEntry.findFirst({
-            where: { date: { gte: new Date(new Date().setHours(0, 0, 0, 0)), lt: new Date(new Date().setHours(23, 59, 59, 999)) } }
-        }),
-        prisma.subscription.findFirst({
-            where: { userId, status: "ACTIVE" }
-        })
-    ]);
+    let todayReading = null;
+    let activeSub = null;
+    try {
+        [todayReading, activeSub] = await Promise.all([
+            prisma.diaryEntry.findFirst({
+                where: { date: { gte: new Date(new Date().setHours(0, 0, 0, 0)), lt: new Date(new Date().setHours(23, 59, 59, 999)) } }
+            }),
+            prisma.subscription.findFirst({
+                where: { userId, status: "ACTIVE" }
+            })
+        ]);
+    } catch (err: any) {
+        console.error("[MemberDashboard] DB error:", err?.message);
+    }
 
     return (
         <div className="space-y-10">

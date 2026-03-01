@@ -10,7 +10,7 @@ export default function CheckoutPage() {
     const searchParams = useSearchParams()
     const planType = searchParams.get("plan") || "MONTHLY"
 
-    const [paymentMethod, setPaymentMethod] = useState<"MOBILE_MONEY" | "VISA" | "PAYPAL">("MOBILE_MONEY")
+    const [paymentMethod, setPaymentMethod] = useState<"MOBILE_MONEY" | "VISA" | "PAYPAL" | "ORANGE_MONEY">("MOBILE_MONEY")
     const [phoneNumber, setPhoneNumber] = useState("")
     const [isProcessing, setIsProcessing] = useState(false)
     const [step, setStep] = useState<"checkout" | "sim_prompt" | "success">("checkout")
@@ -24,7 +24,7 @@ export default function CheckoutPage() {
     const amount = planPrices[planType] || 1000
 
     const handlePayNow = async () => {
-        if (paymentMethod === "MOBILE_MONEY" && !phoneNumber) {
+        if ((paymentMethod === "MOBILE_MONEY" || paymentMethod === "ORANGE_MONEY") && !phoneNumber) {
             alert("Please enter your phone number")
             return
         }
@@ -33,6 +33,20 @@ export default function CheckoutPage() {
 
         // Simulate "Initiating Payment" API call
         await new Promise(r => setTimeout(r, 1500))
+
+        if (paymentMethod === "PAYPAL") {
+            // Redirect to PayPal
+            const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=your-paypal-email@example.com&item_name=${planType}+Subscription&amount=${(amount / 650).toFixed(2)}&currency_code=USD`;
+            window.location.href = paypalUrl;
+            return;
+        }
+
+        if (paymentMethod === "ORANGE_MONEY") {
+            // Redirect to Orange Money (Simulated)
+            alert("Redirecting to Orange Money payment gateway...");
+            window.location.href = `https://orange-money-gateway.example.com/pay?amount=${amount}&ref=${Date.now()}&phone=${phoneNumber}`;
+            return;
+        }
 
         if (paymentMethod === "MOBILE_MONEY") {
             setStep("sim_prompt")
@@ -164,10 +178,40 @@ export default function CheckoutPage() {
                                     <div className={`p-2 rounded-xl ${paymentMethod === "MOBILE_MONEY" ? "bg-blue-600 text-white" : "bg-muted text-muted-foreground"}`}>
                                         <Smartphone className="w-5 h-5" />
                                     </div>
-                                    <span className="font-bold text-sm">Mobile Money (MTN/Orange)</span>
+                                    <span className="font-bold text-sm">Mobile Money (MTN)</span>
                                 </div>
                                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === "MOBILE_MONEY" ? "border-blue-600" : "border-muted-foreground/30"}`}>
                                     {paymentMethod === "MOBILE_MONEY" && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full" />}
+                                </div>
+                            </button>
+
+                            <button
+                                onClick={() => setPaymentMethod("ORANGE_MONEY")}
+                                className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${paymentMethod === "ORANGE_MONEY" ? "border-orange-500 bg-orange-500/5 shadow-md" : "border-border hover:border-muted-foreground/30"}`}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2 rounded-xl ${paymentMethod === "ORANGE_MONEY" ? "bg-orange-500 text-white" : "bg-muted text-muted-foreground"}`}>
+                                        <Smartphone className="w-5 h-5" />
+                                    </div>
+                                    <span className="font-bold text-sm">Orange Money</span>
+                                </div>
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === "ORANGE_MONEY" ? "border-orange-500" : "border-muted-foreground/30"}`}>
+                                    {paymentMethod === "ORANGE_MONEY" && <div className="w-2.5 h-2.5 bg-orange-500 rounded-full" />}
+                                </div>
+                            </button>
+
+                            <button
+                                onClick={() => setPaymentMethod("PAYPAL")}
+                                className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${paymentMethod === "PAYPAL" ? "border-blue-800 bg-blue-800/5 shadow-md" : "border-border hover:border-muted-foreground/30"}`}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2 rounded-xl ${paymentMethod === "PAYPAL" ? "bg-blue-800 text-white" : "bg-muted text-muted-foreground"}`}>
+                                        <div className="w-5 h-5 flex items-center justify-center font-black text-xs">P</div>
+                                    </div>
+                                    <span className="font-bold text-sm">PayPal</span>
+                                </div>
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === "PAYPAL" ? "border-blue-800" : "border-muted-foreground/30"}`}>
+                                    {paymentMethod === "PAYPAL" && <div className="w-2.5 h-2.5 bg-blue-800 rounded-full" />}
                                 </div>
                             </button>
 
@@ -188,7 +232,7 @@ export default function CheckoutPage() {
                         </div>
                     </div>
 
-                    {paymentMethod === "MOBILE_MONEY" && (
+                    {(paymentMethod === "MOBILE_MONEY" || paymentMethod === "ORANGE_MONEY") && (
                         <div className="space-y-4 animate-in slide-in-from-top-2 duration-300">
                             <label className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] block ml-1">Phone Number</label>
                             <input
@@ -198,16 +242,21 @@ export default function CheckoutPage() {
                                 onChange={(e) => setPhoneNumber(e.target.value)}
                                 className="w-full px-5 py-4 bg-card border-border border-2 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-bold text-lg"
                             />
-                            <p className="text-[10px] text-muted-foreground font-medium px-2">We'll send a SIM Toolkit push notification to this number for PIN entry.</p>
+                            <p className="text-[10px] text-muted-foreground font-medium px-2">We'll send a payment push notification to this number for PIN entry.</p>
                         </div>
                     )}
 
                     <button
                         onClick={handlePayNow}
                         disabled={isProcessing}
-                        className="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl text-base shadow-xl shadow-blue-600/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                        className={`w-full py-5 text-white font-black rounded-2xl text-base shadow-xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 ${paymentMethod === "ORANGE_MONEY" ? "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20" :
+                                paymentMethod === "PAYPAL" ? "bg-blue-800 hover:bg-blue-900 shadow-blue-800/20" :
+                                    "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20"
+                            }`}
                     >
-                        {isProcessing ? <Loader2 className="w-6 h-6 animate-spin" /> : "Confirm & Pay Now"}
+                        {isProcessing ? <Loader2 className="w-6 h-6 animate-spin" /> :
+                            paymentMethod === "PAYPAL" ? "Redirect to PayPal" :
+                                paymentMethod === "ORANGE_MONEY" ? "Pay with Orange Money" : "Confirm & Pay Now"}
                     </button>
 
                     <div className="flex items-center center gap-2 justify-center text-muted-foreground">

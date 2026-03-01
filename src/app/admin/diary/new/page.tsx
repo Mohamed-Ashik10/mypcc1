@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 export default async function NewDiaryEntryPage() {
     const session = await getServerSession(authOptions);
     const userRole = (session?.user as any)?.role;
-    if (!["ADMIN", "SUPER_ADMIN", "STAFF"].includes(userRole)) {
+    if (!["ADMIN", "SUPER_ADMIN", "STAFF", "EDITOR"].includes(userRole)) {
         redirect("/admin");
     }
     return (

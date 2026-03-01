@@ -1,23 +1,18 @@
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
+
 const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-async function testConnection() {
-    const url = process.argv[2];
-    console.log(`Testing connection with URL: ${url}`);
-
-    // Prisma 7 style
-    const prisma = new PrismaClient({
-        datasourceUrl: url
-    });
-
+async function main() {
     try {
         await prisma.$connect();
-        console.log("Success! Connected to the database.");
-    } catch (e) {
-        console.error("Connection failed!");
-        console.error(e.message || e);
+        console.log('Successfully connected to the database.');
+    } catch (error) {
+        console.error('Failed to connect to the database:', error);
     } finally {
-        // await prisma.$disconnect();
+        await prisma.$disconnect();
     }
 }
 
-testConnection();
+main();
