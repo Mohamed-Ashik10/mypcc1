@@ -81,8 +81,8 @@ export default function LandingPageClient({
                         </>
                     ) : (
                         <>
-                            <button className="nav-sign" onClick={() => window.location.href = '/auth/user-login'}>Sign In</button>
-                            <button className="nav-join" onClick={() => window.location.href = '/auth/user-login'}>Join Free</button>
+                            <button className="nav-sign" onClick={() => window.location.href = '/auth/login'}>Sign In</button>
+                            <button className="nav-join" onClick={() => window.location.href = '/auth/login'}>Join Free</button>
                         </>
                     )}
                 </div>
@@ -251,7 +251,7 @@ export default function LandingPageClient({
                     <p style={{ fontSize: '.65rem', letterSpacing: '.3em', textTransform: 'uppercase', color: '#b8935a', fontWeight: 300, marginBottom: '16px' }}>Begin today</p>
                     <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(2.5rem,5vw,4rem)', fontWeight: 300, color: '#f7f3ec', lineHeight: 1.2, marginBottom: '20px' }}>Your sacred practice<br /><em style={{ fontStyle: 'italic', color: '#b8935a' }}>starts here.</em></h2>
                     <p style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(247,243,236,.45)', marginBottom: '44px' }}>Free to join. No commitment required. Just you and the music of faith.</p>
-                    <button onClick={() => (window as any).showPage('subs', document.querySelectorAll('.nav-tab')[5])} style={{ padding: '14px 40px', background: '#b8935a', color: '#fdfaf5', border: 'none', cursor: 'pointer', fontSize: '.72rem', letterSpacing: '.18em', textTransform: 'uppercase', fontWeight: 300, transition: 'background .3s' }}>Join Free Today</button>
+                    <button onClick={() => window.location.href = '/auth/login'} style={{ padding: '14px 40px', background: '#b8935a', color: '#fdfaf5', border: 'none', cursor: 'pointer', fontSize: '.72rem', letterSpacing: '.18em', textTransform: 'uppercase', fontWeight: 300, transition: 'background .3s' }}>Join Free Today</button>
                 </section>
 
                 {/* FOOTER */}
@@ -267,11 +267,7 @@ export default function LandingPageClient({
                                 <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none' }}>🎵 Hymns</a></li>
                                 <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('diary', document.querySelectorAll('.nav-tab')[2]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none' }}>📖 Church Diary</a></li>
                                 <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('echo', document.querySelectorAll('.nav-tab')[3]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none' }}>📰 The Echo</a></li>
-                                <li style={{ marginTop: '4px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <a href="/auth/admin-login" style={{ fontSize: '.72rem', fontWeight: 400, color: '#b8935a', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <span>⚙️</span> Admin Portal
-                                    </a>
-                                </li>
+
                             </ul>
                         </div>
                         <div>
