@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
 
 :root {
   --background: #ffffff;
@@ -33,8 +34,6 @@
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  @apply bg-background text-foreground antialiased;
   font-family: var(--font-sans), system-ui, sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
