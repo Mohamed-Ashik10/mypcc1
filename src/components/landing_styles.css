@@ -95,6 +95,9 @@ nav {
   transition: all .25s;
   border-radius: 2px;
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .nav-tab:hover {
@@ -2509,6 +2512,32 @@ nav {
   .modal-title {
     font-size: 1.6rem;
   }
+}
+
+/* ══ SVG ICON ALIGNMENT ══ */
+.float-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sticky-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sc-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 @keyframes wave {

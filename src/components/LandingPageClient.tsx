@@ -14,6 +14,71 @@ interface LandingPageClientProps {
     initialAnnouncements?: any[];
 }
 
+// ─── SVG Icon Components ──────────────────────────────────────────────────────
+
+const SvgHome = ({ size = 16 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}>
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        <polyline points="9 22 9 12 15 12 15 22" />
+    </svg>
+);
+
+const SvgMusic = ({ size = 16 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}>
+        <path d="M9 18V5l12-2v13" />
+        <circle cx="6" cy="18" r="3" />
+        <circle cx="18" cy="16" r="3" />
+    </svg>
+);
+
+const SvgCross = ({ size = 16 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}>
+        <line x1="12" y1="2" x2="12" y2="22" />
+        <line x1="5" y1="8" x2="19" y2="8" />
+    </svg>
+);
+
+const SvgBook = ({ size = 16 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}>
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </svg>
+);
+
+const SvgNewspaper = ({ size = 16 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}>
+        <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
+        <path d="M18 14h-8" /><path d="M15 18h-5" />
+        <path d="M10 6h8v4h-8V6z" />
+    </svg>
+);
+
+const SvgPray = ({ size = 16 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}>
+        <path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2" />
+        <path d="M14 10V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v2" />
+        <path d="M10 10.5V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8" />
+        <path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+    </svg>
+);
+
+const SvgCard = ({ size = 16 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}>
+        <rect width="20" height="14" x="2" y="5" rx="2" />
+        <line x1="2" x2="22" y1="10" y2="10" />
+    </svg>
+);
+
+const SvgSparkle = ({ size = 16 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}>
+        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+        <path d="M5 3v4" /><path d="M19 17v4" />
+        <path d="M3 5h4" /><path d="M17 19h4" />
+    </svg>
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function LandingPageClient({
     session,
     initialHymns = [],
@@ -64,12 +129,12 @@ export default function LandingPageClient({
             <nav className="landing-nav">
                 <a className="logo" href="#">Canti<span>cle</span></a>
                 <div className="nav-tabs">
-                    <button className="nav-tab active" onClick={(e) => (window as any).showPage('home', e.currentTarget)}>🏠 Home<div className="dot"></div></button>
-                    <button className="nav-tab" onClick={(e) => (window as any).showPage('hymns', e.currentTarget)}>🎵 Hymns<div className="dot"></div></button>
-                    <button className="nav-tab" onClick={(e) => (window as any).showPage('diary', e.currentTarget)}>📖 Church Diary<div className="dot"></div></button>
-                    <button className="nav-tab" onClick={(e) => (window as any).showPage('echo', e.currentTarget)}>📰 The Echo<div className="dot"></div></button>
-                    <button className="nav-tab" onClick={(e) => (window as any).showPage('devo', e.currentTarget)}>🙏 Devotionals<div className="dot"></div></button>
-                    <button className="nav-tab" onClick={(e) => (window as any).showPage('subs', e.currentTarget)}>💳 Subscriptions<div className="dot"></div></button>
+                    <button className="nav-tab active" onClick={(e) => (window as any).showPage('home', e.currentTarget)}><SvgHome size={15} /> Home<div className="dot"></div></button>
+                    <button className="nav-tab" onClick={(e) => (window as any).showPage('hymns', e.currentTarget)}><SvgMusic size={15} /> Hymns<div className="dot"></div></button>
+                    <button className="nav-tab" onClick={(e) => (window as any).showPage('diary', e.currentTarget)}><SvgBook size={15} /> Church Diary<div className="dot"></div></button>
+                    <button className="nav-tab" onClick={(e) => (window as any).showPage('echo', e.currentTarget)}><SvgNewspaper size={15} /> The Echo<div className="dot"></div></button>
+                    <button className="nav-tab" onClick={(e) => (window as any).showPage('devo', e.currentTarget)}><SvgPray size={15} /> Devotionals<div className="dot"></div></button>
+                    <button className="nav-tab" onClick={(e) => (window as any).showPage('subs', e.currentTarget)}><SvgCard size={15} /> Subscriptions<div className="dot"></div></button>
                 </div>
                 <div className="nav-right" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     {session ? (
@@ -93,7 +158,7 @@ export default function LandingPageClient({
 
             {/* ══════════════════════════════════
              PAGE: HOME
-        ══════════════════════════════════════ */}
+         ══════════════════════════════════════ */}
             <div className="page active" id="page-home">
                 {/* HERO with floating icons */}
                 <section className="hymns-hero" style={{ minHeight: '100vh' }}>
@@ -107,14 +172,15 @@ export default function LandingPageClient({
                             <line x1="0" y1="233" x2="700" y2="233" stroke="#6e1799" strokeWidth="1" />
                         </svg>
                     </div>
-                    <div className="float-icon" style={{ top: '14%', left: '8%', animationDelay: '0s' }}>🎵</div>
-                    <div className="float-icon" style={{ top: '22%', right: '9%', animationDelay: '.8s', fontSize: '2rem' }}>✝</div>
-                    <div className="float-icon" style={{ top: '65%', left: '5%', animationDelay: '1.4s' }}>📖</div>
-                    <div className="float-icon" style={{ top: '70%', right: '7%', animationDelay: '.4s' }}>🙏</div>
-                    <div className="float-icon" style={{ top: '38%', left: '3%', animationDelay: '2s', fontSize: '1.2rem' }}>🎶</div>
-                    <div className="float-icon" style={{ top: '42%', right: '4%', animationDelay: '1.1s', fontSize: '1.2rem' }}>✨</div>
-                    <div className="float-icon" style={{ top: '80%', left: '18%', animationDelay: '.6s', fontSize: '1.4rem' }}>📰</div>
-                    <div className="float-icon" style={{ top: '12%', right: '22%', animationDelay: '1.7s', fontSize: '1.4rem' }}>💳</div>
+                    {/* Floating hero SVG icons */}
+                    <div className="float-icon" style={{ top: '14%', left: '8%', animationDelay: '0s' }}><SvgMusic size={28} /></div>
+                    <div className="float-icon" style={{ top: '22%', right: '9%', animationDelay: '.8s' }}><SvgCross size={32} /></div>
+                    <div className="float-icon" style={{ top: '65%', left: '5%', animationDelay: '1.4s' }}><SvgBook size={28} /></div>
+                    <div className="float-icon" style={{ top: '70%', right: '7%', animationDelay: '.4s' }}><SvgPray size={28} /></div>
+                    <div className="float-icon" style={{ top: '38%', left: '3%', animationDelay: '2s' }}><SvgMusic size={20} /></div>
+                    <div className="float-icon" style={{ top: '42%', right: '4%', animationDelay: '1.1s' }}><SvgSparkle size={20} /></div>
+                    <div className="float-icon" style={{ top: '80%', left: '18%', animationDelay: '.6s' }}><SvgNewspaper size={22} /></div>
+                    <div className="float-icon" style={{ top: '12%', right: '22%', animationDelay: '1.7s' }}><SvgCard size={22} /></div>
 
                     <p className="hero-eyebrow" style={{ animation: 'fadeUp .8s .2s ease both', position: 'relative', zIndex: 2 }}>A sacred space for every believer</p>
                     <h1 className="hero-h1" style={{ animation: 'fadeUp .8s .4s ease both', position: 'relative', zIndex: 2 }}>Sing. Listen.<br /><em>Remember.</em></h1>
@@ -140,23 +206,23 @@ export default function LandingPageClient({
                     </p>
                 </div>
 
-                {/* MARQUEE TICKER (Optional) */}
+                {/* MARQUEE TICKER */}
                 <div className="marquee-section reveal from-bottom">
                     <p style={{ fontSize: '.62rem', letterSpacing: '.28em', textTransform: 'uppercase', color: '#6e1799', textAlign: 'center', marginBottom: '32px', fontWeight: 300 }}>
                         From the hymn library
                     </p>
                     <div className="marquee-wrap" style={{ marginBottom: '12px' }}>
                         <div className="marquee-track">
-                            <div className="marquee-item">🎵 Amazing Grace</div>
-                            <div className="marquee-item">✝ How Great Thou Art</div>
-                            <div className="marquee-item">🙏 It Is Well With My Soul</div>
-                            <div className="marquee-item">🎶 Be Thou My Vision</div>
-                            <div className="marquee-item">🎵 Holy, Holy, Holy</div>
-                            <div className="marquee-item">✨ Blessed Assurance</div>
-                            <div className="marquee-item">🎵 Great Is Thy Faithfulness</div>
-                            <div className="marquee-item">🎶 Be Still, My Soul</div>
-                            <div className="marquee-item">✝ Crown Him With Many Crowns</div>
-                            <div className="marquee-item">🙏 To God Be The Glory</div>
+                            <div className="marquee-item"><SvgMusic size={13} /> Amazing Grace</div>
+                            <div className="marquee-item"><SvgCross size={13} /> How Great Thou Art</div>
+                            <div className="marquee-item"><SvgPray size={13} /> It Is Well With My Soul</div>
+                            <div className="marquee-item"><SvgMusic size={13} /> Be Thou My Vision</div>
+                            <div className="marquee-item"><SvgMusic size={13} /> Holy, Holy, Holy</div>
+                            <div className="marquee-item"><SvgSparkle size={13} /> Blessed Assurance</div>
+                            <div className="marquee-item"><SvgMusic size={13} /> Great Is Thy Faithfulness</div>
+                            <div className="marquee-item"><SvgMusic size={13} /> Be Still, My Soul</div>
+                            <div className="marquee-item"><SvgCross size={13} /> Crown Him With Many Crowns</div>
+                            <div className="marquee-item"><SvgPray size={13} /> To God Be The Glory</div>
                         </div>
                     </div>
                 </div>
@@ -165,34 +231,34 @@ export default function LandingPageClient({
                 <section className="sticky-section">
                     <div className="sticky-left">
                         <div className="sticky-panel active" data-panel="0">
-                            <p className="sticky-label">🎵 Hymns</p>
+                            <p className="sticky-label"><SvgMusic size={14} /> Hymns</p>
                             <h2 className="sticky-title">Ancient words,<br /><em>ever new</em></h2>
                             <p className="sticky-body">Hundreds of classic and contemporary hymns, beautifully typeset. Search by theme, scripture or season. Every word carries centuries of faith.</p>
                             <button onClick={(e) => (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1])} className="sticky-btn">Browse Hymns &rarr;</button>
                         </div>
                         <div className="sticky-panel" data-panel="1">
-                            <p className="sticky-label">📖 Church Diary</p>
+                            <p className="sticky-label"><SvgBook size={14} /> Church Diary</p>
                             <h2 className="sticky-title">Your faith,<br /><em>written down</em></h2>
                             <p className="sticky-body">Every time a hymn moves you, write it down. Over time your diary becomes a testimony — a sacred record of how God spoke through music.</p>
                             <button onClick={(e) => (window as any).showPage('diary', document.querySelectorAll('.nav-tab')[2])} className="sticky-btn">Open Diary &rarr;</button>
                         </div>
                         <div className="sticky-panel" data-panel="2">
-                            <p className="sticky-label">📰 The Echo</p>
+                            <p className="sticky-label"><SvgNewspaper size={14} /> The Echo</p>
                             <h2 className="sticky-title">Stories that<br /><em>resonate</em></h2>
                             <p className="sticky-body">Testimonies, church news, and community voices. The Echo carries the stories of believers from around the world.</p>
                             <button onClick={(e) => (window as any).showPage('echo', document.querySelectorAll('.nav-tab')[3])} className="sticky-btn">Read The Echo &rarr;</button>
                         </div>
                         <div className="sticky-panel" data-panel="3">
-                            <p className="sticky-label">🙏 Devotionals</p>
+                            <p className="sticky-label"><SvgPray size={14} /> Devotionals</p>
                             <h2 className="sticky-title">Morning by<br /><em>morning</em></h2>
-                            <p className="sticky-body">365 daily devotionals — scripture, reflection and prayer. Start every day grounded in God’s word, with a companion hymn to carry you through.</p>
+                            <p className="sticky-body">365 daily devotionals — scripture, reflection and prayer. Start every day grounded in God's word, with a companion hymn to carry you through.</p>
                             <button onClick={(e) => (window as any).showPage('devo', document.querySelectorAll('.nav-tab')[4])} className="sticky-btn">Today's Devotional &rarr;</button>
                         </div>
                     </div>
                     <div className="sticky-right">
                         <div className="sticky-cards-wrap">
                             <div className="sticky-card active" data-card="0">
-                                <div className="sc-icon">🎵</div>
+                                <div className="sc-icon"><SvgMusic size={22} /></div>
                                 <p className="sc-num">{initialHymns.length}+ Hymns</p>
                                 <p className="sc-title">{initialHymns[0]?.title || 'Amazing Grace'}</p>
                                 <p className="sc-sub">{initialHymns[0]?.author || 'John Newton · 1779'}</p>
@@ -200,7 +266,7 @@ export default function LandingPageClient({
                                 <p className="sc-tag">{initialHymns[0]?.tags?.join(' · ') || 'Grace · Faith · Salvation'}</p>
                             </div>
                             <div className="sticky-card" data-card="1">
-                                <div className="sc-icon">📖</div>
+                                <div className="sc-icon"><SvgBook size={22} /></div>
                                 <p className="sc-num">Diary Entry &middot; {initialDiary[0] ? new Date(initialDiary[0].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Feb 25'}</p>
                                 <p className="sc-title">{initialDiary[0]?.title || 'Morning of Quiet Grace'}</p>
                                 <p className="sc-sub">{initialDiary[0]?.hymn || 'Great Is Thy Faithfulness'}</p>
@@ -210,7 +276,7 @@ export default function LandingPageClient({
                                 </div>
                             </div>
                             <div className="sticky-card" data-card="2">
-                                <div className="sc-icon">📰</div>
+                                <div className="sc-icon"><SvgNewspaper size={22} /></div>
                                 <p className="sc-num">The Echo &middot; Latest</p>
                                 <p className="sc-title">{initialEcho[0]?.title || 'From Doubt to Devotion'}</p>
                                 <p className="sc-sub">{initialEcho[0]?.author || 'Sarah M.'} &middot; {initialEcho[0]?.date || 'Feb 22, 2026'}</p>
@@ -218,7 +284,7 @@ export default function LandingPageClient({
                                 <span className="sc-badge" style={{ marginTop: '16px', display: 'inline-block', textTransform: 'capitalize' }}>{initialEcho[0]?.cat || 'Testimony'}</span>
                             </div>
                             <div className="sticky-card" data-card="3">
-                                <div className="sc-icon">🙏</div>
+                                <div className="sc-icon"><SvgPray size={22} /></div>
                                 <p className="sc-num">Today's Devotional</p>
                                 <p className="sc-title">{initialDevotional?.title || 'Still Waters'}</p>
                                 <p className="sc-sub">{initialDevotional?.date || 'Feb 25, 2026'}</p>
@@ -267,10 +333,9 @@ export default function LandingPageClient({
                         <div>
                             <p style={{ fontSize: '.6rem', letterSpacing: '.28em', textTransform: 'uppercase', color: '#6e1799', marginBottom: '18px' }}>Explore</p>
                             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '11px' }}>
-                                <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none' }}>🎵 Hymns</a></li>
-                                <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('diary', document.querySelectorAll('.nav-tab')[2]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none' }}>📖 Church Diary</a></li>
-                                <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('echo', document.querySelectorAll('.nav-tab')[3]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none' }}>📰 The Echo</a></li>
-
+                                <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgMusic size={13} /> Hymns</a></li>
+                                <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('diary', document.querySelectorAll('.nav-tab')[2]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgBook size={13} /> Church Diary</a></li>
+                                <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('echo', document.querySelectorAll('.nav-tab')[3]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgNewspaper size={13} /> The Echo</a></li>
                             </ul>
                         </div>
                         <div>
@@ -283,7 +348,7 @@ export default function LandingPageClient({
 
             {/* ══════════════════════════════════
              PAGE: HYMNS
-        ══════════════════════════════════════ */}
+         ══════════════════════════════════════ */}
             <div className="page" id="page-hymns">
                 <section className="hymns-hero">
                     <div className="hymns-hero-bg">
@@ -331,7 +396,7 @@ export default function LandingPageClient({
 
             {/* ══════════════════════════════════
              PAGE: CHURCH DIARY
-        ══════════════════════════════════════ */}
+         ══════════════════════════════════════ */}
             <div className="page" id="page-diary">
                 <div className="diary-layout">
                     <aside className="diary-sidebar">
@@ -353,7 +418,7 @@ export default function LandingPageClient({
 
             {/* ══════════════════════════════════
              PAGE: THE ECHO
-        ══════════════════════════════════════ */}
+         ══════════════════════════════════════ */}
             <div className="page" id="page-echo">
                 <div className="echo-hero">
                     <p className="echo-hero-label">COMMUNITY &amp; STORIES</p>
@@ -372,7 +437,7 @@ export default function LandingPageClient({
 
             {/* ══════════════════════════════════
              PAGE: DEVOTIONALS
-        ══════════════════════════════════════ */}
+         ══════════════════════════════════════ */}
             <div className="page" id="page-devo">
                 <div className="devo-hero">
                     <h1 className="devo-today-title">Daily Devotional</h1>
@@ -399,7 +464,7 @@ export default function LandingPageClient({
 
             {/* ══════════════════════════════════
              PAGE: SUBSCRIPTIONS
-        ══════════════════════════════════════ */}
+         ══════════════════════════════════════ */}
             <div className="page" id="page-subs">
                 <div className="sub-hero">
                     <h1 className="sub-hero-title">Support Canticle</h1>
