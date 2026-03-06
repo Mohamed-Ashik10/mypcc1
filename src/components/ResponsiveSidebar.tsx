@@ -33,7 +33,7 @@ export function ResponsiveSidebar({ navLinks, userRole }: ResponsiveSidebarProps
         ["/admin", "/admin/hymns", "/admin/diary", "/admin/the-echo", "/admin/devotionals", "/admin/announcements"].includes(l.href)
     )
     const adminLinks = filteredLinks.filter(l =>
-        ["/admin/users", "/admin/user-logs", "/admin/subscriptions", "/admin/transactions", "/admin/pcc-info"].includes(l.href)
+        ["/admin/users", "/admin/user-logs", "/admin/subscriptions", "/admin/transactions", "/admin/pcc-info", "/admin/settings"].includes(l.href)
     )
 
     const NavItem = ({ link }: { link: NavLink }) => {
