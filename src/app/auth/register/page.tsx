@@ -114,14 +114,17 @@ export default function RegisterPage() {
                         {/* Phone with Country Code */}
                         <div>
                             <label className={labelClass}>
-                                Phone Number <span className="font-normal text-slate-400">(optional)</span>
+                                Phone Number
                             </label>
                             <div className="flex gap-2">
                                 {/* Country Code Dropdown */}
                                 <div className="relative">
                                     <select
                                         value={countryCode}
-                                        onChange={e => setCountryCode(e.target.value)}
+                                        onChange={e => {
+                                            setCountryCode(e.target.value);
+                                            setPhoneNumber(""); // Clear number on country change
+                                        }}
                                         className="appearance-none h-full pl-3 pr-8 py-3 bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all sm:text-sm cursor-pointer"
                                     >
                                         {COUNTRY_CODES.map(c => (
@@ -139,7 +142,7 @@ export default function RegisterPage() {
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
                                         <Phone className="w-5 h-5" />
                                     </div>
-                                    <input name="phone" type="tel" className={inputClass}
+                                    <input name="phone" type="tel" required className={inputClass}
                                         placeholder="6XX XXX XXX" value={phoneNumber}
                                         onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, ""))} />
                                 </div>
