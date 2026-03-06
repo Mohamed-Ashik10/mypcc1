@@ -56,7 +56,7 @@ export function ResponsiveSidebar({ navLinks, userRole }: ResponsiveSidebarProps
     }
 
     const sidebarContent = (
-        <div className="flex flex-col h-full bg-white dark:bg-transparent">
+        <div className="flex flex-col h-full" style={{ backgroundColor: "rgb(var(--sidebar-bg))", color: "rgb(var(--sidebar-text))" }}>
             {/* Logo */}
             <div className="px-5 py-6 border-b border-slate-200 dark:border-white/[0.07] flex justify-between items-center">
                 <div className="flex items-center gap-3">
@@ -141,8 +141,13 @@ export function ResponsiveSidebar({ navLinks, userRole }: ResponsiveSidebarProps
 
             {/* Sidebar */}
             <aside
-                className={`fixed inset-y-0 left-0 w-60 bg-white dark:bg-[#0d0d1e] border-r border-slate-200 dark:border-white/[0.07] text-slate-900 dark:text-white flex flex-col z-[60] transition-all duration-300 lg:translate-x-0 lg:static lg:inset-0
+                className={`fixed inset-y-0 left-0 w-60 border-r flex flex-col z-[60] transition-all duration-300 lg:translate-x-0 lg:static lg:inset-0
                     ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+                style={{
+                    backgroundColor: "rgb(var(--sidebar-bg))",
+                    color: "rgb(var(--sidebar-text))",
+                    borderColor: "rgb(var(--border))",
+                }}
             >
                 {sidebarContent}
             </aside>
