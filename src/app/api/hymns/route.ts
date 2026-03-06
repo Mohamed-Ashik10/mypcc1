@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { HymnSchema } from "@/lib/validators";
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") ?? "1");
-    const limit = parseInt(searchParams.get("limit") ?? "30");
+    const limit = Math.min(parseInt(searchParams.get("limit") ?? "30"), 100); // cap at 100
     const skip = (page - 1) * limit;
     const search = searchParams.get("search") ?? "";
 
@@ -24,7 +25,12 @@ export async function GET(request: NextRequest) {
         prisma.hymn.count({ where }),
     ]);
 
-    return NextResponse.json({ hymns, total, page, limit });
+    return NextResponse.json({ hymns, total, page, limit }, {
+        headers: {
+            // Cache at CDN edge for 5 mins, serve stale for up to 10 mins while revalidating
+            "Cache-Control": "s-maxage=300, stale-while-revalidate=600",
+        },
+    });
 }
 
 export async function POST(request: NextRequest) {
@@ -34,14 +40,17 @@ export async function POST(request: NextRequest) {
     }
     try {
         const body = await request.json();
-        const { number, title, lyrics } = body;
-
-        if (!number || !title || !lyrics) {
-            return NextResponse.json({ error: "Number, title and lyrics are required." }, { status: 400 });
+        const parsed = HymnSchema.safeParse(body);
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+                { status: 400 }
+            );
         }
 
+        const { number, title, lyrics, author, tags } = parsed.data;
         const hymn = await prisma.hymn.create({
-            data: { number: parseInt(number), title, lyrics },
+            data: { number, title, lyrics, author, tags },
         });
         return NextResponse.json(hymn, { status: 201 });
     } catch (error: any) {

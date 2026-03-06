@@ -2,7 +2,48 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import LandingPageClient from "@/components/LandingPageClient";
+import { unstable_cache } from "next/cache";
 
+// ─── Cached DB Queries ────────────────────────────────────────────────────────
+// Hymns rarely change — cache for 1 hour (3600s)
+const getCachedHymns = unstable_cache(
+  async () => prisma.hymn.findMany({ take: 500, orderBy: { number: "asc" } }),
+  ["hymns-home"],
+  { revalidate: 3600, tags: ["hymns"] }
+);
+
+// Echo issues change occasionally — cache for 30 minutes
+const getCachedEcho = unstable_cache(
+  async () => prisma.theEchoIssue.findMany({ take: 6, orderBy: { issueMonth: "desc" } }),
+  ["echo-home"],
+  { revalidate: 1800, tags: ["echo"] }
+);
+
+// Devotionals change once per day — cache for 1 hour
+const getCachedDevotionals = unstable_cache(
+  async () =>
+    prisma.devotional.findMany({
+      where: { date: { lte: new Date() } },
+      orderBy: { date: "desc" },
+      take: 8,
+    }),
+  ["devotionals-home"],
+  { revalidate: 3600, tags: ["devotionals"] }
+);
+
+// Announcements may change more frequently — cache for 10 minutes
+const getCachedAnnouncements = unstable_cache(
+  async () =>
+    prisma.announcement.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+    }),
+  ["announcements-home"],
+  { revalidate: 600, tags: ["announcements"] }
+);
+
+// ─── Page Component ───────────────────────────────────────────────────────────
 export default async function Home() {
   const session = await getServerSession(authOptions);
 
@@ -10,39 +51,19 @@ export default async function Home() {
   let echoIssues: any[] = [];
   let latestDevotional: any = null;
   let archivedDevotionals: any[] = [];
-  let diaryEntries: any[] = [];
   let announcements: any[] = [];
 
   try {
-    // Fetch real data from the database sequentially to prevent Prisma connection pool deadlocks in Dev mode
-    hymns = await prisma.hymn.findMany({
-      take: 500,
-      orderBy: { number: "asc" },
-    });
+    [hymns, echoIssues, , announcements] = await Promise.all([
+      getCachedHymns(),
+      getCachedEcho(),
+      Promise.resolve(), // placeholder
+      getCachedAnnouncements(),
+    ]);
 
-    echoIssues = await prisma.theEchoIssue.findMany({
-      take: 6,
-      orderBy: { issueMonth: "desc" },
-    });
-
-    const devotionals = await prisma.devotional.findMany({
-      where: { date: { lte: new Date() } },
-      orderBy: { date: "desc" },
-      take: 8,
-    });
+    const devotionals = await getCachedDevotionals();
     latestDevotional = devotionals[0] || null;
     archivedDevotionals = devotionals.slice(1);
-
-    diaryEntries = await prisma.diaryEntry.findMany({
-      take: 3,
-      orderBy: { date: "desc" },
-    });
-
-    announcements = await prisma.announcement.findMany({
-      where: { isActive: true },
-      orderBy: { createdAt: "desc" },
-      take: 3,
-    });
   } catch (error) {
     console.error("Database connection failed. Serving empty data array fallback.", error);
   }
@@ -91,7 +112,7 @@ export default async function Home() {
       initialEcho={formattedEcho}
       initialDevotional={formattedDevotional}
       initialArchive={formattedArchive}
-      initialDiary={diaryEntries}
+      initialDiary={[]}
       initialAnnouncements={announcements}
     />
   );

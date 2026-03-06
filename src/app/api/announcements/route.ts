@@ -2,10 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { AnnouncementSchema } from "@/lib/validators";
 
 export async function GET() {
-    const announcements = await prisma.announcement.findMany({ orderBy: { createdAt: "desc" } });
-    return NextResponse.json(announcements);
+    const announcements = await prisma.announcement.findMany({
+        orderBy: { createdAt: "desc" },
+    });
+
+    return NextResponse.json(announcements, {
+        headers: {
+            // Announcements update often — cache for 10 minutes
+            "Cache-Control": "s-maxage=600, stale-while-revalidate=1200",
+        },
+    });
 }
 
 // POST create announcement (ADMIN / STAFF only)
@@ -18,12 +27,17 @@ export async function POST(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const { title, content, isActive } = body;
-        if (!title || !content) {
-            return NextResponse.json({ error: "Title and content are required." }, { status: 400 });
+        const parsed = AnnouncementSchema.safeParse(body);
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+                { status: 400 }
+            );
         }
+
+        const { title, content, isActive } = parsed.data;
         const announcement = await prisma.announcement.create({
-            data: { title, content, isActive: isActive ?? true },
+            data: { title, content, isActive },
         });
         return NextResponse.json(announcement, { status: 201 });
     } catch {
