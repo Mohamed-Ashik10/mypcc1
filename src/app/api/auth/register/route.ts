@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
     try {
-        const { name, email, password } = await req.json();
+        const { name, email, password, phone } = await req.json();
 
         if (!email || !password) {
             return NextResponse.json(
@@ -13,11 +13,15 @@ export async function POST(req: Request) {
             );
         }
 
-        // Check if user already exists
-        const existingUser = await prisma.user.findUnique({
-            where: { email },
-        });
+        if (password.length < 6) {
+            return NextResponse.json(
+                { error: "Password must be at least 6 characters" },
+                { status: 400 }
+            );
+        }
 
+        // Check if user already exists
+        const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
             return NextResponse.json(
                 { error: "User already exists with this email" },
@@ -25,16 +29,15 @@ export async function POST(req: Request) {
             );
         }
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create user
         const user = await prisma.user.create({
             data: {
                 name,
                 email,
                 password: hashedPassword,
-                role: "NORMAL_USER", // Default role
+                phone: phone || null,
+                role: "NORMAL_USER",
             },
         });
 

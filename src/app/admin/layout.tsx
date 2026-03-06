@@ -34,8 +34,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     const userRole = (session.user as any)?.role || "NORMAL_USER";
 
     return (
-        <div className="flex flex-col lg:flex-row h-screen text-white transition-colors duration-300 overflow-hidden"
-            style={{ background: "linear-gradient(135deg,#080812 0%,#0a0a18 100%)" }}>
+        <div className="flex flex-col lg:flex-row h-screen bg-slate-50 dark:bg-[#0a0a18] text-slate-900 dark:text-white transition-colors duration-300 overflow-hidden">
             <ResponsiveSidebar navLinks={navLinks} userRole={userRole} />
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto">
