@@ -50,10 +50,13 @@ export const sendResetPasswordEmail = async (email: string, token: string) => {
     auth: { user, pass },
   });
 
-  // Use Vercel URL in production, localhost in dev
-  const baseUrl = process.env.NEXTAUTH_URL?.includes("localhost")
-    ? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.NEXTAUTH_URL)
-    : process.env.NEXTAUTH_URL;
+  // Priority: VERCEL_PROJECT_PRODUCTION_URL (stable) > NEXTAUTH_URL > localhost fallback
+  const baseUrl =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : process.env.NEXTAUTH_URL && !process.env.NEXTAUTH_URL.includes("localhost")
+        ? process.env.NEXTAUTH_URL
+        : "https://mypcc1-ebt4.vercel.app"; // hardcoded production fallback
 
   const resetUrl = `${baseUrl}/auth/reset-password?token=${token}`;
 
