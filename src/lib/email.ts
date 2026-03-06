@@ -1,60 +1,83 @@
 import nodemailer from "nodemailer";
+import prisma from "@/lib/prisma";
+
+// Load SMTP settings from DB, fall back to .env
+async function getSmtpConfig() {
+  let host = process.env.SMTP_HOST || "smtp.gmail.com";
+  let port = parseInt(process.env.SMTP_PORT || "587");
+  let user = process.env.SMTP_USER || "";
+  let pass = process.env.SMTP_PASSWORD || "";
+  let fromName = "My PCC Support";
+  let fromEmail = process.env.SMTP_FROM || user;
+
+  try {
+    const rows = await prisma.appSetting.findMany({
+      where: {
+        key: {
+          in: ["smtp_host", "smtp_port", "smtp_user", "smtp_pass", "smtp_from_name", "smtp_from_email"],
+        },
+      },
+    });
+    const s: Record<string, string> = {};
+    for (const r of rows) s[r.key] = r.value;
+
+    if (s.smtp_host) host = s.smtp_host;
+    if (s.smtp_port) port = parseInt(s.smtp_port);
+    if (s.smtp_user) user = s.smtp_user;
+    if (s.smtp_pass) pass = s.smtp_pass;
+    if (s.smtp_from_name) fromName = s.smtp_from_name;
+    if (s.smtp_from_email) fromEmail = s.smtp_from_email;
+  } catch {
+    // DB unavailable — use .env values silently
+  }
+
+  return { host, port, user, pass, fromName, fromEmail };
+}
 
 export const sendResetPasswordEmail = async (email: string, token: string) => {
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASSWORD;
-  const host = process.env.SMTP_HOST || "smtp.gmail.com";
-  const port = parseInt(process.env.SMTP_PORT || "587");
+  const { host, port, user, pass, fromName, fromEmail } = await getSmtpConfig();
 
-  // Diagnostic check for environment variables
-  console.log("Email Config Check (Live):", {
-    hasUser: !!user,
-    userValue: user ? `${user.substring(0, 3)}...` : "MISSING",
-    hasPass: !!pass,
-    passLength: pass?.length || 0,
-    host,
-    port,
-    nextAuthUrl: !!process.env.NEXTAUTH_URL
-  });
+  console.log("Email Config:", { host, port, hasUser: !!user, hasPass: !!pass });
+
+  if (!user || !pass) {
+    throw new Error("SMTP credentials not configured. Set them in Admin → Settings → Email.");
+  }
 
   const transporter = nodemailer.createTransport({
     host,
     port,
-    secure: process.env.SMTP_SECURE === "true",
-    auth: {
-      user,
-      pass,
-    },
+    secure: port === 465,
+    auth: { user, pass },
   });
 
-  const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`;
+  // Use Vercel URL in production, localhost in dev
+  const baseUrl = process.env.NEXTAUTH_URL?.includes("localhost")
+    ? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.NEXTAUTH_URL)
+    : process.env.NEXTAUTH_URL;
 
-  try {
-    await transporter.verify();
-    console.log("SMTP Transporter verified successfully");
-  } catch (verifyError) {
-    console.error("SMTP Transporter verification failed:", verifyError);
-    throw verifyError;
-  }
+  const resetUrl = `${baseUrl}/auth/reset-password?token=${token}`;
 
-  const mailOptions = {
-    from: `"My PCC Support" <${process.env.SMTP_FROM || user}>`,
+  await transporter.verify();
+
+  await transporter.sendMail({
+    from: `"${fromName}" <${fromEmail}>`,
     to: email,
-    subject: "Reset Your Password - My PCC",
+    subject: "Reset Your Password – My PCC",
     html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
-        <h2 style="color: #2563eb; text-align: center;">My PCC Admin Dashboard</h2>
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:32px;border:1px solid #e2e8f0;border-radius:12px;">
+        <h2 style="color:#6c47ff;text-align:center;">My PCC – Password Reset</h2>
         <p>Hello,</p>
         <p>We received a request to reset your password. Click the button below to choose a new one:</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${resetUrl}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Reset Password</a>
+        <div style="text-align:center;margin:30px 0;">
+          <a href="${resetUrl}"
+             style="background:#6c47ff;color:white;padding:12px 28px;text-decoration:none;border-radius:8px;font-weight:bold;display:inline-block;">
+            Reset Password
+          </a>
         </div>
-        <p>If you didn't request this, you can safely ignore this email. This link will expire in 1 hour.</p>
-        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-        <p style="font-size: 12px; color: #64748b; text-align: center;">© ${new Date().getFullYear()} Presbyterian Church in Cameroon</p>
+        <p style="font-size:13px;color:#64748b;">If you didn't request this, you can safely ignore this email. This link expires in <strong>1 hour</strong>.</p>
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:20px 0;" />
+        <p style="font-size:11px;color:#94a3b8;text-align:center;">© ${new Date().getFullYear()} Presbyterian Church in Cameroon</p>
       </div>
     `,
-  };
-
-  await transporter.sendMail(mailOptions);
+  });
 };
