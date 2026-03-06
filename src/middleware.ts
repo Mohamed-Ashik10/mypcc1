@@ -1,7 +1,7 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
-const ADMIN_ROLES = ["SUPER_ADMIN", "ADMIN", "STAFF", "EDITOR"];
+const ADMIN_ROLES = ["SUPER_ADMIN", "ADMIN_STAFF", "ADMIN_STAFF", "CONTENT_EDITOR"];
 
 export default withAuth(
     function middleware(req) {

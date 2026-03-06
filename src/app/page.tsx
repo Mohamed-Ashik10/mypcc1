@@ -9,13 +9,14 @@ export default async function Home() {
   let hymns: any[] = [];
   let echoIssues: any[] = [];
   let latestDevotional: any = null;
+  let archivedDevotionals: any[] = [];
   let diaryEntries: any[] = [];
   let announcements: any[] = [];
 
   try {
     // Fetch real data from the database sequentially to prevent Prisma connection pool deadlocks in Dev mode
     hymns = await prisma.hymn.findMany({
-      take: 30,
+      take: 500,
       orderBy: { number: "asc" },
     });
 
@@ -24,9 +25,13 @@ export default async function Home() {
       orderBy: { issueMonth: "desc" },
     });
 
-    latestDevotional = await prisma.devotional.findFirst({
+    const devotionals = await prisma.devotional.findMany({
+      where: { date: { lte: new Date() } },
       orderBy: { date: "desc" },
+      take: 8,
     });
+    latestDevotional = devotionals[0] || null;
+    archivedDevotionals = devotionals.slice(1);
 
     diaryEntries = await prisma.diaryEntry.findMany({
       take: 3,
@@ -72,12 +77,20 @@ export default async function Home() {
     author: latestDevotional.author || "PCC Community"
   } : null;
 
+  const formattedArchive = archivedDevotionals.map((d: any) => ({
+    title: d.title,
+    date: d.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    content: d.content,
+    author: d.author || "PCC Community"
+  }));
+
   return (
     <LandingPageClient
       session={session}
       initialHymns={formattedHymns}
       initialEcho={formattedEcho}
       initialDevotional={formattedDevotional}
+      initialArchive={formattedArchive}
       initialDiary={diaryEntries}
       initialAnnouncements={announcements}
     />

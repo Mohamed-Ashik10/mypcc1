@@ -9,6 +9,7 @@ interface LandingPageClientProps {
     initialHymns: any[];
     initialEcho?: any[];
     initialDevotional?: any | null;
+    initialArchive?: any[];
     initialDiary?: any[];
     initialAnnouncements?: any[];
 }
@@ -18,6 +19,7 @@ export default function LandingPageClient({
     initialHymns = [],
     initialEcho = [],
     initialDevotional = null,
+    initialArchive = [],
     initialDiary = [],
     initialAnnouncements = []
 }: LandingPageClientProps) {
@@ -26,6 +28,7 @@ export default function LandingPageClient({
         (window as any).hymns_db = initialHymns;
         (window as any).echo_db = initialEcho;
         (window as any).devotional_db = initialDevotional;
+        (window as any).archive_db = initialArchive;
         (window as any).diary_db = initialDiary;
         (window as any).announcements_db = initialAnnouncements;
 
@@ -34,7 +37,7 @@ export default function LandingPageClient({
         if (!document.getElementById(scriptId)) {
             const script = document.createElement("script");
             script.id = scriptId;
-            script.src = `/canticle_logic_v2.js`; // Removed cache-buster for performance
+            script.src = `/canticle_logic_v2.js?v=${Date.now()}`;
             script.async = true;
             document.body.appendChild(script);
         } else {
@@ -51,7 +54,7 @@ export default function LandingPageClient({
             // Do not remove the script here, as Next.js navigation might rely on it persisting,
             // or we will just let it live for the lifecycle of the SPA.
         };
-    }, [initialHymns, initialEcho, initialDevotional, initialDiary, initialAnnouncements]);
+    }, [initialHymns, initialEcho, initialDevotional, initialArchive, initialDiary, initialAnnouncements]);
 
     return (
         <div className="landing-body">
@@ -100,8 +103,8 @@ export default function LandingPageClient({
                         <div className="ring"></div>
                         <div className="ring"></div>
                         <svg style={{ position: 'absolute', opacity: .04, animation: 'rotateSlow 80s linear infinite' }} width="700" height="700" viewBox="0 0 700 700">
-                            <line x1="350" y1="0" x2="350" y2="700" stroke="#b8935a" strokeWidth="1" />
-                            <line x1="0" y1="233" x2="700" y2="233" stroke="#b8935a" strokeWidth="1" />
+                            <line x1="350" y1="0" x2="350" y2="700" stroke="#6e1799" strokeWidth="1" />
+                            <line x1="0" y1="233" x2="700" y2="233" stroke="#6e1799" strokeWidth="1" />
                         </svg>
                     </div>
                     <div className="float-icon" style={{ top: '14%', left: '8%', animationDelay: '0s' }}>🎵</div>
@@ -128,18 +131,18 @@ export default function LandingPageClient({
                 </section>
 
                 {/* VERSE STRIP (Optional, but usually part of the aesthetic) */}
-                <div style={{ background: '#1a1510', padding: '28px 48px', textAlign: 'center', overflow: 'hidden' }} className="reveal from-bottom">
+                <div className="verse-strip reveal from-bottom">
                     <p id="verseText" style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(.95rem,2vw,1.15rem)', fontWeight: 300, fontStyle: 'italic', letterSpacing: '.04em', lineHeight: 1.8, color: '#f7f3ec', transition: 'opacity .8s' }}>
                         &ldquo;Sing to the Lord a new song; sing to the Lord, all the earth.&rdquo;
                     </p>
-                    <p id="verseRef" style={{ fontSize: '.65rem', letterSpacing: '.2em', textTransform: 'uppercase', color: '#b8935a', marginTop: '8px', fontWeight: 300, transition: 'opacity .8s' }}>
+                    <p id="verseRef" style={{ fontSize: '.65rem', letterSpacing: '.2em', textTransform: 'uppercase', color: '#6e1799', marginTop: '8px', fontWeight: 300, transition: 'opacity .8s' }}>
                         Psalm 96:1
                     </p>
                 </div>
 
                 {/* MARQUEE TICKER (Optional) */}
-                <div style={{ padding: '64px 0', overflow: 'hidden', background: 'var(--warm)', borderBottom: '1px solid rgba(184,147,90,.12)' }} className="reveal from-bottom">
-                    <p style={{ fontSize: '.62rem', letterSpacing: '.28em', textTransform: 'uppercase', color: '#b8935a', textAlign: 'center', marginBottom: '32px', fontWeight: 300 }}>
+                <div className="marquee-section reveal from-bottom">
+                    <p style={{ fontSize: '.62rem', letterSpacing: '.28em', textTransform: 'uppercase', color: '#6e1799', textAlign: 'center', marginBottom: '32px', fontWeight: 300 }}>
                         From the hymn library
                     </p>
                     <div className="marquee-wrap" style={{ marginBottom: '12px' }}>
@@ -227,7 +230,7 @@ export default function LandingPageClient({
                 </section>
 
                 {/* CHURCH ANNOUNCEMENTS IN HOME PAGE */}
-                <section style={{ background: 'var(--bg)', padding: '64px 24px', position: 'relative', borderTop: '1px solid rgba(184,147,90,.15)' }} className="reveal from-bottom">
+                <section className="announcements-section reveal from-bottom">
                     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                         <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '2.5rem', color: 'var(--ink)', marginBottom: '40px', textAlign: 'center', fontStyle: 'italic' }}>Church Announcements</h2>
                         <div id="announcementsList" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
@@ -244,25 +247,25 @@ export default function LandingPageClient({
                 </section>
 
                 {/* CTA BANNER */}
-                <section style={{ background: '#1a1510', padding: '100px 48px', textAlign: 'center', position: 'relative', overflow: 'hidden' }} className="reveal from-bottom">
+                <section className="cta-banner reveal from-bottom">
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                         <span style={{ fontSize: '40vw', color: 'rgba(255,255,255,.015)', fontFamily: "'Cormorant Garamond',serif", lineHeight: 1 }}>✝</span>
                     </div>
                     <p style={{ fontSize: '.65rem', letterSpacing: '.3em', textTransform: 'uppercase', color: '#b8935a', fontWeight: 300, marginBottom: '16px' }}>Begin today</p>
-                    <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(2.5rem,5vw,4rem)', fontWeight: 300, color: '#f7f3ec', lineHeight: 1.2, marginBottom: '20px' }}>Your sacred practice<br /><em style={{ fontStyle: 'italic', color: '#b8935a' }}>starts here.</em></h2>
+                    <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(2.5rem,5vw,4rem)', fontWeight: 300, color: '#f7f3ec', lineHeight: 1.2, marginBottom: '20px' }}>Your sacred practice<br /><em style={{ fontStyle: 'italic', color: '#6e1799' }}>starts here.</em></h2>
                     <p style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(247,243,236,.45)', marginBottom: '44px' }}>Free to join. No commitment required. Just you and the music of faith.</p>
-                    <button onClick={() => window.location.href = '/auth/login'} style={{ padding: '14px 40px', background: '#b8935a', color: '#fdfaf5', border: 'none', cursor: 'pointer', fontSize: '.72rem', letterSpacing: '.18em', textTransform: 'uppercase', fontWeight: 300, transition: 'background .3s' }}>Join Free Today</button>
+                    <button onClick={() => window.location.href = '/auth/login'} style={{ padding: '14px 40px', background: '#6e1799', color: '#fdfaf5', border: 'none', cursor: 'pointer', fontSize: '.72rem', letterSpacing: '.18em', textTransform: 'uppercase', fontWeight: 300, transition: 'background .3s' }}>Join Free Today</button>
                 </section>
 
                 {/* FOOTER */}
-                <footer style={{ background: '#1a1510', color: '#f7f3ec', padding: '56px 48px 0', borderTop: '1px solid rgba(255,255,255,.06)' }}>
-                    <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '56px', paddingBottom: '48px', borderBottom: '1px solid rgba(255,255,255,.07)' }}>
+                <footer className="landing-footer">
+                    <div className="footer-grid">
                         <div>
-                            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '1.6rem', fontWeight: 300, marginBottom: '14px' }}>Canti<span style={{ color: '#b8935a', fontStyle: 'italic' }}>cle</span></div>
+                            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '1.6rem', fontWeight: 300, marginBottom: '14px' }}>Canti<span style={{ color: '#6e1799', fontStyle: 'italic' }}>cle</span></div>
                             <p style={{ fontSize: '.8rem', fontWeight: 300, lineHeight: 1.9, color: 'rgba(247,243,236,.5)', maxWidth: '260px', marginBottom: '28px' }}>A sacred digital space for believers to read hymns, keep a spiritual diary, and grow daily in faith.</p>
                         </div>
                         <div>
-                            <p style={{ fontSize: '.6rem', letterSpacing: '.28em', textTransform: 'uppercase', color: '#b8935a', marginBottom: '18px' }}>Explore</p>
+                            <p style={{ fontSize: '.6rem', letterSpacing: '.28em', textTransform: 'uppercase', color: '#6e1799', marginBottom: '18px' }}>Explore</p>
                             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '11px' }}>
                                 <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none' }}>🎵 Hymns</a></li>
                                 <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('diary', document.querySelectorAll('.nav-tab')[2]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none' }}>📖 Church Diary</a></li>
@@ -271,7 +274,7 @@ export default function LandingPageClient({
                             </ul>
                         </div>
                         <div>
-                            <p style={{ fontSize: '.6rem', letterSpacing: '.28em', textTransform: 'uppercase', color: '#b8935a', marginBottom: '18px' }}>Contact</p>
+                            <p style={{ fontSize: '.6rem', letterSpacing: '.28em', textTransform: 'uppercase', color: '#6e1799', marginBottom: '18px' }}>Contact</p>
                             <p style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.55)', lineHeight: 1.7 }}>hello@canticle.app</p>
                         </div>
                     </div>
@@ -386,6 +389,14 @@ export default function LandingPageClient({
                 </div>
             </div>
 
+            {/* DEVOTIONAL MODAL */}
+            <div className="hymn-modal-bg" id="devoModal">
+                <div className="devo-modal">
+                    <button className="modal-close" onClick={() => (window as any).closeDevoModal()}>✕</button>
+                    <div id="devoModalContent"></div>
+                </div>
+            </div>
+
             {/* ══════════════════════════════════
              PAGE: SUBSCRIPTIONS
         ══════════════════════════════════════ */}
@@ -401,7 +412,7 @@ export default function LandingPageClient({
                     {/* Stats Footer Layout requested by user */}
                     <div style={{ marginTop: '80px', paddingTop: '64px', borderTop: '1px solid rgba(184,147,90,0.15)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '32px', textAlign: 'center', opacity: 0.8 }} className="reveal from-bottom">
                         <div>
-                            <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#b8935a', marginBottom: '8px' }}>Trusted by believers worldwide</p>
+                            <p style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#6e1799', marginBottom: '8px' }}>Trusted by believers worldwide</p>
                             <p style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '2.5rem', color: 'var(--ink)' }}>12k+</p>
                             <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '4px' }}>Active members</p>
                         </div>

@@ -9,8 +9,8 @@ export async function DELETE(
 ) {
     try {
         const session = await getServerSession(authOptions);
-        const userRole = (session?.user as any)?.role || "USER";
-        if (!["ADMIN", "STAFF", "EDITOR", "SUPER_ADMIN"].includes(userRole.toUpperCase())) {
+        const userRole = (session?.user as any)?.role || "NORMAL_USER";
+        if (!["ADMIN_STAFF", "ADMIN_STAFF", "CONTENT_EDITOR", "SUPER_ADMIN"].includes(userRole.toUpperCase())) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
         }
 

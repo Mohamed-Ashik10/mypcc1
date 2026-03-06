@@ -24,7 +24,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: U
         name: "",
         email: "",
         password: "",
-        role: "USER"
+        role: "NORMAL_USER"
     });
 
     const filteredUsers = users.filter(user =>
@@ -47,7 +47,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: U
                 name: "",
                 email: "",
                 password: "",
-                role: "USER"
+                role: "NORMAL_USER"
             });
         }
         setError("");
@@ -146,8 +146,8 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: U
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${user.role === "SUPER_ADMIN" ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" :
-                                            user.role === "ADMIN" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" :
-                                                user.role === "EDITOR" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
+                                            user.role === "ADMIN_STAFF" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" :
+                                                user.role === "CONTENT_EDITOR" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
                                                     "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400"
                                             }`}>
                                             {user.role}
@@ -239,9 +239,9 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: U
                                         className="w-full px-4 py-3 bg-muted/30 border border-border rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
                                     >
                                         <option value="SUPER_ADMIN">⚙️ Super Admin</option>
-                                        <option value="ADMIN">👨💼 Admin Staff</option>
-                                        <option value="EDITOR">📝 Content Editor</option>
-                                        <option value="USER">📱 Church User</option>
+                                        <option value="ADMIN_STAFF">👨💼 Admin Staff</option>
+                                        <option value="CONTENT_EDITOR">📝 Content Editor</option>
+                                        <option value="NORMAL_USER">📱 Church User</option>
                                     </select>
                                 </div>
                             </div>

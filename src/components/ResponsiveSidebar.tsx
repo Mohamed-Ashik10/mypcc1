@@ -68,7 +68,7 @@ export function ResponsiveSidebar({ navLinks, userRole }: ResponsiveSidebarProps
                             Canti<span className="text-[#a855f7]">cle</span>
                         </h1>
                         <p className="text-[10px] text-white/30 mt-0.5 tracking-widest uppercase">
-                            {userRole === "USER" ? "Member Portal" : "Admin Dashboard"}
+                            {userRole === "NORMAL_USER" ? "Member Portal" : "Admin Dashboard"}
                         </p>
                     </div>
                 </div>
@@ -127,7 +127,7 @@ export function ResponsiveSidebar({ navLinks, userRole }: ResponsiveSidebarProps
                     </div>
                 </div>
                 <div className="text-[10px] text-[#a855f7] font-semibold bg-[#6c47ff]/10 border border-[#6c47ff]/20 px-3 py-1 rounded-full tracking-widest uppercase">
-                    {userRole === "USER" ? "Member" : "Admin"}
+                    {userRole === "NORMAL_USER" ? "Member" : "Admin"}
                 </div>
             </header>
 

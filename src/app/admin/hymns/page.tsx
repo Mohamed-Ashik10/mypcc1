@@ -18,8 +18,8 @@ export default async function HymnsPage({
     const search = searchStr ?? "";
 
     const session = await getServerSession(authOptions);
-    const userRole = (session?.user as any)?.role || "USER";
-    const canModify = ["ADMIN", "SUPER_ADMIN", "STAFF", "EDITOR"].includes(userRole);
+    const userRole = (session?.user as any)?.role || "NORMAL_USER";
+    const canModify = ["ADMIN_STAFF", "SUPER_ADMIN", "CONTENT_EDITOR"].includes(userRole);
 
     const where = search
         ? {

@@ -17,8 +17,8 @@ export default async function DiaryManagementPage({
     const skip = (page - 1) * limit;
 
     const session = await getServerSession(authOptions);
-    const userRole = (session?.user as any)?.role || "USER";
-    const canModify = ["ADMIN", "SUPER_ADMIN", "STAFF", "EDITOR"].includes(userRole);
+    const userRole = (session?.user as any)?.role || "NORMAL_USER";
+    const canModify = ["ADMIN_STAFF", "SUPER_ADMIN", "CONTENT_EDITOR"].includes(userRole);
     const isAdmin = canModify;
 
     const months = [

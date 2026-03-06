@@ -7,7 +7,7 @@ import { authOptions } from "@/lib/auth";
 export default async function EditDiaryEntryPage({ params }: { params: Promise<{ id: string }> }) {
     const session = await getServerSession(authOptions);
     const userRole = (session?.user as any)?.role;
-    if (!["ADMIN", "SUPER_ADMIN", "STAFF", "EDITOR"].includes(userRole)) {
+    if (!["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR"].includes(userRole)) {
         redirect("/admin");
     }
     const { id } = await params;

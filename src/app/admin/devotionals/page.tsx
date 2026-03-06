@@ -1,10 +1,16 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import DevotionalDeleteButton from "@/components/DevotionalDeleteButton";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function DevotionalsPage() {
+    const session = await getServerSession(authOptions);
+    const userRole = (session?.user as any)?.role || "NORMAL_USER";
+    const canModify = ["ADMIN_STAFF", "SUPER_ADMIN", "CONTENT_EDITOR"].includes(userRole);
+
     const devotionals = await prisma.devotional.findMany({ orderBy: { date: "desc" }, take: 50 });
 
     return (
@@ -14,12 +20,14 @@ export default async function DevotionalsPage() {
                     <h2 className="text-3xl font-bold text-foreground">🙏 Devotionals</h2>
                     <p className="text-muted-foreground mt-1">{devotionals.length} devotionals</p>
                 </div>
-                <Link
-                    href="/admin/devotionals/new"
-                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-blue-500 transition-all active:scale-95 whitespace-nowrap"
-                >
-                    ➕ New Devotional
-                </Link>
+                {canModify && (
+                    <Link
+                        href="/admin/devotionals/new"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow hover:bg-blue-500 transition-all active:scale-95 whitespace-nowrap"
+                    >
+                        ➕ New Devotional
+                    </Link>
+                )}
             </div>
 
             {devotionals.length === 0 ? (
@@ -41,7 +49,7 @@ export default async function DevotionalsPage() {
                                     <p className="text-muted-foreground mt-3 text-sm line-clamp-3">{d.content}</p>
                                 </div>
                                 <div className="ml-4">
-                                    <DevotionalDeleteButton id={d.id} />
+                                    {canModify && <DevotionalDeleteButton id={d.id} />}
                                 </div>
                             </div>
                         </div>

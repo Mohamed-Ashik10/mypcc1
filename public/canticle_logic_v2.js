@@ -72,6 +72,7 @@
     let activeFilter = 'all';
     function renderHymns(list) {
         const grid = document.getElementById('hymnsGrid');
+        if (!grid) return;
         grid.innerHTML = '';
         list.forEach((h, i) => {
             const card = document.createElement('div');
@@ -89,7 +90,9 @@
     }
 
     function filterHymns() {
-        const q = document.getElementById('hymnSearch').value.toLowerCase();
+        const searchInput = document.getElementById('hymnSearch');
+        if (!searchInput) return;
+        const q = searchInput.value.toLowerCase();
         let list = hymns;
         if (activeFilter !== 'all') list = list.filter(h => h.tags.includes(activeFilter));
         if (q) list = list.filter(h => h.title.toLowerCase().includes(q) || h.author.toLowerCase().includes(q));
@@ -115,17 +118,23 @@
         _ttsSpeaking = false;
         _ttsPaused = false;
 
-        document.getElementById('m-eyebrow').textContent = 'Hymn No. ' + h.num;
-        document.getElementById('m-title').textContent = h.title;
-        document.getElementById('m-author').textContent = h.author;
+        const mEyebrow = document.getElementById('m-eyebrow');
+        const mTitle = document.getElementById('m-title');
+        const mAuthor = document.getElementById('m-author');
+        const mLyrics = document.getElementById('m-lyrics');
+        const hModal = document.getElementById('hymnModal');
+
+        if (mEyebrow) mEyebrow.textContent = 'Hymn No. ' + h.num;
+        if (mTitle) mTitle.textContent = h.title;
+        if (mAuthor) mAuthor.textContent = h.author;
         let lyricsHTML = '';
         h.lyrics.forEach(l => {
             const cls = l.type === 'refrain' ? 'refrain' : 'stanza';
             lyricsHTML += `<div class="${cls}">${l.text.replace(/\n/g, '<br>')}</div>`;
         });
-        document.getElementById('m-lyrics').innerHTML = lyricsHTML;
+        if (mLyrics) mLyrics.innerHTML = lyricsHTML;
         buildWave('modalWave', 22);
-        document.getElementById('hymnModal').classList.add('open');
+        if (hModal) hModal.classList.add('open');
         // Reset play button
         const btn = document.querySelector('.modal-play-btn');
         if (btn) btn.textContent = '▶ Play';
@@ -134,7 +143,8 @@
     function closeModal() {
         if (window.speechSynthesis) window.speechSynthesis.cancel();
         _ttsSpeaking = false; _ttsPaused = false;
-        document.getElementById('hymnModal').classList.remove('open');
+        const hModal = document.getElementById('hymnModal');
+        if (hModal) hModal.classList.remove('open');
     }
 
     function togglePlay(btn) {
@@ -263,7 +273,8 @@
         const e = diaryEntries[i];
         document.querySelectorAll('.diary-entry-item').forEach((el, j) =>
             el.classList.toggle('active', j === i));
-        document.getElementById('newEntryForm').classList.remove('open');
+        const nef = document.getElementById('newEntryForm');
+        if (nef) nef.classList.remove('open');
         const mc = document.getElementById('diaryMainContent');
         if (!mc) return;
         mc.style.display = 'block';
@@ -285,12 +296,16 @@
     }
 
     function showNewEntry() {
-        document.getElementById('diaryMainContent').style.display = 'none';
-        document.getElementById('newEntryForm').classList.add('open');
+        const mc = document.getElementById('diaryMainContent');
+        const nef = document.getElementById('newEntryForm');
+        if (mc) mc.style.display = 'none';
+        if (nef) nef.classList.add('open');
     }
     function cancelNewEntry() {
-        document.getElementById('newEntryForm').classList.remove('open');
-        document.getElementById('diaryMainContent').style.display = 'block';
+        const mc = document.getElementById('diaryMainContent');
+        const nef = document.getElementById('newEntryForm');
+        if (nef) nef.classList.remove('open');
+        if (mc) mc.style.display = 'block';
     }
 
     // ══ ECHO DATA ══
@@ -373,27 +388,39 @@
         renderEcho(cat);
     }
 
-    // ══ DEVOTIONAL ARCHIVE ══
-    const devoArchive = [
-        { date: 'Feb 24', title: 'A Light Unto My Path', ref: 'Psalm 119:105' },
-        { date: 'Feb 23', title: 'Fear Not, For I Am With You', ref: 'Isaiah 41:10' },
-        { date: 'Feb 22', title: 'The Peace That Passes Understanding', ref: 'Philippians 4:7' },
-        { date: 'Feb 21', title: 'Come to Me, All Who Are Weary', ref: 'Matthew 11:28' },
-        { date: 'Feb 20', title: 'New Every Morning', ref: 'Lamentations 3:22–23' },
-        { date: 'Feb 19', title: 'Delight Yourself in the Lord', ref: 'Psalm 37:4' },
-    ];
-
     function renderDevotional() {
+        // 1. Render Archive Grid
         const grid = document.getElementById('devoArchive');
+        const dbArchive = window.archive_db || [];
+
         if (grid) {
-            grid.innerHTML = devoArchive.map(d => `
-          <div class="devo-arc-card">
-            <p class="dac-date">${d.date}</p>
-            <p class="dac-title">${d.title}</p>
-            <p class="dac-ref">${d.ref}</p>
-          </div>`).join('');
+            if (dbArchive.length === 0) {
+                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--muted); font-style:italic; padding:40px;">No previous devotionals available.</p>';
+            } else {
+                grid.innerHTML = dbArchive.map((d, idx) => {
+                    // Extract reference for the card
+                    const lines = (d.content || '').split('\n');
+                    let ref = '';
+                    for (let line of lines) {
+                        if (line.trim().startsWith('>')) {
+                            const text = line.substring(1).trim();
+                            if (text.length > 2 && (text === text.toUpperCase() || /^[0-9]?\s?[A-Za-z]+ \d+:\d+/.test(text) || text.toUpperCase().includes('PSALM'))) {
+                                ref = text;
+                                break;
+                            }
+                        }
+                    }
+                    return `
+                      <div class="devo-arc-card" onclick="window.openArchiveDevotional(window.archive_db[${idx}])">
+                        <p class="dac-date">${d.date}</p>
+                        <p class="dac-title">${d.title}</p>
+                        <p class="dac-ref">${ref || 'Daily Grace'}</p>
+                      </div>`;
+                }).join('');
+            }
         }
 
+        // 2. Render Current Devotional
         const currentContainer = document.getElementById('currentDevoContent');
         if (!currentContainer) return;
 
@@ -507,22 +534,48 @@
         // Remove the static "Daily Devotional" header, we're rendering it dynamically!
         const hero = document.querySelector('.devo-hero');
         if (hero) hero.style.display = 'none';
+
+        // Expose modal handlers
+        window.openArchiveDevotional = function (devo) {
+            const modal = document.getElementById('devoModal');
+            const content = document.getElementById('devoModalContent');
+            if (modal && content) {
+                content.innerHTML = parseFullDevotion(devo);
+                modal.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+        };
+
+        window.closeDevoModal = function () {
+            const modal = document.getElementById('devoModal');
+            if (modal) {
+                modal.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+        };
+
+        // Helper to parse devotion for modal (re-using the logic)
+        window.parseFullDevotion = parseFullDevotion;
     }
+    window.renderDevotional = renderDevotional;
 
     // ══ SUBSCRIPTIONS ══
     const plans = [
         {
             name: 'Seeker', price: { monthly: 0, annual: 0 }, popular: false,
+            desc: 'A humble beginning for your spiritual journey. Access core features for free.',
             features: ['Access to 100 free hymns', 'Church Diary (5 entries)', 'Daily Devotional', 'The Echo newsletter'],
             absent: ['Full hymn library (850+)', 'Unlimited diary entries', 'Audio playback', 'Offline access']
         },
         {
             name: 'Pilgrim', price: { monthly: 7, annual: 5 }, popular: true,
+            desc: 'Deeper devotion with full access to our growing library and worship tools.',
             features: ['Full hymn library (850+)', 'Unlimited diary entries', 'Audio playback', 'Daily devotionals', 'The Echo — full access', 'Scripture cross-references'],
             absent: ['Offline access']
         },
         {
             name: 'Shepherd', price: { monthly: 18, annual: 12 }, popular: false,
+            desc: 'The ultimate experience for leaders and seekers. Complete offline peace and community features.',
             features: ['Everything in Pilgrim', 'Offline access', 'Community groups', 'Share diary entries', 'Priority support', 'Exclusive choir recordings']
         },
     ];
@@ -532,15 +585,14 @@
         const sp = document.getElementById('subPlans');
         if (!sp) return;
         sp.innerHTML = plans.map(p => `
-    <div class="sub-plan ${p.popular ? 'popular' : ''}">
+    <div class="sub-plan ${p.popular ? 'featured' : ''}" onmouseenter="this.parentElement.querySelectorAll('.sub-plan').forEach(c=>c.classList.remove('featured'));this.classList.add('featured')">
       ${p.popular ? '<div class="popular-badge">Most Popular</div>' : ''}
       <p class="sub-plan-name">${p.name}</p>
-      <p class="sub-plan-price">${p.price[billing] === 0 ? 'Free' : '<span>$</span>' + p.price[billing]}</p>
-      <p class="sub-plan-period">${p.price[billing] === 0 ? 'Always free' : billing === 'monthly' ? 'per month' : 'per month, billed annually'}</p>
-      <div class="sub-divider"></div>
+      <div class="sub-plan-price">${p.price[billing] === 0 ? 'Free' : '<span>$</span>' + p.price[billing]} ${p.price[billing] !== 0 ? `<span>/ mon</span>` : ''}</div>
+      <p class="sub-plan-desc">${p.desc}</p>
       <ul class="sub-features-list">
-        ${p.features.map(f => `<li>${f}</li>`).join('')}
-        ${p.absent ? p.absent.map(f => `<li class="off">${f}</li>`).join('') : ''}
+        ${p.features.map(f => `<li><span class="sub-check">✓</span> ${f}</li>`).join('')}
+        ${p.absent ? p.absent.map(f => `<li class="off"><span class="sub-check" style="background:rgba(0,0,0,0.1);color:transparent">✓</span> ${f}</li>`).join('') : ''}
       </ul>
       <button class="sub-cta-btn" onclick="handleSubscribe('${p.name.toUpperCase()}', '${billing.toUpperCase()}')">
         ${p.price[billing] === 0 ? 'Get Started Free' : 'Subscribe Now'}
@@ -610,7 +662,8 @@
                 body: JSON.stringify({ planType, billingCycle, paymentMethod })
             });
             const data = await res.json();
-            document.getElementById('subConfirmModal').remove();
+            const modal = document.getElementById('subConfirmModal');
+            if (modal) modal.remove();
             if (res.ok && data.success) {
                 showCanticleToast(`✦ You\'re now on the ${planType.charAt(0) + planType.slice(1).toLowerCase()} plan!`, 'success');
             } else {
@@ -667,20 +720,23 @@
         const scrollTop = window.scrollY;
         const docHeight = document.documentElement.scrollHeight - window.innerHeight;
         const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-        document.getElementById('scrollBar').style.width = pct + '%';
+        const scrollBar = document.getElementById('scrollBar');
+        if (scrollBar) scrollBar.style.width = pct + '%';
 
         // 2. Parallax cross — subtle drift on scroll
         const cross = document.getElementById('parallaxCross');
-        cross.style.transform = `translate(-50%, calc(-50% + ${scrollTop * 0.12}px)) rotate(${scrollTop * 0.01}deg)`;
+        if (cross) cross.style.transform = `translate(-50%, calc(-50% + ${scrollTop * 0.12}px)) rotate(${scrollTop * 0.01}deg)`;
 
         // 3. Nav shrink on scroll
         const nav = document.querySelector('nav');
-        if (scrollTop > 60) {
-            nav.style.height = '52px';
-            nav.style.background = 'rgba(253,250,245,0.98)';
-        } else {
-            nav.style.height = '64px';
-            nav.style.background = 'rgba(253,250,245,0.92)';
+        if (nav) {
+            if (scrollTop > 60) {
+                nav.style.height = '52px';
+                nav.style.background = 'rgba(253,250,245,0.98)';
+            } else {
+                nav.style.height = '64px';
+                nav.style.background = 'rgba(253,250,245,0.92)';
+            }
         }
     });
 

@@ -10,17 +10,17 @@ export const metadata: Metadata = {
 };
 
 const navLinks = [
-    { href: "/admin", label: "Dashboard", icon: "📊", roles: ["SUPER_ADMIN", "ADMIN", "EDITOR", "USER"] },
-    { href: "/admin/hymns", label: "Hymns", icon: "🎵", roles: ["SUPER_ADMIN", "ADMIN", "EDITOR", "USER"] },
-    { href: "/admin/diary", label: "Church Diary", icon: "📖", roles: ["SUPER_ADMIN", "ADMIN", "EDITOR", "USER"] },
-    { href: "/admin/the-echo", label: "The Echo", icon: "📰", roles: ["SUPER_ADMIN", "ADMIN", "EDITOR", "USER"] },
-    { href: "/admin/devotionals", label: "Devotionals", icon: "🙏", roles: ["SUPER_ADMIN", "ADMIN", "EDITOR", "USER"] },
+    { href: "/admin", label: "Dashboard", icon: "📊", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR", "CHURCH_USER", "NORMAL_USER"] },
+    { href: "/admin/hymns", label: "Hymns", icon: "🎵", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR", "CHURCH_USER", "NORMAL_USER"] },
+    { href: "/admin/diary", label: "Church Diary", icon: "📖", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR", "CHURCH_USER", "NORMAL_USER"] },
+    { href: "/admin/the-echo", label: "The Echo", icon: "📰", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR", "CHURCH_USER", "NORMAL_USER"] },
+    { href: "/admin/devotionals", label: "Devotionals", icon: "🙏", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR", "CHURCH_USER", "NORMAL_USER"] },
     { href: "/admin/users", label: "Users", icon: "👥", roles: ["SUPER_ADMIN"] },
     { href: "/admin/user-logs", label: "User Logs", icon: "🔐", roles: ["SUPER_ADMIN"] },
-    { href: "/admin/subscriptions", label: "Subscriptions", icon: "💳", roles: ["SUPER_ADMIN", "ADMIN", "USER"] },
-    { href: "/admin/transactions", label: "Transactions", icon: "💰", roles: ["SUPER_ADMIN", "ADMIN"] },
-    { href: "/admin/announcements", label: "Announcements", icon: "📢", roles: ["SUPER_ADMIN", "ADMIN", "EDITOR"] },
-    { href: "/admin/pcc-info", label: "PCC Info", icon: "ℹ️", roles: ["SUPER_ADMIN", "ADMIN"] },
+    { href: "/admin/subscriptions", label: "Subscriptions", icon: "💳", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CHURCH_USER", "NORMAL_USER"] },
+    { href: "/admin/transactions", label: "Transactions", icon: "💰", roles: ["SUPER_ADMIN", "ADMIN_STAFF"] },
+    { href: "/admin/announcements", label: "Announcements", icon: "📢", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR"] },
+    { href: "/admin/pcc-info", label: "PCC Info", icon: "ℹ️", roles: ["SUPER_ADMIN", "ADMIN_STAFF"] },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -30,7 +30,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         redirect("/auth/login");
     }
 
-    const userRole = (session.user as any)?.role || "USER";
+    const userRole = (session.user as any)?.role || "NORMAL_USER";
 
     return (
         <div className="flex flex-col lg:flex-row h-screen text-white transition-colors duration-300 overflow-hidden"

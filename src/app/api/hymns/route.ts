@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -26,6 +28,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+    const session = await getServerSession(authOptions);
+    if (!session || !["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR"].includes((session.user as any).role)) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     try {
         const body = await request.json();
         const { number, title, lyrics } = body;

@@ -14,7 +14,7 @@ model User {
   password      String?
   emailVerified DateTime?
   image         String?
-  role          User_role      @default(USER)
+  role          User_role      @default(NORMAL_USER)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   resetToken       String?
@@ -162,7 +162,9 @@ enum TransactionStatus {
 
 enum User_role {
   SUPER_ADMIN
-  ADMIN
-  EDITOR
+  ADMIN_STAFF
+  CONTENT_EDITOR
+  CHURCH_USER
+  NORMAL_USER
   USER
 }

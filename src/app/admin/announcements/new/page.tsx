@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 export default async function NewAnnouncementPage() {
     const session = await getServerSession(authOptions);
     const userRole = (session?.user as any)?.role;
-    if (!["ADMIN", "SUPER_ADMIN", "STAFF", "EDITOR"].includes(userRole)) {
+    if (!["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR"].includes(userRole)) {
         redirect("/admin");
     }
     return (

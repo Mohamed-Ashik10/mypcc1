@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function TransactionsPage() {
     const session = await getServerSession(authOptions);
     const userRole = (session?.user as any)?.role;
-    if (!["ADMIN", "SUPER_ADMIN", "STAFF"].includes(userRole)) {
+    if (!["SUPER_ADMIN", "ADMIN_STAFF"].includes(userRole)) {
         redirect("/admin");
     }
 

@@ -7,7 +7,7 @@ import Link from "next/link"
 import { Lock, Mail, Eye, EyeOff, UserPlus, Facebook, Twitter, Chrome as Google } from "lucide-react"
 import { VantaBackground } from "@/components/VantaBackground"
 
-const ADMIN_ROLES = ["SUPER_ADMIN", "ADMIN", "EDITOR", "STAFF"]
+const ADMIN_ROLES = ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR", "ADMIN_STAFF"]
 
 function LoginForm() {
     const router = useRouter()

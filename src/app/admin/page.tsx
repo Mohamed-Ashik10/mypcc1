@@ -23,11 +23,11 @@ async function getAdminStats() {
 
 export default async function AdminDashboardPage() {
     const session = await getServerSession(authOptions);
-    const userRole = (session?.user as any)?.role || "USER";
+    const userRole = (session?.user as any)?.role || "NORMAL_USER";
     const userId = (session?.user as any)?.id;
     const userName = session?.user?.name || "Member";
 
-    const isAdmin = ["ADMIN", "SUPER_ADMIN", "STAFF", "EDITOR"].includes(userRole.toUpperCase());
+    const isAdmin = ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR"].includes(userRole.toUpperCase());
 
     if (isAdmin) {
         const stats = await getAdminStats();

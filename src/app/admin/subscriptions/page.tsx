@@ -7,9 +7,9 @@ export const dynamic = "force-dynamic";
 
 export default async function SubscriptionsPage() {
     const session = await getServerSession(authOptions);
-    const userRole = (session?.user as any)?.role || "USER";
+    const userRole = (session?.user as any)?.role || "NORMAL_USER";
     const userId = (session?.user as any)?.id;
-    const isAdmin = ["ADMIN", "SUPER_ADMIN", "STAFF"].includes(userRole);
+    const isAdmin = ["SUPER_ADMIN", "ADMIN_STAFF"].includes(userRole);
 
     if (isAdmin) {
         const subscriptions = await prisma.subscription.findMany({
