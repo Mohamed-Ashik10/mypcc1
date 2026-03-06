@@ -41,8 +41,8 @@ export default async function HymnsPage({
         <div>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h2 className="text-2xl sm:text-3xl font-bold text-foreground">🎵 Hymns</h2>
-                    <p className="text-muted-foreground mt-1 text-sm">{total} hymns in the database</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">🎵 Hymns</h2>
+                    <p className="text-slate-500 dark:text-white/40 mt-1 text-sm">{total} hymns in the database</p>
                 </div>
                 {canModify && (
                     <Link
@@ -61,46 +61,46 @@ export default async function HymnsPage({
                         name="search"
                         defaultValue={search}
                         placeholder="Search by number or title…"
-                        className="flex-1 rounded-lg border border-border bg-card text-foreground px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500"
+                        className="flex-1 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-[#6c47ff]"
                     />
-                    <button type="submit" className="px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-500 transition-all active:scale-95">
+                    <button type="submit" className="px-5 py-2.5 bg-slate-900 dark:bg-white/10 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 dark:hover:bg-white/20 transition-all active:scale-95 border border-transparent dark:border-white/10">
                         Search
                     </button>
                 </div>
             </form>
 
             {hymns.length === 0 ? (
-                <div className="bg-card text-card-foreground rounded-2xl shadow-md p-12 text-center border border-border">
-                    <p className="text-5xl mb-4 text-muted-foreground/20">🎵</p>
-                    <p className="text-muted-foreground text-lg">No hymns found.</p>
+                <div className="bg-white dark:bg-[#111127]/90 rounded-2xl shadow-md p-12 text-center border border-slate-200 dark:border-white/[0.08]">
+                    <p className="text-5xl mb-4 text-slate-300 dark:text-white/20">🎵</p>
+                    <p className="text-slate-500 dark:text-white/40 text-lg">No hymns found.</p>
                     {canModify && (
-                        <Link href="/admin/hymns/new" className="mt-4 inline-block text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                        <Link href="/admin/hymns/new" className="mt-4 inline-block text-blue-600 dark:text-[#a855f7] hover:underline font-medium">
                             Add the first hymn →
                         </Link>
                     )}
                 </div>
             ) : (
-                <div className="bg-card text-card-foreground rounded-2xl shadow-md overflow-hidden border border-border">
+                <div className="bg-white dark:bg-[#111127]/90 rounded-2xl shadow-md overflow-hidden border border-slate-200 dark:border-white/[0.08]">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm min-w-[600px]">
-                            <thead className="bg-muted/50 text-xs text-muted-foreground uppercase tracking-wide">
+                            <thead className="bg-slate-50 dark:bg-white/5 text-xs text-slate-500 dark:text-white/40 uppercase tracking-wide">
                                 <tr>
-                                    <th className="px-6 py-3 text-left w-20">No.</th>
-                                    <th className="px-6 py-3 text-left">Title</th>
-                                    <th className="px-6 py-3 text-left">First Line</th>
-                                    {canModify && <th className="px-6 py-3 text-right">Actions</th>}
+                                    <th className="px-6 py-4 text-left w-20 font-bold">No.</th>
+                                    <th className="px-6 py-4 text-left font-bold">Title</th>
+                                    <th className="px-6 py-4 text-left font-bold">First Line</th>
+                                    {canModify && <th className="px-6 py-4 text-right font-bold">Actions</th>}
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-border">
+                            <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
                                 {hymns.map((hymn) => (
-                                    <tr key={hymn.id} className="hover:bg-muted/30 transition-colors">
-                                        <td className="px-6 py-4 font-bold text-blue-600 dark:text-blue-400">{hymn.number}</td>
-                                        <td className="px-6 py-4 font-medium text-foreground">{hymn.title}</td>
-                                        <td className="px-6 py-4 text-muted-foreground/60 max-w-xs truncate">{hymn.lyrics.split("\n")[0]}</td>
+                                    <tr key={hymn.id} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                                        <td className="px-6 py-4 font-bold text-blue-600 dark:text-[#a855f7]">{hymn.number}</td>
+                                        <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">{hymn.title}</td>
+                                        <td className="px-6 py-4 text-slate-500 dark:text-white/50 max-w-xs truncate">{hymn.lyrics.split("\n")[0]}</td>
                                         {canModify && (
                                             <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-3">
-                                                    <Link href={`/admin/hymns/${hymn.id}/edit`} className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition">Edit</Link>
+                                                <div className="flex items-center justify-end gap-4">
+                                                    <Link href={`/admin/hymns/${hymn.id}/edit`} className="text-xs font-semibold text-slate-400 dark:text-white/30 hover:text-blue-600 dark:hover:text-white transition">Edit</Link>
                                                     <HymnDeleteButton id={hymn.id} />
                                                 </div>
                                             </td>
