@@ -21,6 +21,7 @@ const navLinks = [
     { href: "/admin/transactions", label: "Transactions", icon: "💰", roles: ["SUPER_ADMIN", "ADMIN_STAFF"] },
     { href: "/admin/announcements", label: "Announcements", icon: "📢", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR"] },
     { href: "/admin/pcc-info", label: "PCC Info", icon: "ℹ️", roles: ["SUPER_ADMIN", "ADMIN_STAFF"] },
+    { href: "/admin/settings", label: "Settings", icon: "⚙️", roles: ["SUPER_ADMIN"] },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

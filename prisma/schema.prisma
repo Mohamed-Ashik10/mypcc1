@@ -168,3 +168,10 @@ enum User_role {
   NORMAL_USER
   USER
 }
+
+model AppSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}
