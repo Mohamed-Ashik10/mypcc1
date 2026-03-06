@@ -84,8 +84,8 @@ export default async function Home() {
     cat: issue.category || 'news',
     title: issue.title,
     author: issue.author || "Admin",
-    date: issue.issueMonth.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-    excerpt: issue.excerpt || `Latest issue of The Echo for ${issue.issueMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.`,
+    date: new Date(issue.issueMonth).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    excerpt: issue.excerpt || `Latest issue of The Echo for ${new Date(issue.issueMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.`,
     fullText: issue.fullText || "Download the PDF to read the full story.",
     pdfUrl: issue.pdfUrl,
     coverUrl: issue.coverUrl
@@ -93,14 +93,14 @@ export default async function Home() {
 
   const formattedDevotional = latestDevotional ? {
     title: latestDevotional.title,
-    date: latestDevotional.date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+    date: new Date(latestDevotional.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
     content: latestDevotional.content,
     author: latestDevotional.author || "PCC Community"
   } : null;
 
   const formattedArchive = archivedDevotionals.map((d: any) => ({
     title: d.title,
-    date: d.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    date: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     content: d.content,
     author: d.author || "PCC Community"
   }));
