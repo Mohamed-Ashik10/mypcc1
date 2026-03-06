@@ -143,9 +143,6 @@ export function ResponsiveSidebar({ navLinks, userRole }: ResponsiveSidebarProps
             <aside
                 className={`fixed inset-y-0 left-0 w-60 bg-white dark:bg-[#0d0d1e] border-r border-slate-200 dark:border-white/[0.07] text-slate-900 dark:text-white flex flex-col z-[60] transition-all duration-300 lg:translate-x-0 lg:static lg:inset-0
                     ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
-                style={typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? {
-                    background: "linear-gradient(180deg,#0f0f22 0%,#0a0a18 100%)"
-                } : undefined}
             >
                 {sidebarContent}
             </aside>
