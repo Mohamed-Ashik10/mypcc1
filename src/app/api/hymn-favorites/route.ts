@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     const favorites = await prisma.hymnFavourite.findMany({
       where: { userId },
       include: {
-        hymn: true
+        Hymn: true
       },
       orderBy: { createdAt: 'desc' }
     });
