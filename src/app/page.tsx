@@ -109,7 +109,12 @@ export default async function Home() {
 
   // Format Church Diary Dates safely
   const formattedDiary = churchDiary.map(d => ({
-    ...d,
+    id: d.id,
+    title: d.title,
+    body: d.body,
+    author: d.author,
+    hymn: d.hymn,
+    category: d.category,
     date: d.date ? new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No Date'
   }));
 
@@ -132,7 +137,10 @@ export default async function Home() {
       formattedFavorites = userFavs.map(f => f.hymnId);
 
       userDiary = personalEntries.map(e => ({
-        ...e,
+        id: e.id,
+        title: e.title,
+        body: e.body,
+        hymn: e.hymn,
         date: e.date ? new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No Date'
       }));
     } catch (err) {
