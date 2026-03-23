@@ -48,9 +48,9 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { number, title, lyrics, author, tags } = parsed.data;
+        const { number, title, lyrics, author, tags, tuneUrl } = parsed.data;
         const hymn = await prisma.hymn.create({
-            data: { number, title, lyrics, author, tags },
+            data: { number, title, lyrics, author, tags, tuneUrl },
         });
         return NextResponse.json(hymn, { status: 201 });
     } catch (error: any) {

@@ -8,21 +8,23 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  name          String?
-  email         String?        @unique
-  password      String?
-  phone         String?
-  emailVerified DateTime?
-  image         String?
-  role          User_role      @default(NORMAL_USER)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id               String          @id @default(cuid())
+  name             String?
+  email            String?         @unique
+  password         String?
+  emailVerified    DateTime?
+  image            String?
+  role             User_role       @default(NORMAL_USER)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
   resetToken       String?
   resetTokenExpiry DateTime?
-  sessions      Session[]
-  subscriptions Subscription[]
-  transactions  Transaction[]
+  phone            String?
+  DiaryEntry       DiaryEntry[]
+  HymnFavourite    HymnFavourite[]
+  sessions         Session[]
+  subscriptions    Subscription[]
+  transactions     Transaction[]
 }
 
 model Session {
@@ -36,43 +38,51 @@ model Session {
 }
 
 model Hymn {
-  id        String   @id @default(cuid())
-  number    Int      @unique
-  title     String
-  author    String?
-  tags      String?
-  lyrics    String   @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String          @id @default(cuid())
+  number        Int             @unique
+  title         String
+  lyrics        String          @db.Text
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  author        String?
+  tags          String?
+  tuneUrl       String?
+  HymnFavourite HymnFavourite[]
 }
 
 model DiaryEntry {
   id           String   @id @default(cuid())
-  date         DateTime @unique
+  date         DateTime
   title        String?
-  body         String?  @db.Text
-  hymn         String?
   readingOne   String?
   readingTwo   String?
   readingThree String?
   theme        String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  body         String?  @db.Text
+  hymn         String?
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model TheEchoIssue {
-  id          String   @id @default(cuid())
-  title       String
-  category    String   @default("news")
-  author      String   @default("Admin")
-  excerpt     String?  @db.Text
-  fullText    String?  @db.Text
-  issueMonth  DateTime
-  pdfUrl      String
-  coverUrl    String?
-  isFree      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  title      String
+  issueMonth DateTime
+  pdfUrl     String
+  coverUrl   String?
+  isFree     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  author     String   @default("Admin")
+  category   String   @default("news")
+  excerpt    String?  @db.Text
+  fullText   String?  @db.Text
+  isFeatured Boolean  @default(false)
+  images     Json?
 }
 
 model Devotional {
@@ -81,6 +91,12 @@ model Devotional {
   date      DateTime
   content   String   @db.Text
   author    String?
+  excerpt   String?  @db.Text
+  image     String?
+  reading   String?  // Scripture reading
+  category  String?  @default("Inspiration")
+  isFree    Boolean  @default(true)
+  minPlan   SubscriptionType @default(SEEKER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -106,12 +122,12 @@ model Subscription {
   id           String             @id @default(cuid())
   userId       String
   type         SubscriptionType
-  billingCycle BillingCycle       @default(MONTHLY)
   status       SubscriptionStatus @default(ACTIVE)
   startDate    DateTime           @default(now())
   endDate      DateTime
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
+  billingCycle BillingCycle       @default(MONTHLY)
   user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId], map: "Subscription_userId_fkey")
@@ -130,6 +146,36 @@ model Transaction {
   user          User              @relation(fields: [userId], references: [id])
 
   @@index([userId], map: "Transaction_userId_fkey")
+}
+
+model AppSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}
+
+model HymnFavourite {
+  id        String   @id
+  userId    String
+  hymnId    String
+  createdAt DateTime @default(now())
+  Hymn      Hymn     @relation(fields: [hymnId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, hymnId])
+  @@index([hymnId])
+  @@index([userId])
+}
+
+model Testimonial {
+  id         String   @id @default(cuid())
+  content    String   @db.Text
+  authorName String
+  authorRole String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 enum SubscriptionType {
@@ -168,11 +214,4 @@ enum User_role {
   CHURCH_USER
   NORMAL_USER
   USER
-}
-
-model AppSetting {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  value     String   @db.Text
-  updatedAt DateTime @updatedAt
 }

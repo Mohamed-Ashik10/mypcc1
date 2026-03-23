@@ -20,6 +20,7 @@ const navLinks = [
     { href: "/admin/subscriptions", label: "Subscriptions", icon: "💳", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CHURCH_USER", "NORMAL_USER"] },
     { href: "/admin/transactions", label: "Transactions", icon: "💰", roles: ["SUPER_ADMIN", "ADMIN_STAFF"] },
     { href: "/admin/announcements", label: "Announcements", icon: "📢", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR"] },
+    { href: "/admin/testimonials", label: "Community Voices", icon: "💬", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR"] },
     { href: "/admin/pcc-info", label: "PCC Info", icon: "ℹ️", roles: ["SUPER_ADMIN", "ADMIN_STAFF"] },
     { href: "/admin/settings", label: "Settings", icon: "⚙️", roles: ["SUPER_ADMIN"] },
 ];

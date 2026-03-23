@@ -7,6 +7,7 @@ export const HymnSchema = z.object({
     author: z.string().max(200).optional(),
     lyrics: z.string().min(1, "Lyrics are required"),
     tags: z.string().max(500).optional(),
+    tuneUrl: z.string().url().max(500).optional().or(z.literal("")),
 });
 
 export type HymnInput = z.infer<typeof HymnSchema>;
@@ -18,10 +19,13 @@ export const DiaryEntrySchema = z.object({
         "Invalid date format"
     ),
     title: z.string().max(300).optional(),
-    readingOne: z.string().min(1, "Reading One is required"),
+    readingOne: z.string().optional(),
     readingTwo: z.string().optional(),
     readingThree: z.string().optional(),
     theme: z.string().max(500).optional(),
+    body: z.string().optional(),
+    hymn: z.string().optional(),
+    userId: z.string().optional(),
 });
 
 export type DiaryEntryInput = z.infer<typeof DiaryEntrySchema>;

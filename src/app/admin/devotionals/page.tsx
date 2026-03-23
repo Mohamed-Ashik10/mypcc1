@@ -11,7 +11,7 @@ export default async function DevotionalsPage() {
     const userRole = (session?.user as any)?.role || "NORMAL_USER";
     const canModify = ["ADMIN_STAFF", "SUPER_ADMIN", "CONTENT_EDITOR"].includes(userRole);
 
-    const devotionals = await prisma.devotional.findMany({ orderBy: { date: "desc" }, take: 50 });
+    const devotionals = (await prisma.devotional.findMany({ orderBy: { date: "desc" }, take: 50 })) as any[];
 
     return (
         <div>
@@ -37,23 +37,55 @@ export default async function DevotionalsPage() {
                 </div>
             ) : (
                 <div className="space-y-4">
-                    {devotionals.map((d) => (
-                        <div key={d.id} className="bg-card text-card-foreground rounded-2xl shadow-md p-6 border border-border hover:shadow-lg transition-shadow">
-                            <div className="flex items-start justify-between">
+                    {devotionals.map((d) => {
+                        const isQueued = new Date(d.date) > new Date();
+                        
+                        return (
+                        <div key={d.id} className="relative overflow-hidden bg-card text-card-foreground rounded-2xl shadow-md p-6 border border-border hover:shadow-lg transition-shadow">
+                            {/* Insert background image with a massive fade so it doesn't block text */}
+                            {d.image && (
+                                <div 
+                                    className="absolute inset-0 z-0 opacity-[0.15] dark:opacity-[0.1]" 
+                                    style={{
+                                        backgroundImage: `url(${d.image})`,
+                                        backgroundSize: 'cover',
+                                        backgroundPosition: 'center'
+                                    }}
+                                />
+                            )}
+                            <div className="relative z-10 flex items-start justify-between">
                                 <div className="flex-1">
-                                    <h3 className="font-bold text-foreground">{d.title}</h3>
-                                    <p className="text-sm text-muted-foreground/60 mt-1">
-                                        {new Date(d.date).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}
-                                        {d.author && <> · By <span className="text-muted-foreground">{d.author}</span></>}
+                                    <div className="flex items-center gap-3">
+                                        {d.image && (
+                                            <div 
+                                                className="w-10 h-10 rounded-lg shadow-sm bg-cover bg-center border border-border"
+                                                style={{ backgroundImage: `url(${d.image})` }}
+                                            />
+                                        )}
+                                        <h3 className="font-bold text-foreground text-lg">{d.title}</h3>
+                                        {isQueued && (
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400 rounded-lg border border-amber-200 dark:border-amber-500/20">
+                                                ⏳ Queued
+                                            </span>
+                                        )}
+                                        {!d.isFree && (
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 dark:bg-purple-500/15 dark:text-purple-400 rounded-lg border border-purple-200 dark:border-purple-500/20">
+                                                🔒 {d.minPlan === 'SHEPHERD' ? 'Shepherd' : 'Pilgrim'}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-sm text-muted-foreground/80 mt-2 font-medium">
+                                        🗓️ {new Date(d.date).toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "long", year: "numeric" })}
+                                        {d.author && <> · ✍️ <span className="text-muted-foreground">{d.author}</span></>}
                                     </p>
-                                    <p className="text-muted-foreground mt-3 text-sm line-clamp-3">{d.content}</p>
+                                    <p className="text-muted-foreground/90 mt-3 text-sm line-clamp-2 leading-relaxed max-w-3xl">{(d as any).excerpt || d.content.substring(0, 150)}</p>
                                 </div>
-                                <div className="ml-4">
+                                <div className="ml-4 pl-4 border-l border-border/50">
                                     {canModify && <DevotionalDeleteButton id={d.id} />}
                                 </div>
                             </div>
                         </div>
-                    ))}
+                    )})}
                 </div>
             )}
         </div>

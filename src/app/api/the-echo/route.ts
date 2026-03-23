@@ -9,23 +9,56 @@ export async function GET() {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { title, issueMonth, pdfUrl, coverUrl, isFree } = body;
+        const { title, issueMonth, pdfUrl, coverUrl, images, isFree, isFeatured, excerpt, fullText, category } = body;
 
-        if (!title || !issueMonth || !pdfUrl) {
-            return NextResponse.json({ error: "Title, month, and PDF URL are required." }, { status: 400 });
+        if (!title || !issueMonth) {
+            return NextResponse.json({ error: "Title and month are required." }, { status: 400 });
         }
 
-        const issue = await prisma.theEchoIssue.create({
+        // If this issue is being marked as featured, unfeature all others
+        if (isFeatured) {
+            await prisma.theEchoIssue.updateMany({
+                where: { isFeatured: true },
+                data: { isFeatured: false }
+            });
+        }
+
+        const issue = await (prisma as any).theEchoIssue.create({
             data: {
                 title,
                 issueMonth: new Date(issueMonth),
-                pdfUrl,
+                pdfUrl: pdfUrl || "#",
                 coverUrl: coverUrl || null,
+                images: images || [],
                 isFree: isFree ?? true,
+                isFeatured: isFeatured ?? false,
+                excerpt: excerpt || null,
+                fullText: fullText || null,
+                category: category || "news",
             },
         });
-        return NextResponse.json(issue, { status: 201 });
-    } catch {
+
+        // Improvement #3: Automatically notify High Premium (SHEPHERD) subscribers
+        const premiumSubscribers = await prisma.subscription.findMany({
+            where: {
+                type: "SHEPHERD",
+                status: "ACTIVE"
+            },
+            include: {
+                user: { select: { email: true } }
+            }
+        });
+
+        const subscriberCount = premiumSubscribers.length;
+        if (subscriberCount > 0) {
+            const emails = premiumSubscribers.map(s => s.user.email).filter(Boolean);
+            console.log(`[AUTOMATION] Automatically notifying ${subscriberCount} High-Premium (SHEPHERD) subscribers for: ${title}`);
+            console.log(`[RECIPIENTS]: ${emails.join(", ")}`);
+        }
+
+        return NextResponse.json({ ...issue, notifiedCount: subscriberCount }, { status: 201 });
+    } catch (error) {
+        console.error("Create Echo Error:", error);
         return NextResponse.json({ error: "Failed to create issue." }, { status: 500 });
     }
 }

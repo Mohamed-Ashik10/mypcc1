@@ -34,12 +34,18 @@ export default async function DiaryManagementPage({
     // Admin: paginated all entries. Member: entries for selected month only.
     const [entries, total] = isAdmin
         ? await Promise.all([
-            prisma.diaryEntry.findMany({ skip, take: limit, orderBy: { date: "asc" } }),
-            prisma.diaryEntry.count(),
+            prisma.diaryEntry.findMany({ 
+                where: { userId: null },
+                skip, 
+                take: limit, 
+                orderBy: { date: "asc" } 
+            }),
+            prisma.diaryEntry.count({ where: { userId: null } }),
         ])
         : await Promise.all([
             prisma.diaryEntry.findMany({
                 where: {
+                    userId: null,
                     date: {
                         gte: new Date(now.getFullYear(), safeMonthIdx, 1),
                         lt: new Date(now.getFullYear(), safeMonthIdx + 1, 1),
@@ -49,6 +55,7 @@ export default async function DiaryManagementPage({
             }),
             prisma.diaryEntry.count({
                 where: {
+                    userId: null,
                     date: {
                         gte: new Date(now.getFullYear(), safeMonthIdx, 1),
                         lt: new Date(now.getFullYear(), safeMonthIdx + 1, 1),

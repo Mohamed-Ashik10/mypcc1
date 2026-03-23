@@ -8,22 +8,36 @@ interface EchoFormData {
     issueMonth: string;
     pdfUrl: string;
     coverUrl: string;
+    images: string[];
     isFree: boolean;
+    isFeatured: boolean;
+    excerpt: string;
+    fullText: string;
 }
 
 interface Props {
-    initialData?: EchoFormData & { id?: string };
+    initialData?: any; // Use any to handle Json parsing from prisma
     mode: "create" | "edit";
 }
 
 export default function EchoForm({ initialData, mode }: Props) {
     const router = useRouter();
+    
+    // Parse images if they come as string/Json
+    const initialImages = Array.isArray(initialData?.images) 
+        ? initialData.images 
+        : (typeof initialData?.images === 'string' ? JSON.parse(initialData.images) : []);
+
     const [form, setForm] = useState<EchoFormData>({
         title: initialData?.title ?? "",
         issueMonth: initialData?.issueMonth?.slice(0, 7) ?? "",
-        pdfUrl: initialData?.pdfUrl ?? "",
+        pdfUrl: initialData?.pdfUrl ?? "#",
         coverUrl: initialData?.coverUrl ?? "",
+        images: initialImages,
         isFree: initialData?.isFree ?? true,
+        isFeatured: initialData?.isFeatured ?? false,
+        excerpt: initialData?.excerpt ?? "",
+        fullText: initialData?.fullText ?? "",
     });
     const [error, setError] = useState("");
     const [saving, setSaving] = useState(false);
@@ -31,6 +45,20 @@ export default function EchoForm({ initialData, mode }: Props) {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value, type, checked } = e.target;
         setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+    };
+
+    const handleImageChange = (index: number, value: string) => {
+        const newImages = [...form.images];
+        newImages[index] = value;
+        setForm(prev => ({ ...prev, images: newImages }));
+    };
+
+    const addImage = () => {
+        setForm(prev => ({ ...prev, images: [...prev.images, ""] }));
+    };
+
+    const removeImage = (index: number) => {
+        setForm(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -77,20 +105,73 @@ export default function EchoForm({ initialData, mode }: Props) {
                 </div>
                 <div className="flex items-end pb-2">
                     <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground cursor-pointer group">
-                        <input type="checkbox" name="isFree" checked={form.isFree} onChange={handleChange} className="h-4 w-4 rounded border-border bg-background text-blue-600 focus:ring-blue-500 transition-colors" />
-                        <span className="group-hover:text-foreground transition-colors">Free Access</span>
+                        <input type="checkbox" id="isFree" name="isFree" checked={form.isFree} onChange={handleChange} className="h-4 w-4 rounded border-border bg-background text-blue-600 focus:ring-blue-500 transition-colors" />
+                        <span className="group-hover:text-foreground transition-colors mr-6">Free Access</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground cursor-pointer group">
+                        <input type="checkbox" id="isFeatured" name="isFeatured" checked={form.isFeatured} onChange={handleChange} className="h-4 w-4 rounded border-border bg-background text-amber-600 focus:ring-amber-500 transition-colors" />
+                        <span className="group-hover:text-amber-600 transition-colors">Featured Issue</span>
                     </label>
                 </div>
             </div>
 
-            <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5 ml-1">PDF URL <span className="text-destructive">*</span></label>
-                <input type="url" name="pdfUrl" required value={form.pdfUrl} onChange={handleChange} placeholder="https://storage.example.com/echo-march-2026.pdf" className={inputCls} />
-            </div>
+
 
             <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5 ml-1">Cover Image URL</label>
                 <input type="url" name="coverUrl" value={form.coverUrl} onChange={handleChange} placeholder="https://storage.example.com/cover.jpg" className={inputCls} />
+            </div>
+
+            <div className="space-y-3">
+                <div className="flex items-center justify-between ml-1">
+                    <label className="text-sm font-medium text-foreground">Gallery Images</label>
+                    <button type="button" onClick={addImage} className="text-xs font-semibold text-blue-600 hover:text-blue-500 flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-md transition-all">
+                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Add Image
+                    </button>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                    {form.images.map((url, index) => (
+                        <div key={index} className="flex gap-2">
+                            <input 
+                                type="url" 
+                                value={url} 
+                                onChange={(e) => handleImageChange(index, e.target.value)} 
+                                placeholder={`Gallery Image #${index + 1} URL`} 
+                                className={inputCls + " flex-1"} 
+                            />
+                            <button type="button" onClick={() => removeImage(index)} className="p-2.5 text-destructive hover:bg-destructive/10 rounded-lg transition-colors border border-transparent hover:border-destructive/20" title="Remove image">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                            </button>
+                        </div>
+                    ))}
+                    {form.images.length === 0 && (
+                        <p className="text-xs text-muted-foreground italic ml-1">No additional gallery images added.</p>
+                    )}
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5 ml-1">Excerpt <span className="text-xs text-muted-foreground">(short summary shown on cards)</span></label>
+                <textarea
+                    name="excerpt"
+                    value={form.excerpt}
+                    onChange={(e) => setForm(prev => ({ ...prev, excerpt: e.target.value }))}
+                    placeholder="A brief description of this Echo issue…"
+                    rows={2}
+                    className={inputCls + " resize-none"}
+                />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5 ml-1">Full Article Text <span className="text-xs text-muted-foreground">(shown when user clicks "Read More")</span></label>
+                <textarea
+                    name="fullText"
+                    value={form.fullText}
+                    onChange={(e) => setForm(prev => ({ ...prev, fullText: e.target.value }))}
+                    placeholder="Paste the full article content here…"
+                    rows={8}
+                    className={inputCls + " resize-y"}
+                />
             </div>
 
             {error && <p className="text-sm text-destructive bg-destructive/10 p-4 rounded-xl border border-destructive/20">{error}</p>}

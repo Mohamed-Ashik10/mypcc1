@@ -3,10 +3,12 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import EchoDeleteButton from "@/components/EchoDeleteButton";
+import EchoFilters from "@/components/EchoFilters";
 
 export const dynamic = "force-dynamic";
 
-export default async function TheEchoPage() {
+export default async function TheEchoPage({ searchParams }: { searchParams: Promise<{ search?: string, year?: string, month?: string }> }) {
+    const { search, year, month } = await searchParams;
     const session = await getServerSession(authOptions);
     const userRole = (session?.user as any)?.role || "NORMAL_USER";
     const userId = (session?.user as any)?.id;
@@ -20,7 +22,31 @@ export default async function TheEchoPage() {
 
     const hasAccess = !isMember || !!activeSub;
 
-    const issues = await prisma.theEchoIssue.findMany({ orderBy: { issueMonth: "desc" } });
+    // Prisma Filter Logic
+    const whereClause: any = {};
+    if (search) {
+        whereClause.OR = [
+            { title: { contains: search, mode: 'insensitive' } },
+            { excerpt: { contains: search, mode: 'insensitive' } }
+        ];
+    }
+    
+    if (year) {
+        const start = new Date(year + (month ? `-${month}-01` : "-01-01"));
+        const end = month 
+            ? new Date(new Date(start).setMonth(start.getMonth() + 1))
+            : new Date(`${year}-12-31T23:59:59.999Z`);
+            
+        whereClause.issueMonth = {
+            gte: start,
+            [month ? "lt" : "lte"]: end
+        };
+    }
+
+    const issues = await prisma.theEchoIssue.findMany({ 
+        where: whereClause,
+        orderBy: { issueMonth: "desc" } 
+    });
 
     const latestFree = issues.find(i => i.isFree);
 
@@ -28,15 +54,18 @@ export default async function TheEchoPage() {
     if (isMember) {
         return (
             <div className="max-w-4xl mx-auto space-y-8">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                     <div>
                         <h2 className="text-2xl sm:text-3xl font-bold text-foreground">📰 The Echo</h2>
                         <p className="text-muted-foreground mt-1 text-sm">The official newsletter of the Presbyterian Church in Cameroon</p>
                     </div>
                 </div>
 
-                {/* Latest Free Issue Hero */}
-                {latestFree && (
+                {/* Filters */}
+                <EchoFilters initialYear={year} />
+
+                {/* Latest Free Issue Hero (Visible only if no active search) */}
+                {!search && !year && latestFree && (
                     <div className="relative bg-gradient-to-br from-purple-600 to-blue-700 dark:from-purple-700 dark:to-blue-900 rounded-2xl shadow-xl p-6 text-white overflow-hidden">
                         <div className="absolute -top-8 -right-8 w-48 h-48 bg-white/5 rounded-full pointer-events-none" />
                         <p className="text-xs font-bold uppercase tracking-widest text-purple-200 mb-2">Latest Free Issue</p>
@@ -44,33 +73,38 @@ export default async function TheEchoPage() {
                         <p className="text-sm text-purple-200 mb-5">
                             {new Date(latestFree.issueMonth).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}
                         </p>
-                        <a
-                            href={latestFree.pdfUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <Link
+                            href={`/admin/the-echo/${latestFree.id}`}
                             className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-purple-700 font-bold rounded-xl text-sm shadow hover:bg-purple-50 transition-all active:scale-95"
                         >
-                            📄 Read Now
-                        </a>
+                            📖 Read Digital Issue
+                        </Link>
                     </div>
                 )}
 
                 {/* All Issues Grid */}
                 {issues.length === 0 ? (
                     <div className="bg-card text-card-foreground rounded-2xl shadow-md p-12 text-center border border-border">
-                        <p className="text-5xl mb-4 text-muted-foreground/20">📰</p>
-                        <p className="text-muted-foreground text-lg">No issues published yet. Check back soon.</p>
+                        <p className="text-5xl mb-4 text-muted-foreground/20">🔍</p>
+                        <p className="text-muted-foreground text-lg">No issues found matching your filters.</p>
+                        <button 
+                            className="mt-4 text-blue-500 hover:underline"
+                            onClick={() => window.location.href = "?"}
+                        >
+                            Clear all filters
+                        </button>
                     </div>
                 ) : (
                     <div>
-                        <h3 className="text-lg font-semibold text-foreground mb-4">All Issues</h3>
+                        <h3 className="text-lg font-semibold text-foreground mb-4">
+                            {search || year ? `${issues.length} Result${issues.length === 1 ? '' : 's'}` : 'All Issues'}
+                        </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                             {issues.map((issue) => {
-                                const isPaid = !issue.isFree;
                                 const canView = issue.isFree || hasAccess;
 
                                 return (
-                                    <div key={issue.id} className="bg-card text-card-foreground rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-all relative group">
+                                    <div key={issue.id} className="bg-card text-card-foreground rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-all relative group shadow-sm">
                                         {/* Cover / Placeholder */}
                                         {issue.coverUrl ? (
                                             <img src={issue.coverUrl} alt={issue.title} className="w-full h-32 object-cover" />
@@ -108,14 +142,12 @@ export default async function TheEchoPage() {
                                                     {issue.isFree ? "Free" : "Premium"}
                                                 </span>
                                                 {canView ? (
-                                                    <a
-                                                        href={issue.pdfUrl}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
+                                                    <Link
+                                                        href={`/admin/the-echo/${issue.id}`}
                                                         className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
                                                     >
-                                                        Read PDF →
-                                                    </a>
+                                                        Read More →
+                                                    </Link>
                                                 ) : (
                                                     <span className="text-xs text-muted-foreground/60 flex items-center gap-1">
                                                         🔒 Locked
@@ -150,10 +182,10 @@ export default async function TheEchoPage() {
     // ── ADMIN VIEW ───────────────────────────────────────────────────────────
     return (
         <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                 <div>
                     <h2 className="text-2xl sm:text-3xl font-bold text-foreground">📰 The Echo</h2>
-                    <p className="text-muted-foreground mt-1 text-sm">{issues.length} issues published</p>
+                    <p className="text-muted-foreground mt-1 text-sm">{issues.length} issues {search || year ? 'matching filters' : 'published'}</p>
                 </div>
                 <Link
                     href="/admin/the-echo/new"
@@ -163,13 +195,22 @@ export default async function TheEchoPage() {
                 </Link>
             </div>
 
+            {/* Filters */}
+            <EchoFilters initialYear={year} />
+
             {issues.length === 0 ? (
                 <div className="bg-card text-card-foreground rounded-2xl shadow-md p-12 text-center border border-border">
-                    <p className="text-5xl mb-4 text-muted-foreground/20">📰</p>
-                    <p className="text-muted-foreground text-lg">No issues published yet.</p>
-                    <Link href="/admin/the-echo/new" className="mt-4 inline-block text-blue-600 dark:text-blue-400 hover:underline font-medium">
-                        Upload the first issue →
-                    </Link>
+                    <p className="text-5xl mb-4 text-muted-foreground/20">🔍</p>
+                    <p className="text-muted-foreground text-lg">No issues found matching your filters.</p>
+                    {search || year ? (
+                        <Link href="?" className="mt-4 inline-block text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                            Reset filters →
+                        </Link>
+                    ) : (
+                        <Link href="/admin/the-echo/new" className="mt-4 inline-block text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                            Upload the first issue →
+                        </Link>
+                    )}
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -191,13 +232,18 @@ export default async function TheEchoPage() {
                                     <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${issue.isFree ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"}`}>
                                         {issue.isFree ? "Free" : "Paid"}
                                     </span>
+                                    {issue.isFeatured && (
+                                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50">
+                                            ★ Featured
+                                        </span>
+                                    )}
                                 </div>
-                                <div className="mt-4 flex items-center justify-between">
-                                    <a href={issue.pdfUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
-                                        View PDF →
-                                    </a>
+                                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
+                                    <Link href={`/admin/the-echo/${issue.id}`} className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                                        📖 View Full Article
+                                    </Link>
                                     <div className="flex items-center gap-3">
-                                        <Link href={`/admin/the-echo/${issue.id}/edit`} className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
+                                        <Link href={`/admin/the-echo/${issue.id}/edit`} className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
                                             Edit
                                         </Link>
                                         <EchoDeleteButton id={issue.id} />

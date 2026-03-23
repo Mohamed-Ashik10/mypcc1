@@ -214,10 +214,25 @@ nav {
 
 .cta-banner {
   background: #1a1510;
+  background-image: url('/echo_community.png');
+  background-size: cover;
+  background-position: center;
   padding: 100px 48px;
   text-align: center;
   position: relative;
   overflow: hidden;
+}
+
+.cta-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 21, 16, 0.85);
+}
+
+.cta-banner > * {
+  position: relative;
+  z-index: 2;
 }
 
 .landing-footer {
@@ -256,7 +271,19 @@ nav {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  background-image: url('/worship_hymns.png');
+  background-size: cover;
+  background-position: center;
+  z-index: 1;
 }
+
+.hymns-hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(23, 19, 15, 0.75), rgba(23, 19, 15, 0.95));
+}
+
 
 .ring {
   position: absolute;
@@ -306,6 +333,7 @@ nav {
   font-size: clamp(3rem, 8vw, 7rem);
   font-weight: 300;
   line-height: 1;
+  color: var(--warm);
   animation: fadeUp .8s .4s ease both;
 }
 
@@ -319,7 +347,7 @@ nav {
   font-size: 1.1rem;
   font-style: italic;
   font-weight: 300;
-  color: var(--muted);
+  color: rgba(253, 250, 245, 0.8);
   margin-top: 16px;
   animation: fadeUp .8s .6s ease both;
 }
@@ -399,6 +427,52 @@ nav {
   background: var(--ink);
   color: var(--cream);
   border-color: var(--ink);
+}
+
+.hymn-advanced-filters {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hymn-filter-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hymn-filter-label {
+  font-size: .62rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.hymn-select {
+  background: var(--warm);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236e1799' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+}
+
+.hymn-select:hover {
+  border-color: var(--gold);
+  background-color: var(--cream);
 }
 
 /* Hymn grid */
@@ -531,6 +605,37 @@ nav {
   padding: 48px;
   position: relative;
   animation: modalIn .4s ease;
+  border-radius: 20px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: -10px;
+}
+
+.font-controls {
+    display: flex;
+    gap: 8px;
+    background: rgba(247, 243, 236, 0.05);
+    padding: 4px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+
+.font-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.font-btn:hover {
+    color: var(--gold);
+    background: rgba(212, 175, 55, 0.1);
 }
 
 @keyframes modalIn {
@@ -543,6 +648,63 @@ nav {
     opacity: 1;
     transform: scale(1)
   }
+}
+
+/* Modal Utility Buttons (Copy/Share) */
+.modal-utils {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.util-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 8px 16px;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.util-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: var(--cream);
+}
+
+/* Toast Notification */
+#canticle-toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--ink);
+  color: var(--warm);
+  padding: 12px 24px;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  z-index: 10000;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#canticle-toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+#canticle-toast svg {
+  color: var(--gold);
 }
 
 .modal-close {
@@ -582,10 +744,37 @@ nav {
   margin-bottom: 28px;
 }
 
+.modal-metadata {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  justify-content: center;
+}
+
+.m-meta-item {
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(110, 23, 153, 0.05);
+  padding: 6px 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border2);
+}
+
+.m-meta-text {
+  color: var(--ink);
+  font-weight: 500;
+}
+
 .modal-divider {
   height: 1px;
-  background: var(--border);
-  margin-bottom: 28px;
+  background: var(--border2);
+  margin: 24px 0;
+  opacity: 0.5;
 }
 
 .modal-lyrics {
@@ -1158,6 +1347,55 @@ nav {
   justify-content: center;
   font-size: 3rem;
   color: var(--border);
+}
+
+.player-wave-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.player-wave {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  justify-content: center;
+}
+
+.player-progress-container {
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.progress-track {
+  height: 4px;
+  background: var(--border);
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--gold);
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+.player-times {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.6rem;
+  font-family: 'Inter', sans-serif;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 /* ══════════════════════════════════════
@@ -2357,6 +2595,41 @@ nav {
   }
 }
 
+/* ══ HOW IT WORKS CARDS ══ */
+.hiw-card {
+  padding: 32px 24px;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+  height: 100%;
+  cursor: pointer;
+}
+
+.hiw-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(184, 147, 90, 0.08);
+  border-color: rgba(184, 147, 90, 0.3);
+}
+
+.hiw-card:hover .hiw-icon {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+.hiw-card:hover .hiw-icon svg {
+  color: var(--warm) !important;
+}
+
+.hiw-icon {
+  transition: all 0.4s ease;
+}
+
+.hiw-icon svg {
+  color: var(--gold);
+  transition: color 0.4s ease;
+}
+
 /* --------------------------------------
    RESPONSIVE DESIGN (TABLET & MOBILE)
 -------------------------------------- */
@@ -2513,6 +2786,47 @@ nav {
     font-size: 1.6rem;
   }
 }
+
+/* ══ STICKY SCROLL SECTION (Reasonal-style pinned reveal) ══ */
+.sticky-section{display:grid;grid-template-columns:1fr 1fr;min-height:400vh;
+  max-width:1200px;margin:0 auto;padding:0 48px;}
+.sticky-left{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;
+  justify-content:center;padding:80px 48px 80px 0;}
+.sticky-panel{display:none;animation:fadeUp .6s ease both;}
+.sticky-panel.active{display:block;}
+.sticky-label{font-size:.65rem;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--gold);font-weight:300;margin-bottom:16px;}
+.sticky-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,4vw,3.8rem);
+  font-weight:300;line-height:1.1;margin-bottom:20px;}
+.sticky-title em{font-style:italic;color:var(--gold);}
+.sticky-body{font-size:.88rem;font-weight:300;line-height:1.9;color:var(--muted);
+  max-width:400px;margin-bottom:32px;}
+.sticky-btn{padding:12px 28px;background:var(--ink);color:var(--cream);border:none;
+  cursor:pointer;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;
+  font-weight:300;transition:background .3s;}
+.sticky-btn:hover{background:var(--gold);}
+.sticky-right{padding:160px 0 160px 48px;display:flex;flex-direction:column;
+  justify-content:space-around;gap:0;}
+.sticky-cards-wrap{display:flex;flex-direction:column;gap:24px;}
+.sticky-card{padding:32px 28px;border:1px solid var(--border);background:var(--warm);
+  opacity:.35;transform:scale(.96);transition:all .5s ease;}
+.sticky-card.active{opacity:1;transform:scale(1);
+  box-shadow:0 12px 40px rgba(184,147,90,.1);border-color:rgba(184,147,90,.35);}
+.sc-icon{font-size:1.6rem;margin-bottom:12px;}
+.sc-num{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:8px;}
+.sc-title{font-family:'Cormorant Garamond',serif;font-size:1.2rem;
+  font-weight:400;margin-bottom:4px;}
+.sc-sub{font-size:.72rem;color:var(--muted);font-weight:300;margin-bottom:12px;}
+.sc-bar{height:3px;background:var(--border);margin-bottom:12px;border-radius:2px;}
+.sc-bar-fill{height:100%;width:65%;background:var(--gold);border-radius:2px;
+  animation:barFill 2s ease both;}
+@keyframes barFill{from{width:0}to{width:65%}}
+.sc-body{font-size:.78rem;font-weight:300;color:var(--muted);
+  font-style:italic;line-height:1.7;}
+.sc-tag{font-size:.62rem;letter-spacing:.12em;color:var(--muted2);}
+.sc-badge{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:3px 10px;border:1px solid var(--border);color:var(--muted);}
 
 /* ══ SVG ICON ALIGNMENT ══ */
 .float-icon {

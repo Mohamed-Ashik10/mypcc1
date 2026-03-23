@@ -6,6 +6,9 @@ interface HymnFormData {
     number: string;
     title: string;
     lyrics: string;
+    author: string;
+    tags: string;
+    tuneUrl: string;
 }
 
 interface Props {
@@ -19,6 +22,9 @@ export default function HymnForm({ initialData, mode }: Props) {
         number: initialData?.number ?? "",
         title: initialData?.title ?? "",
         lyrics: initialData?.lyrics ?? "",
+        author: initialData?.author ?? "",
+        tags: initialData?.tags ?? "",
+        tuneUrl: (initialData as any)?.tuneUrl ?? "",
     });
     const [error, setError] = useState("");
     const [saving, setSaving] = useState(false);
@@ -103,6 +109,21 @@ export default function HymnForm({ initialData, mode }: Props) {
                     className={`${inputCls} resize-y`}
                 />
                 <p className="text-xs text-muted-foreground/60 mt-2 ml-1">Separate verses with a blank line.</p>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5 ml-1">
+                    Tune URL (MP3 or Audio Link)
+                </label>
+                <input
+                    type="url"
+                    name="tuneUrl"
+                    value={form.tuneUrl}
+                    onChange={handleChange}
+                    placeholder="e.g. https://example.com/hymn.mp3"
+                    className={inputCls}
+                />
+                <p className="text-xs text-muted-foreground/60 mt-2 ml-1">Optional: Link to an audio file for playback.</p>
             </div>
 
             {error && <p className="text-sm text-destructive bg-destructive/10 p-4 rounded-xl border border-destructive/20">{error}</p>}

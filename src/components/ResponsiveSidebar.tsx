@@ -30,7 +30,7 @@ export function ResponsiveSidebar({ navLinks, userRole }: ResponsiveSidebarProps
 
     // Split into main and admin sections
     const mainLinks = filteredLinks.filter(l =>
-        ["/admin", "/admin/hymns", "/admin/diary", "/admin/the-echo", "/admin/devotionals", "/admin/announcements"].includes(l.href)
+        ["/admin", "/admin/hymns", "/admin/diary", "/admin/the-echo", "/admin/devotionals", "/admin/announcements", "/admin/testimonials"].includes(l.href)
     )
     const adminLinks = filteredLinks.filter(l =>
         ["/admin/users", "/admin/user-logs", "/admin/subscriptions", "/admin/transactions", "/admin/pcc-info", "/admin/settings"].includes(l.href)
@@ -96,9 +96,17 @@ export function ResponsiveSidebar({ navLinks, userRole }: ResponsiveSidebarProps
             </nav>
 
             {/* Footer */}
-            <div className="p-4 border-t border-slate-200 dark:border-white/[0.07] space-y-3">
-                <div className="flex justify-center">
+            <div className="p-4 border-t border-slate-200 dark:border-white/[0.07] space-y-2">
+                <div className="flex items-center justify-center gap-3 mb-1">
                     <ThemeToggle />
+                    <Link
+                        href="/"
+                        onClick={closeSidebar}
+                        title="View Website"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 dark:text-white/40 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-all border border-slate-200 dark:border-white/10 text-base"
+                    >
+                        🌐
+                    </Link>
                 </div>
                 <button
                     onClick={() => signOut({ callbackUrl: "/auth/login" })}

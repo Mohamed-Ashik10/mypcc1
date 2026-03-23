@@ -9,31 +9,48 @@ export const dynamic = "force-dynamic";
 export default async function HymnsPage({
     searchParams,
 }: {
-    searchParams: Promise<{ page?: string; search?: string }>;
+    searchParams: Promise<{ page?: string; search?: string; tag?: string }>;
 }) {
-    const { page: pageStr, search: searchStr } = await searchParams;
+    const { page: pageStr, search: searchStr, tag: tagStr } = await searchParams;
     const page = parseInt(pageStr ?? "1");
     const limit = 30;
     const skip = (page - 1) * limit;
     const search = searchStr ?? "";
+    const selectedTag = tagStr ?? "";
 
     const session = await getServerSession(authOptions);
     const userRole = (session?.user as any)?.role || "NORMAL_USER";
     const canModify = ["ADMIN_STAFF", "SUPER_ADMIN", "CONTENT_EDITOR"].includes(userRole);
 
-    const where = search
-        ? {
-            OR: [
-                { title: { contains: search } },
-                { number: { equals: parseInt(search) || undefined } },
-            ],
-        }
-        : {};
+    const where: any = {
+        AND: [
+            search
+                ? {
+                    OR: [
+                        { title: { contains: search } },
+                        { number: { equals: parseInt(search) || undefined } },
+                    ],
+                }
+                : {},
+            selectedTag
+                ? { tags: { contains: selectedTag } }
+                : {},
+        ],
+    };
 
-    const [hymns, total] = await Promise.all([
+    const [hymns, total, allHymnsWithTags] = await Promise.all([
         prisma.hymn.findMany({ where, skip, take: limit, orderBy: { number: "asc" } }),
         prisma.hymn.count({ where }),
+        prisma.hymn.findMany({ select: { tags: true }, where: { NOT: { tags: null } } }),
     ]);
+
+    const uniqueTags = Array.from(
+        new Set(
+            allHymnsWithTags
+                .flatMap((h) => h.tags?.split(",").map((t) => t.trim()) ?? [])
+                .filter((t) => t.length > 0)
+        )
+    ).sort();
 
     const totalPages = Math.ceil(total / limit);
 
@@ -55,17 +72,32 @@ export default async function HymnsPage({
             </div>
 
             <form method="GET" className="mb-6">
-                <div className="flex gap-3 max-w-md">
+                <div className="flex flex-wrap gap-3 max-w-2xl">
                     <input
                         type="text"
                         name="search"
                         defaultValue={search}
                         placeholder="Search by number or title…"
-                        className="flex-1 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-[#6c47ff]"
+                        className="flex-1 min-w-[200px] rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-[#6c47ff]"
                     />
+                    <select
+                        name="tag"
+                        defaultValue={selectedTag}
+                        className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-[#6c47ff] min-w-[150px]"
+                    >
+                        <option value="">All Tags</option>
+                        {uniqueTags.map((t) => (
+                            <option key={t} value={t}>{t}</option>
+                        ))}
+                    </select>
                     <button type="submit" className="px-5 py-2.5 bg-slate-900 dark:bg-white/10 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 dark:hover:bg-white/20 transition-all active:scale-95 border border-transparent dark:border-white/10">
-                        Search
+                        Filter
                     </button>
+                    {(search || selectedTag) && (
+                        <Link href="/admin/hymns" className="px-5 py-2.5 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/60 text-sm font-semibold rounded-xl hover:bg-slate-200 dark:hover:bg-white/10 transition-all border border-transparent dark:border-white/10 flex items-center">
+                            Reset
+                        </Link>
+                    )}
                 </div>
             </form>
 
@@ -118,7 +150,7 @@ export default async function HymnsPage({
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                         <Link
                             key={p}
-                            href={`/admin/hymns?page=${p}${search ? `&search=${search}` : ""}`}
+                            href={`/admin/hymns?page=${p}${search ? `&search=${search}` : ""}${selectedTag ? `&tag=${selectedTag}` : ""}`}
                             className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all ${p === page ? "bg-blue-600 text-white shadow-md scale-105" : "bg-card text-muted-foreground border border-border hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400"
                                 }`}
                         >

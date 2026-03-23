@@ -21,6 +21,9 @@ export default async function EditEchoIssuePage({ params }: { params: Promise<{ 
         pdfUrl: issue.pdfUrl,
         coverUrl: issue.coverUrl ?? "",
         isFree: issue.isFree,
+        isFeatured: issue.isFeatured,
+        excerpt: issue.excerpt ?? "",
+        fullText: issue.fullText ?? "",
     };
 
     return (

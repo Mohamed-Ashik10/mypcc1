@@ -2,7 +2,6 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { DevotionalSchema } from "@/lib/validators";
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -21,7 +20,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ devotionals, total, page, limit }, {
         headers: {
-            // Devotionals change once per day — cache for 1 hour
             "Cache-Control": "s-maxage=3600, stale-while-revalidate=7200",
         },
     });
@@ -36,17 +34,25 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const parsed = DevotionalSchema.safeParse(body);
-        if (!parsed.success) {
-            return NextResponse.json(
-                { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
-                { status: 400 }
-            );
+        const { title, date, content, author, image, category, reading, excerpt, isFree, minPlan } = body;
+
+        if (!title || !date || !content) {
+            return NextResponse.json({ error: "Title, date, and content are required." }, { status: 400 });
         }
 
-        const { title, date, content, author } = parsed.data;
         const devotional = await prisma.devotional.create({
-            data: { title, date: new Date(date), content, author },
+            data: {
+                title,
+                date: new Date(date),
+                content,
+                author: author || null,
+                image: image || null,
+                category: category || "Inspiration",
+                reading: reading || null,
+                excerpt: excerpt || null,
+                isFree: isFree !== false,
+                minPlan: (minPlan as any) || "SEEKER",
+            },
         });
 
         return NextResponse.json(devotional, { status: 201 });

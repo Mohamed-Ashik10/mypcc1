@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import "./landing_styles.css";
 
@@ -11,7 +11,12 @@ interface LandingPageClientProps {
     initialDevotional?: any | null;
     initialArchive?: any[];
     initialDiary?: any[];
+    initialUserDiary?: any[];
     initialAnnouncements?: any[];
+    initialTestimonials?: any[];
+    initialFavorites?: string[];
+    isPaywallActive?: boolean;
+    subscriptionType?: string | null;
 }
 
 // ─── SVG Icon Components ──────────────────────────────────────────────────────
@@ -61,7 +66,6 @@ const SvgPray = ({ size = 16 }: { size?: number }) => (
         <path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
     </svg>
 );
-
 const SvgCard = ({ size = 16 }: { size?: number }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}>
         <rect width="20" height="14" x="2" y="5" rx="2" />
@@ -86,16 +90,36 @@ export default function LandingPageClient({
     initialDevotional = null,
     initialArchive = [],
     initialDiary = [],
-    initialAnnouncements = []
+    initialUserDiary = [],
+    initialAnnouncements = [],
+    initialTestimonials = [],
+    initialFavorites = [],
+    isPaywallActive = true,
+    subscriptionType = null
 }: LandingPageClientProps) {
+    const [favorites, setFavorites] = useState<string[]>(initialFavorites);
+    const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+
+    useEffect(() => {
+        (window as any).hymnFavorites = favorites;
+        (window as any).refreshFavoritesModal = () => {
+            setFavorites([...((window as any).hymnFavorites || [])]);
+        };
+    }, [favorites]);
+
     useEffect(() => {
         // Inject initial data for the legacy script
         (window as any).hymns_db = initialHymns;
         (window as any).echo_db = initialEcho;
-        (window as any).devotional_db = initialDevotional;
+        (window as any).diary_db_official = initialDiary;
+        (window as any).diary_db_personal = initialUserDiary;
         (window as any).archive_db = initialArchive;
+        (window as any).devotional_db = initialDevotional;
         (window as any).diary_db = initialDiary;
         (window as any).announcements_db = initialAnnouncements;
+        (window as any).isPaywallActive = isPaywallActive;
+        (window as any).subscriptionType = subscriptionType;
+        (window as any).userSession = session;
 
         // Load external logic script on mount, making sure it isn't loaded twice in Dev environment
         const scriptId = "canticle-logic-script";
@@ -137,13 +161,55 @@ export default function LandingPageClient({
                     <button className="nav-tab" onClick={(e) => (window as any).showPage('subs', e.currentTarget)}><SvgCard size={15} /> Subscriptions<div className="dot"></div></button>
                 </div>
                 <div className="nav-right" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button
+                        title="Global Master Search"
+                        onClick={() => (window as any).openMasterSearch && (window as any).openMasterSearch()}
+                        style={{
+                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                            width: '32px', height: '32px', borderRadius: '8px',
+                            background: 'rgba(0, 0, 0, 0.05)', color: 'var(--ink)',
+                            border: '1px solid rgba(0, 0, 0, 0.1)',
+                            cursor: 'pointer', flexShrink: 0,
+                            transition: 'all .2s'
+                        }}
+                        onMouseOver={(e:any) => e.currentTarget.style.background='rgba(0, 0, 0, 0.1)'}
+                        onMouseOut={(e:any) => e.currentTarget.style.background='rgba(0, 0, 0, 0.05)'}
+                    >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </button>
                     {session ? (
                         <>
-                            <span style={{ fontSize: '.75rem', color: 'var(--muted)', marginRight: '8px' }}>
-                                Welcome, <span style={{ color: 'var(--gold)' }}>{session.user?.name?.split(' ')[0] || session.user?.email?.split('@')[0]}</span>
-                            </span>
+                            <button
+                                title="My Profile"
+                                onClick={() => (window as any).renderProfileHub && (window as any).renderProfileHub()}
+                                style={{
+                                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                    width: '32px', height: '32px', borderRadius: '8px',
+                                    background: 'rgba(184,147,90,0.15)', color: 'var(--gold)',
+                                    border: '1px solid rgba(184,147,90,0.3)',
+                                    cursor: 'pointer', flexShrink: 0,
+                                    transition: 'all .2s', fontSize: '14px'
+                                }}
+                                onMouseOver={(e:any) => {e.currentTarget.style.background='var(--gold)'; e.currentTarget.style.color='#1a1510';}}
+                                onMouseOut={(e:any) => {e.currentTarget.style.background='rgba(184,147,90,0.15)'; e.currentTarget.style.color='var(--gold)';}}
+                            >
+                                👤
+                            </button>
                             {session.user?.role?.toLowerCase() !== 'user' && (
-                                <button className="nav-join" onClick={() => window.location.href = '/admin'}>Admin</button>
+                                <a
+                                    href="/admin"
+                                    title="Admin Dashboard"
+                                    style={{
+                                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                        width: '32px', height: '32px', borderRadius: '8px',
+                                        background: 'rgba(22,163,74,0.12)', color: '#16a34a',
+                                        border: '1px solid rgba(22,163,74,0.3)',
+                                        textDecoration: 'none', fontSize: '15px', flexShrink: 0,
+                                        transition: 'background .2s'
+                                    }}
+                                >
+                                    ⚙️
+                                </a>
                             )}
                             <button className="nav-sign" onClick={() => signOut()}>Sign Out</button>
                         </>
@@ -173,14 +239,14 @@ export default function LandingPageClient({
                         </svg>
                     </div>
                     {/* Floating hero SVG icons */}
-                    <div className="float-icon" style={{ top: '14%', left: '8%', animationDelay: '0s' }}><SvgMusic size={28} /></div>
-                    <div className="float-icon" style={{ top: '22%', right: '9%', animationDelay: '.8s' }}><SvgCross size={32} /></div>
-                    <div className="float-icon" style={{ top: '65%', left: '5%', animationDelay: '1.4s' }}><SvgBook size={28} /></div>
-                    <div className="float-icon" style={{ top: '70%', right: '7%', animationDelay: '.4s' }}><SvgPray size={28} /></div>
-                    <div className="float-icon" style={{ top: '38%', left: '3%', animationDelay: '2s' }}><SvgMusic size={20} /></div>
-                    <div className="float-icon" style={{ top: '42%', right: '4%', animationDelay: '1.1s' }}><SvgSparkle size={20} /></div>
-                    <div className="float-icon" style={{ top: '80%', left: '18%', animationDelay: '.6s' }}><SvgNewspaper size={22} /></div>
-                    <div className="float-icon" style={{ top: '12%', right: '22%', animationDelay: '1.7s' }}><SvgCard size={22} /></div>
+                    <div className="float-icon" style={{ top: '14%', left: '8%', animationDelay: '0s', color: 'rgba(253, 250, 245, 0.15)' }}><SvgMusic size={28} /></div>
+                    <div className="float-icon" style={{ top: '22%', right: '9%', animationDelay: '.8s', color: 'rgba(253, 250, 245, 0.15)' }}><SvgCross size={32} /></div>
+                    <div className="float-icon" style={{ top: '65%', left: '5%', animationDelay: '1.4s', color: 'rgba(253, 250, 245, 0.15)' }}><SvgBook size={28} /></div>
+                    <div className="float-icon" style={{ top: '70%', right: '7%', animationDelay: '.4s', color: 'rgba(253, 250, 245, 0.15)' }}><SvgPray size={28} /></div>
+                    <div className="float-icon" style={{ top: '38%', left: '3%', animationDelay: '2s', color: 'rgba(253, 250, 245, 0.15)' }}><SvgMusic size={20} /></div>
+                    <div className="float-icon" style={{ top: '42%', right: '4%', animationDelay: '1.1s', color: 'rgba(253, 250, 245, 0.15)' }}><SvgSparkle size={20} /></div>
+                    <div className="float-icon" style={{ top: '80%', left: '18%', animationDelay: '.6s', color: 'rgba(253, 250, 245, 0.15)' }}><SvgNewspaper size={22} /></div>
+                    <div className="float-icon" style={{ top: '12%', right: '22%', animationDelay: '1.7s', color: 'rgba(253, 250, 245, 0.15)' }}><SvgCard size={22} /></div>
 
                     <p className="hero-eyebrow" style={{ animation: 'fadeUp .8s .2s ease both', position: 'relative', zIndex: 2 }}>A sacred space for every believer</p>
                     <h1 className="hero-h1" style={{ animation: 'fadeUp .8s .4s ease both', position: 'relative', zIndex: 2 }}>Sing. Listen.<br /><em>Remember.</em></h1>
@@ -188,11 +254,11 @@ export default function LandingPageClient({
                         Read beloved hymns, keep a personal church diary, stay connected through The Echo, and grow daily with morning devotionals.
                     </p>
                     <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center', animation: 'fadeUp .8s .8s ease both', marginTop: '8px', position: 'relative', zIndex: 2 }}>
-                        <button onClick={() => (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1])} className="btn-primary">Explore Hymns &rarr;</button>
-                        <button onClick={() => (window as any).showPage('subs', document.querySelectorAll('.nav-tab')[5])} className="btn-ghost">View Plans</button>
+                        <button onClick={() => (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1])} className="btn-primary" style={{ background: 'var(--gold)', color: 'var(--cream)', border: 'none' }}>Explore Hymns &rarr;</button>
+                        <button onClick={() => (window as any).showPage('subs', document.querySelectorAll('.nav-tab')[5])} className="btn-ghost" style={{ borderColor: 'rgba(253, 250, 245, 0.4)', color: 'var(--cream)', background: 'transparent' }}>View Plans</button>
                     </div>
-                    <div className="hero-scroll" style={{ animation: 'fadeUp .8s 1.1s ease both' }}>
-                        <div className="scroll-line"></div><span>Scroll</span>
+                    <div className="hero-scroll" style={{ animation: 'fadeUp .8s 1.1s ease both', color: 'rgba(253, 250, 245, 0.6)' }}>
+                        <div className="scroll-line" style={{ background: 'rgba(253, 250, 245, 0.3)' }}></div><span>Scroll</span>
                     </div>
                 </section>
 
@@ -257,43 +323,46 @@ export default function LandingPageClient({
                     </div>
                     <div className="sticky-right">
                         <div className="sticky-cards-wrap">
-                            <div className="sticky-card active" data-card="0">
-                                <div className="sc-icon"><SvgMusic size={22} /></div>
-                                <p className="sc-num">{initialHymns.length}+ Hymns</p>
-                                <p className="sc-title">{initialHymns[0]?.title || 'Amazing Grace'}</p>
-                                <p className="sc-sub">{initialHymns[0]?.author || 'John Newton · 1779'}</p>
-                                <div className="sc-bar"><div className="sc-bar-fill"></div></div>
-                                <p className="sc-tag">{initialHymns[0]?.tags?.join(' · ') || 'Grace · Faith · Salvation'}</p>
+                            <div className="sticky-card active" data-card="0" style={{ backgroundImage: "linear-gradient(rgba(26, 21, 16, 0.75), rgba(26, 21, 16, 0.95)), url('/worship_hymns.png')", backgroundSize: 'cover', backgroundPosition: 'center', color: 'var(--cream)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                                <div className="sc-icon" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--cream)' }}><SvgMusic size={22} /></div>
+                                <p className="sc-num" style={{ color: '#b8935a' }}>{initialHymns.length}+ Hymns</p>
+                                <p className="sc-title" style={{ color: 'var(--cream)' }}>{initialHymns[0]?.title || 'Amazing Grace'}</p>
+                                <p className="sc-sub" style={{ color: 'rgba(247,243,236,0.6)' }}>{initialHymns[0]?.author || 'John Newton · 1779'}</p>
+                                <div className="sc-bar"><div className="sc-bar-fill" style={{ background: '#b8935a' }}></div></div>
+                                <p className="sc-tag" style={{ color: 'rgba(247,243,236,0.6)' }}>
+                                    {(Array.isArray(initialHymns[0]?.tags) ? initialHymns[0]?.tags : (initialHymns[0]?.tags || '').split(/[,;]\s*/)).filter(Boolean).join(' · ') || 'Grace · Faith · Salvation'}
+                                </p>
                             </div>
-                            <div className="sticky-card" data-card="1">
-                                <div className="sc-icon"><SvgBook size={22} /></div>
-                                <p className="sc-num">Diary Entry &middot; {initialDiary[0] ? new Date(initialDiary[0].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Feb 25'}</p>
-                                <p className="sc-title">{initialDiary[0]?.title || 'Morning of Quiet Grace'}</p>
-                                <p className="sc-sub">{initialDiary[0]?.hymn || 'Great Is Thy Faithfulness'}</p>
-                                <p className="sc-body">&ldquo;{initialDiary[0]?.body?.substring(0, 60) || 'The second verse felt like a letter written directly to me...'}...&rdquo;</p>
+                            <div className="sticky-card" data-card="1" style={{ backgroundImage: "linear-gradient(rgba(26, 21, 16, 0.8), rgba(26, 21, 16, 0.95)), url('/church_diary.png')", backgroundSize: 'cover', backgroundPosition: 'center', color: 'var(--cream)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                                <div className="sc-icon" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--cream)' }}><SvgBook size={22} /></div>
+                                <p className="sc-num" style={{ color: '#b8935a' }}>Diary Entry &middot; {initialDiary[0] ? new Date(initialDiary[0].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Feb 25'}</p>
+                                <p className="sc-title" style={{ color: 'var(--cream)' }}>{initialDiary[0]?.title || 'Morning of Quiet Grace'}</p>
+                                <p className="sc-sub" style={{ color: 'rgba(247,243,236,0.6)' }}>{initialDiary[0]?.hymn || 'Great Is Thy Faithfulness'}</p>
+                                <p className="sc-body" style={{ color: 'rgba(247,243,236,0.8)' }}>&ldquo;{initialDiary[0]?.body?.substring(0, 60) || 'The second verse felt like a letter written directly to me...'}...&rdquo;</p>
                                 <div style={{ display: 'flex', gap: '6px', marginTop: '16px', flexWrap: 'wrap' }}>
-                                    {initialDiary[0]?.theme ? initialDiary[0].theme.split(',').map((t: string) => <span key={t} className="sc-badge">{t.trim()}</span>) : <><span className="sc-badge">Gratitude</span><span className="sc-badge">Faithfulness</span></>}
+                                    {initialDiary[0]?.theme ? initialDiary[0].theme.split(',').map((t: string) => <span key={t} className="sc-badge" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(247,243,236,0.7)' }}>{t.trim()}</span>) : <><span className="sc-badge" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(247,243,236,0.7)' }}>Gratitude</span><span className="sc-badge" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(247,243,236,0.7)' }}>Faithfulness</span></>}
                                 </div>
                             </div>
-                            <div className="sticky-card" data-card="2">
-                                <div className="sc-icon"><SvgNewspaper size={22} /></div>
-                                <p className="sc-num">The Echo &middot; Latest</p>
-                                <p className="sc-title">{initialEcho[0]?.title || 'From Doubt to Devotion'}</p>
-                                <p className="sc-sub">{initialEcho[0]?.author || 'Sarah M.'} &middot; {initialEcho[0]?.date || 'Feb 22, 2026'}</p>
-                                <p className="sc-body">&ldquo;{initialEcho[0]?.excerpt?.substring(0, 60) || 'Then one Sunday morning, a single hymn changed everything…'}...&rdquo;</p>
-                                <span className="sc-badge" style={{ marginTop: '16px', display: 'inline-block', textTransform: 'capitalize' }}>{initialEcho[0]?.cat || 'Testimony'}</span>
+                            <div className="sticky-card" data-card="2" style={{ backgroundImage: "linear-gradient(rgba(26, 21, 16, 0.8), rgba(26, 21, 16, 0.95)), url('/echo_community.png')", backgroundSize: 'cover', backgroundPosition: 'center', color: 'var(--cream)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                                <div className="sc-icon" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--cream)' }}><SvgNewspaper size={22} /></div>
+                                <p className="sc-num" style={{ color: '#b8935a' }}>The Echo &middot; Latest</p>
+                                <p className="sc-title" style={{ color: 'var(--cream)' }}>{initialEcho[0]?.title || 'From Doubt to Devotion'}</p>
+                                <p className="sc-sub" style={{ color: 'rgba(247,243,236,0.6)' }}>{initialEcho[0]?.author || 'Sarah M.'} &middot; {initialEcho[0]?.date || 'Feb 22, 2026'}</p>
+                                <p className="sc-body" style={{ color: 'rgba(247,243,236,0.8)' }}>&ldquo;{initialEcho[0]?.excerpt?.substring(0, 60) || 'Then one Sunday morning, a single hymn changed everything…'}...&rdquo;</p>
+                                <span className="sc-badge" style={{ marginTop: '16px', display: 'inline-block', textTransform: 'capitalize', borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(247,243,236,0.7)' }}>{initialEcho[0]?.cat || 'Testimony'}</span>
                             </div>
-                            <div className="sticky-card" data-card="3">
-                                <div className="sc-icon"><SvgPray size={22} /></div>
-                                <p className="sc-num">Today's Devotional</p>
-                                <p className="sc-title">{initialDevotional?.title || 'Still Waters'}</p>
-                                <p className="sc-sub">{initialDevotional?.date || 'Feb 25, 2026'}</p>
-                                <p className="sc-body">&ldquo;{initialDevotional?.content?.split('### Reflection')[1]?.replace(/[#>\[\]!\n"]/g, ' ')?.substring(0, 75).trim() || 'He leads me beside quiet waters, he refreshes my soul.'}...&rdquo;</p>
-                                <span className="sc-badge" style={{ marginTop: '16px', display: 'inline-block' }}>Peace &middot; Rest</span>
+                            <div className="sticky-card" data-card="3" style={{ backgroundImage: "linear-gradient(rgba(26, 21, 16, 0.8), rgba(26, 21, 16, 0.95)), url('/daily_devo.png')", backgroundSize: 'cover', backgroundPosition: 'center', color: 'var(--cream)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                                <div className="sc-icon" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--cream)' }}><SvgPray size={22} /></div>
+                                <p className="sc-num" style={{ color: '#b8935a' }}>Today's Devotional</p>
+                                <p className="sc-title" style={{ color: 'var(--cream)' }}>{initialDevotional?.title || 'Still Waters'}</p>
+                                <p className="sc-sub" style={{ color: 'rgba(247,243,236,0.6)' }}>{initialDevotional?.date || 'Feb 25, 2026'}</p>
+                                <p className="sc-body" style={{ color: 'rgba(247,243,236,0.8)' }}>&ldquo;{initialDevotional?.content?.split('### Reflection')[1]?.replace(/[#>\[\]!\n"]/g, ' ')?.substring(0, 75).trim() || 'He leads me beside quiet waters, he refreshes my soul.'}...&rdquo;</p>
+                                <span className="sc-badge" style={{ marginTop: '16px', display: 'inline-block', borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(247,243,236,0.7)' }}>Peace &middot; Rest</span>
                             </div>
                         </div>
                     </div>
                 </section>
+
 
                 {/* CHURCH ANNOUNCEMENTS IN HOME PAGE */}
                 <section className="announcements-section reveal from-bottom">
@@ -312,6 +381,72 @@ export default function LandingPageClient({
                     </div>
                 </section>
 
+                {/* HOW IT WORKS */}
+                <section className="how-it-works-section reveal from-bottom" style={{ padding: '100px 48px', background: 'var(--warm)' }}>
+                    <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+                        <p style={{ fontSize: '.65rem', letterSpacing: '.3em', textTransform: 'uppercase', color: '#6e1799', fontWeight: 300, marginBottom: '16px' }}>Anytime, Anywhere</p>
+                        <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 'clamp(2.5rem, 4vw, 3.5rem)', color: 'var(--ink)', marginBottom: '64px', fontWeight: 300 }}>Worship across all your devices</h2>
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '40px', alignItems: 'flex-start' }}>
+                            <div className="hiw-card" onClick={(e) => (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1])}>
+                                <div className="hiw-icon" style={{ background: 'var(--cream)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', border: '1px solid var(--border)' }}>
+                                    <SvgMusic size={28} />
+                                </div>
+                                <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.4rem', fontWeight: 400, marginBottom: '12px' }}>1. Find your song</h3>
+                                <p style={{ fontSize: '.9rem', color: 'var(--muted)', lineHeight: 1.7, fontWeight: 300 }}>Search our library of 850+ hymns by theme, scripture, or author. Press play to hear the melody or read the sheet music.</p>
+                            </div>
+                            <div className="hiw-card" onClick={(e) => (window as any).showPage('diary', document.querySelectorAll('.nav-tab')[2])}>
+                                <div className="hiw-icon" style={{ background: 'var(--cream)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', border: '1px solid var(--border)' }}>
+                                    <SvgBook size={28} />
+                                </div>
+                                <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.4rem', fontWeight: 400, marginBottom: '12px' }}>2. Record your journey</h3>
+                                <p style={{ fontSize: '.9rem', color: 'var(--muted)', lineHeight: 1.7, fontWeight: 300 }}>Save your favorite hymns and attach personal diary entries. Keep a record of how God speaks to you through music.</p>
+                            </div>
+                            <div className="hiw-card" onClick={(e) => (window as any).showPage('echo', document.querySelectorAll('.nav-tab')[3])}>
+                                <div className="hiw-icon" style={{ background: 'var(--cream)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', border: '1px solid var(--border)' }}>
+                                    <SvgNewspaper size={28} />
+                                </div>
+                                <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.4rem', fontWeight: 400, marginBottom: '12px' }}>3. Stay connected</h3>
+                                <p style={{ fontSize: '.9rem', color: 'var(--muted)', lineHeight: 1.7, fontWeight: 300 }}>Read testimonies from the community in The Echo, and start each morning grounded with our daily devotionals.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* TESTIMONIALS */}
+                <section className="testimonials-section reveal from-bottom" style={{ background: 'var(--cream)', padding: '100px 48px', borderTop: '1px solid var(--border)' }}>
+                    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+                            <p style={{ fontSize: '.65rem', letterSpacing: '.3em', textTransform: 'uppercase', color: '#b8935a', fontWeight: 300, marginBottom: '12px' }}>Community Voices</p>
+                            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 'clamp(2.5rem, 4vw, 3.5rem)', color: 'var(--ink)', fontWeight: 300 }}>Stories from the congregation</h2>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px' }}>
+                            {initialTestimonials && initialTestimonials.length > 0 ? (
+                                initialTestimonials.map((t: any, idx: number) => (
+                                    <div key={idx} style={{ background: 'var(--warm)', padding: '40px', border: '1px solid var(--border)', position: 'relative' }}>
+                                        <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '4rem', color: 'rgba(184, 147, 90, 0.15)', position: 'absolute', top: '10px', left: '24px', lineHeight: 1 }}>"</span>
+                                        <p style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.1rem', color: 'var(--ink2)', lineHeight: 1.8, fontStyle: 'italic', marginBottom: '24px', position: 'relative', zIndex: 1 }}>"{t.content}"</p>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <div style={{ width: '40px', height: '40px', background: '#e0d5c1', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Cormorant Garamond", serif', fontSize: '1.2rem', color: '#6e1799' }}>
+                                                {t.authorName.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <p style={{ fontSize: '.85rem', fontWeight: 500, color: 'var(--ink)' }}>{t.authorName}</p>
+                                                {t.authorRole && (
+                                                    <p style={{ fontSize: '.7rem', color: 'var(--muted)' }}>{t.authorRole}</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.2rem', color: 'var(--muted)', fontStyle: 'italic', textAlign: 'center', width: '100%', padding: '40px 0' }}>Community voices will appear here soon.</p>
+                            )}
+                        </div>
+                    </div>
+                </section>
+
+
                 {/* CTA BANNER */}
                 <section className="cta-banner reveal from-bottom">
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
@@ -320,7 +455,7 @@ export default function LandingPageClient({
                     <p style={{ fontSize: '.65rem', letterSpacing: '.3em', textTransform: 'uppercase', color: '#b8935a', fontWeight: 300, marginBottom: '16px' }}>Begin today</p>
                     <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(2.5rem,5vw,4rem)', fontWeight: 300, color: '#f7f3ec', lineHeight: 1.2, marginBottom: '20px' }}>Your sacred practice<br /><em style={{ fontStyle: 'italic', color: '#6e1799' }}>starts here.</em></h2>
                     <p style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(247,243,236,.45)', marginBottom: '44px' }}>Free to join. No commitment required. Just you and the music of faith.</p>
-                    <button onClick={() => window.location.href = '/auth/login'} style={{ padding: '14px 40px', background: '#6e1799', color: '#fdfaf5', border: 'none', cursor: 'pointer', fontSize: '.72rem', letterSpacing: '.18em', textTransform: 'uppercase', fontWeight: 300, transition: 'background .3s' }}>Join Free Today</button>
+                    <button onClick={(e) => { e.preventDefault(); (window as any).showPage('subs', document.querySelectorAll('.nav-tab')[5]); }} style={{ padding: '14px 40px', background: '#6e1799', color: '#fdfaf5', border: 'none', cursor: 'pointer', fontSize: '.72rem', letterSpacing: '.18em', textTransform: 'uppercase', fontWeight: 300, transition: 'background .3s' }}>Join Free Today</button>
                 </section>
 
                 {/* FOOTER */}
@@ -350,67 +485,161 @@ export default function LandingPageClient({
              PAGE: HYMNS
          ══════════════════════════════════════ */}
             <div className="page" id="page-hymns">
-                <section className="hymns-hero">
-                    <div className="hymns-hero-bg">
-                        <div className="ring"></div><div className="ring"></div><div className="ring"></div><div className="ring"></div>
+                <section className="hymns-hero" style={{ padding: '140px 24px 100px 24px', position: 'relative', overflow: 'hidden' }}>
+                    <div className="hymns-hero-bg" style={{ position: 'absolute', inset: 0, backgroundImage: `url('/hymn_library_hero.png')`, backgroundSize: 'cover', backgroundPosition: 'center', zIndex: 0, opacity: 1 }}>
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(30,30,30,0.7) 0%, var(--surface) 100%)' }}></div>
                     </div>
-                    <p className="hero-eyebrow">Ancient words, ever new</p>
-                    <h1 className="hero-h1">The Hymn <em>Library</em></h1>
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                        <p className="hero-eyebrow" style={{ color: '#fff', opacity: 0.9, letterSpacing: '0.25em', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Ancient words, ever new</p>
+                        <h1 className="hero-h1" style={{ color: '#fff', textShadow: '0 4px 12px rgba(0,0,0,0.4)', marginTop: '16px' }}>The Hymn <em>Library</em></h1>
+                    </div>
                 </section>
                 <div className="hymn-search-wrap">
-                    <div className="hymn-search">
-                        <input type="text" id="hymnSearch" placeholder="Search by title, author or scripture…" onInput={() => (window as any).filterHymns()} />
-                        <button>Search</button>
+                    <div className="hymn-search-container" style={{ maxWidth: '800px', margin: '0 auto', position: 'relative' }}>
+                        <div className="hymn-search" style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid rgba(184,147,90,0.15)', boxShadow: '0 15px 35px -10px rgba(0,0,0,0.1)', overflow: 'hidden', display: 'flex', alignItems: 'center', transition: 'all 0.3s ease', padding: '4px' }} onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--gold)'} onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(184,147,90,0.15)'}>
+                            <div style={{ padding: '0 16px', color: 'var(--gold)', opacity: 0.6 }}>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                            </div>
+                            <input type="text" id="hymnSearch" placeholder="Search by title, number, author or scripture..." onInput={(e) => (window as any).onSearchInput(e.currentTarget.value)} style={{ flex: 1, padding: '16px 8px', fontSize: '1.1rem', background: 'transparent', border: 'none', color: 'var(--ink)' }} />
+                            <div id="search-clear-btn" style={{ display: 'none', cursor: 'pointer', padding: '0 16px', color: 'var(--muted)', opacity: 0.5 }} onClick={() => (window as any).clearSearch()} title="Clear search">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </div>
+                            <button id="search-btn-main" className="btn-primary" onClick={() => (window as any).onFindClick()} style={{ margin: '4px', padding: '12px 28px', borderRadius: '12px' }}>Find Hymns</button>
+                        </div>
+                        <div id="search-status" style={{ marginTop: '12px', fontSize: '0.85rem', color: 'var(--muted)', fontStyle: 'italic', textAlign: 'center', minHeight: '1.2em', opacity: 0.8 }}></div>
                     </div>
-                    <div className="hymn-filters">
-                        <button className="filter-btn active" onClick={(e) => (window as any).setFilter(e.currentTarget, 'all')}>All</button>
-                        <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'praise')}>Praise</button>
-                        <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'grace')}>Grace</button>
-                        <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'faith')}>Faith</button>
-                        <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'comfort')}>Comfort</button>
-                        <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'advent')}>Advent</button>
+                    <div className="hymn-advanced-filters">
+                        <div className="hymn-filter-field">
+                            <label className="hymn-filter-label">Occasion</label>
+                            <select id="occasionSelect" className="hymn-select" onChange={() => (window as any).filterHymns()}>
+                                <option value="all">All Occasions</option>
+                                <option value="morning">Morning Prayer</option>
+                                <option value="evening">Evening Prayer</option>
+                                <option value="easter">Easter</option>
+                                <option value="christmas">Christmas</option>
+                                <option value="burial">Burial</option>
+                                <option value="wedding">Wedding</option>
+                                <option value="praise">General Praise</option>
+                            </select>
+                        </div>
+                        <div className="hymn-filter-field">
+                            <label className="hymn-filter-label">Tempo</label>
+                            <select id="tempoSelect" className="hymn-select" onChange={() => (window as any).filterHymns()}>
+                                <option value="all">Any Tempo</option>
+                                <option value="fast">Fast & Joyful</option>
+                                <option value="medium">Medium</option>
+                                <option value="slow">Slow & Solemn</option>
+                            </select>
+                        </div>
                     </div>
+                        <div className="hymn-filters">
+                            <button className="filter-btn active" onClick={(e) => (window as any).setFilter(e.currentTarget, 'all')}>All</button>
+                            <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'praise')}>Praise</button>
+                            <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'grace')}>Grace</button>
+                            <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'faith')}>Faith</button>
+                            <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'comfort')}>Comfort</button>
+                            <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'advent')}>Advent</button>
+                            <span style={{ margin: '0 8px', borderLeft: '1px solid var(--border)', opacity: 0.3 }}></span>
+                            <button className="filter-btn" onClick={() => (window as any).openPlaylists()} title="View Saved Sets" style={{ color: 'var(--gold)' }}>📂 Playlists</button>
+                        </div>
+                    </div>
+                    <div className="hymns-grid" id="hymnsGrid"></div>
                 </div>
-                <div className="hymns-grid" id="hymnsGrid"></div>
-            </div>
 
-            {/* HYMN MODAL */}
-            <div className="hymn-modal-bg" id="hymnModal">
-                <div className="hymn-modal">
-                    <button className="modal-close" onClick={() => (window as any).closeModal()}>✕</button>
-                    <p className="modal-eyebrow" id="m-eyebrow"></p>
-                    <h2 className="modal-title" id="m-title"></h2>
-                    <p className="modal-author" id="m-author"></p>
-                    <div className="modal-divider"></div>
-                    <div className="modal-lyrics" id="m-lyrics"></div>
-                    <div className="modal-player">
-                        <p className="player-label">Listen Now</p>
-                        <div className="player-wave" id="modalWave"></div>
-                        <div className="player-controls">
-                            <button className="pc-btn modal-play-btn" onClick={(e) => (window as any).togglePlay(e.currentTarget)}>▶ Play</button>
-                            <button className="pc-btn pc-save">♡ Save to Diary</button>
+                {/* HYMN MODAL */}
+                <div className="hymn-modal-bg" id="hymnModal">
+                    <div className="hymn-modal">
+                        <div className="modal-content">
+                            <div className="modal-actions" style={{ display: 'flex', gap: '8px', zIndex: 10 }}>
+                                <button className="font-btn" onClick={() => (window as any).prevHymn()} title="Previous Hymn" style={{ fontSize: '1.2rem', padding: '0 8px' }}>←</button>
+                                <button className="font-btn" onClick={() => (window as any).nextHymn()} title="Next Hymn" style={{ fontSize: '1.2rem', padding: '0 8px' }}>→</button>
+                                <span style={{ flex: 1 }}></span>
+                                <button className="font-btn" onClick={() => (window as any).toggleDarkMode()} title="Toggle Dark Mode" style={{ fontSize: '1.1rem' }}>🌙</button>
+                                <div className="font-controls" style={{ display: 'flex', gap: '8px', borderLeft: '1px solid var(--border)', paddingLeft: '8px', marginLeft: '4px' }}>
+                                    <button className="font-btn" onClick={() => (window as any).changeFontSize(-1)}>A-</button>
+                                    <button className="font-btn" onClick={() => (window as any).changeFontSize(1)}>A+</button>
+                                </div>
+                            </div>
+                            <p className="modal-eyebrow" id="m-eyebrow"></p>
+                            <h2 className="modal-title" id="m-title"></h2>
+                            <p className="modal-author" id="m-author"></p>
+                            <div className="modal-metadata">
+                                <span className="m-meta-item" id="m-scripture" style={{ display: 'none' }}>📜 <span className="m-meta-text"></span></span>
+                                <span className="m-meta-item" id="m-period" style={{ display: 'none' }}>✍️ <span className="m-meta-text"></span></span>
+                            </div>
+                            <div className="modal-divider"></div>
+                            <div className="modal-lyrics" id="m-lyrics"></div>
+                            <div className="modal-player">
+                                <p className="player-label">Listen Now</p>
+                                <div className="player-wave-container">
+                                    <div className="player-wave" id="modalWave"></div>
+                                    <div className="player-progress-container" id="playerProgressArea" onClick={(e) => (window as any).seekAudio(e)}>
+                                        <div className="progress-track">
+                                            <div className="progress-fill" id="progressFill"></div>
+                                        </div>
+                                        <div className="player-times">
+                                            <span id="currentTime">00:00</span>
+                                            <span id="totalDuration">00:00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="player-controls">
+                                    <button className="pc-btn modal-play-btn" onClick={(e) => (window as any).togglePlay(e.currentTarget)}>▶ Play</button>
+                                    <button className="pc-btn" id="modal-fav-btn" onClick={(e) => { if ((window as any)._ttsHymn) (window as any).toggleFavorite((window as any)._ttsHymn.id, e.currentTarget, true); }}>♡ Add to Favorites</button>
+                                </div>
+                                <div className="modal-utils">
+                                    <button className="util-btn" onClick={() => { if ((window as any)._ttsHymn) (window as any).addToPlaylist((window as any)._ttsHymn.id); }}>➕ Add to Playlist</button>
+                                    <button className="util-btn" onClick={() => (window as any).copyLyrics()}>📋 Copy Lyrics</button>
+                                    <button className="util-btn" onClick={() => (window as any).shareHymn()}>🔗 Share</button>
+                                </div>
+                            </div>
+                            <button className="modal-close" onClick={() => (window as any).closeModal()}>✕</button>
                         </div>
                     </div>
                 </div>
-            </div>
 
             {/* ══════════════════════════════════
              PAGE: CHURCH DIARY
          ══════════════════════════════════════ */}
             <div className="page" id="page-diary">
-                <div className="diary-layout">
-                    <aside className="diary-sidebar">
-                        <div className="diary-sidebar-head">
-                            <h2 className="diary-sidebar-title">My Diary</h2>
-                            <button className="new-entry-btn" onClick={() => (window as any).showNewEntry()}>+ New</button>
+                <div className="diary-layout" style={{ maxWidth: '1200px', margin: '40px auto', display: 'grid', gridTemplateColumns: '350px 1fr', gap: '32px', padding: '0 24px 100px' }}>
+                    <aside className="diary-sidebar" style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid rgba(184,147,90,0.1)', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', height: 'fit-content', overflow: 'hidden' }}>
+                        <div className="diary-sidebar-head" style={{ padding: '24px', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(184,147,90,0.03)' }}>
+                            <h2 className="diary-sidebar-title" style={{ margin: 0, fontStyle: 'italic', fontSize: '1.4rem' }}>My Reflections</h2>
+                            <button className="new-entry-btn" onClick={() => (window as any).showNewEntry()} style={{ background: 'var(--gold)', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>+ New Entry</button>
                         </div>
-                        <div className="diary-entry-list" id="diaryList"></div>
+                        <div className="diary-entry-list" id="diaryList" style={{ maxHeight: '600px', overflowY: 'auto' }}></div>
                     </aside>
-                    <main id="diaryMain">
-                        <div className="diary-main" id="diaryMainContent"></div>
-                        <div className="new-entry-form" id="newEntryForm">
-                            <h2 className="nef-title">New Diary Entry</h2>
-                            <button className="nef-cancel" onClick={() => (window as any).cancelNewEntry()}>Cancel</button>
+
+                    <main id="diaryMain" style={{ position: 'relative' }}>
+                        <div className="diary-paper-shadow" style={{ position: 'absolute', inset: '0 -10px -10px -10px', background: 'rgba(0,0,0,0.05)', borderRadius: '24px', filter: 'blur(20px)', zIndex: -1 }}></div>
+                        <div className="diary-main" id="diaryMainContent" style={{ background: '#fdfbf7', borderRadius: '24px', border: '1px solid #e8e1d5', minHeight: '650px', padding: '60px', position: 'relative', boxShadow: '0 20px 50px rgba(0,0,0,0.08)' }}>
+                            {/* Paper Lines Effect */}
+                            <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(#e8e1d5 1px, transparent 1px)', backgroundSize: '100% 32px', opacity: 0.3, pointerEvents: 'none', borderRadius: '24px' }}></div>
+                            <div id="diaryEntryContainer"></div>
+                        </div>
+
+                        {/* NEW ENTRY FORM */}
+                        <div className="new-entry-form" id="newEntryForm" style={{ display: 'none', background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--gold)', padding: '40px', boxShadow: '0 30px 60px rgba(0,0,0,0.15)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                                <h2 className="nef-title" style={{ margin: 0, fontStyle: 'italic' }}>Capture Your Thoughts</h2>
+                                <button className="nef-cancel" onClick={() => (window as any).cancelNewEntry()} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}>✕ Cancel</button>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                                <div>
+                                    <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: '8px', display: 'block' }}>Entry Title</label>
+                                    <input type="text" id="newDiaryTitle" placeholder="e.g. A morning of quiet grace..." style={{ width: '100%', padding: '16px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.1)', background: 'rgba(184,147,90,0.02)', outline: 'none', fontSize: '1.1rem' }} />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: '8px', display: 'block' }}>Companion Hymn (Optional)</label>
+                                    <input type="text" id="newDiaryHymn" placeholder="Search for a hymn..." style={{ width: '100%', padding: '16px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.1)', background: 'rgba(184,147,90,0.02)', outline: 'none' }} />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: '8px', display: 'block' }}>Your Reflection</label>
+                                    <textarea id="newDiaryBody" placeholder="What is the Spirit speaking to you today?" style={{ width: '100%', height: '250px', padding: '20px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.1)', background: 'rgba(184,147,90,0.02)', outline: 'none', fontSize: '1.05rem', lineHeight: '1.6', resize: 'none' }}></textarea>
+                                </div>
+                                <button className="btn-primary" onClick={() => (window as any).saveDiaryEntry()} style={{ padding: '18px', borderRadius: '14px', fontSize: '1rem' }}>Save to My Diary</button>
+                            </div>
                         </div>
                     </main>
                 </div>
@@ -425,6 +654,49 @@ export default function LandingPageClient({
                     <h1 className="echo-hero-title">The <em>Echo</em></h1>
                     <p className="echo-hero-sub">Stories of faith, testimonies, church news and the voices that echo across our community.</p>
                 </div>
+
+                <div className="echo-filters-wrap" style={{ maxWidth: '800px', margin: '0 auto 40px', padding: '0 24px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                    <div className="echo-search-bar" style={{ flex: 1, minWidth: '280px', position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
+                        <input 
+                            type="text" 
+                            placeholder="Search by title or content..." 
+                            onInput={(e) => (window as any).onEchoSearch(e.currentTarget.value)}
+                            style={{ width: '100%', padding: '16px 16px 16px 44px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.9rem', outline: 'none', transition: 'border-color 0.2s' }}
+                            onFocus={e => e.currentTarget.style.borderColor = 'var(--gold)'}
+                            onBlur={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                        />
+                    </div>
+                    <select 
+                        onChange={(e) => (window as any).onEchoYearChange(e.currentTarget.value)}
+                        style={{ padding: '0 20px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.9rem', outline: 'none', cursor: 'pointer', height: '48px' }}
+                    >
+                        <option value="">All Years</option>
+                        <option value="2026">2026</option>
+                        <option value="2025">2025</option>
+                        <option value="2024">2024</option>
+                    </select>
+
+                    <select 
+                        onChange={(e) => (window as any).onEchoMonthChange(e.currentTarget.value)}
+                        style={{ padding: '0 20px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.9rem', outline: 'none', cursor: 'pointer', height: '48px' }}
+                    >
+                        <option value="">All Months</option>
+                        <option value="Jan">January</option>
+                        <option value="Feb">February</option>
+                        <option value="Mar">March</option>
+                        <option value="Apr">April</option>
+                        <option value="May">May</option>
+                        <option value="Jun">June</option>
+                        <option value="Jul">July</option>
+                        <option value="Aug">August</option>
+                        <option value="Sep">September</option>
+                        <option value="Oct">October</option>
+                        <option value="Nov">November</option>
+                        <option value="Dec">December</option>
+                    </select>
+                </div>
+
                 <div className="echo-categories">
                     <button className="echo-cat active" onClick={(e) => (window as any).setEchoCat(e.currentTarget, 'all')}>All</button>
                     <button className="echo-cat" onClick={(e) => (window as any).setEchoCat(e.currentTarget, 'testimony')}>Testimonies</button>
@@ -496,6 +768,53 @@ export default function LandingPageClient({
                     </div>
                 </div>
             </div>
+
+            {/* FAVORITES MODAL */}
+            {isFavoritesOpen && (
+                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setIsFavoritesOpen(false)}>
+                    <div style={{ background: '#F7F3EC', padding: '40px', borderRadius: '16px', width: '90%', maxWidth: '600px', maxHeight: '75vh', overflowY: 'auto', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexShrink: 0 }}>
+                            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '2.2rem', color: '#1A1A1A', margin: 0 }}>My Favorite Hymns</h2>
+                            <button onClick={() => setIsFavoritesOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.8rem', cursor: 'pointer', color: '#666', padding: 0 }}>✕</button>
+                        </div>
+                        {favorites.length === 0 ? (
+                            <p style={{ color: '#666', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>You haven't saved any hymns yet. Click the heart icon on any hymn to add it here!</p>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', overflowY: 'auto', paddingRight: '12px', margin: '0 -12px 0 0' }}>
+                                {initialHymns.filter(h => favorites.includes(h.id)).map(h => (
+                                    <div key={h.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '10px', cursor: 'pointer', transition: 'background 0.2s', backgroundColor: '#ffffff' }} 
+                                        onClick={() => { setIsFavoritesOpen(false); (window as any).showPage('hymns'); (window as any).openHymn(h); }} 
+                                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FAF8F5'} 
+                                        onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}>
+                                        <div>
+                                            <p style={{ fontSize: '1.05rem', fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px 0' }}>{h.num} - {h.title}</p>
+                                            <p style={{ fontSize: '0.85rem', color: '#666', margin: 0 }}>{h.author}</p>
+                                        </div>
+                                        <div style={{ color: '#d9534f', fontSize: '1.4rem' }}>♥</div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* FLOATING FAVORITES BUTTON */}
+            {favorites.length > 0 && (
+                <button onClick={() => setIsFavoritesOpen(true)} style={{ position: 'fixed', bottom: '30px', right: '30px', background: '#6e1799', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '30px', boxShadow: '0 10px 20px rgba(110, 23, 153, 0.3)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', zIndex: 100, transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
+                    <span style={{ color: '#ffb3b3', fontSize: '1.2rem' }}>♥</span>
+                    <span style={{ fontSize: '0.8rem', letterSpacing: '0.05em', fontWeight: 500 }}>My Favorites ({favorites.length})</span>
+                </button>
+            )}
+
+            {/* Toast Notification Container */}
+            <div id="canticle-toast">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span id="toast-text">Copied to clipboard</span>
+            </div>
+
+            {/* User Profile Page Container */}
+            <div className="page" id="page-profile" style={{ paddingTop: '100px', flexDirection: 'column' }}></div>
         </div>
     );
 }

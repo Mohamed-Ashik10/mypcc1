@@ -26,6 +26,9 @@ export async function PATCH(
                 ...(body.number && { number: parseInt(body.number) }),
                 ...(body.title && { title: body.title }),
                 ...(body.lyrics && { lyrics: body.lyrics }),
+                ...(body.author !== undefined && { author: body.author }),
+                ...(body.tags !== undefined && { tags: body.tags }),
+                ...(body.tuneUrl !== undefined && { tuneUrl: body.tuneUrl }),
             },
         });
         return NextResponse.json(hymn);
