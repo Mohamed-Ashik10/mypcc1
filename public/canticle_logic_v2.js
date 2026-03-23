@@ -1396,7 +1396,12 @@
 
         const session = window.userSession;
         if (!session || !session.user) {
-            alert("Please sign in to save reflections to your cloud journal.");
+            showToast("Please sign in to save reflections to your personal cloud journal.");
+            setTimeout(() => {
+                if (confirm("Would you like to sign in now to save your journal entries?")) {
+                    window.location.href = '/auth/login';
+                }
+            }, 500);
             return;
         }
 
