@@ -24,6 +24,9 @@ export default async function EditHymnPage({ params }: { params: Promise<{ id: s
                     number: String(hymn.number),
                     title: hymn.title,
                     lyrics: hymn.lyrics,
+                    author: hymn.author || "",
+                    tags: hymn.tags || "",
+                    tuneUrl: hymn.tuneUrl || "",
                 }}
             />
         </div>
