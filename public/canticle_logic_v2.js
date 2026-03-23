@@ -73,6 +73,19 @@
 
     window.toggleFavorite = async function (hymnId, el, isModalBtn = false) {
         if (!hymnId) return;
+
+        // NEW: Proactive Login Check
+        if (!window.userSession || !window.userSession.user) {
+            showToast("Please sign in to save your favorite hymns to your cloud library.");
+            // Optional: Redirect them to the login page after a short delay
+            setTimeout(() => {
+                if (confirm("Would you like to sign in now to save your favorites?")) {
+                    window.location.href = '/auth/login';
+                }
+            }, 500);
+            return;
+        }
+
         window.hymnFavorites = window.hymnFavorites || [];
         const isFav = window.hymnFavorites.includes(hymnId);
 
