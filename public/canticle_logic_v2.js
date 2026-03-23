@@ -1599,10 +1599,22 @@
             list.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
         }
 
+        if (list.length === 0) {
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; padding: 60px 20px; text-align: center; background: rgba(0,0,0,0.02); border-radius: 24px; border: 1px dashed rgba(0,0,0,0.1);">
+                    <p style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;">🗞️</p>
+                    <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--gold); margin-bottom: 8px;">No issues of The Echo found</h3>
+                    <p style="color: var(--muted); font-size: 0.9rem;">Check back soon for latest community newsletters and articles.</p>
+                </div>
+            `;
+            return;
+        }
+
         grid.innerHTML = list.map((a, i) => {
             const isFeatured = a.isFeatured || (i === 0 && _activeEchoCat === 'all' && !a.isFeatured && !_echoSearch);
-            // Store the original index in window.echo_db for the modal
-            const originalIndex = window.echo_db.findIndex(item => item.id === a.id);
+            // Store the original index safely
+            const db = window.echo_db || [];
+            const originalIndex = db.findIndex(item => item.id === a.id);
 
             return `
             <div class="echo-card ${isFeatured ? 'featured' : ''}" style="position:relative;">
