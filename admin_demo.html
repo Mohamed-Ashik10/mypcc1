@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Demo - #6e1799</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6e1799;
+            --primary-foreground: #ffffff;
+            --background: #f9fafb;
+            --foreground: #111827;
+            --sidebar: #1f2937;
+            --sidebar-foreground: #f9fafb;
+            --card: #ffffff;
+            --border: #e5e7eb;
+            --muted: #6b7280;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar);
+            color: var(--sidebar-foreground);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--primary-foreground);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background-color: var(--primary);
+            border-radius: 8px;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-item.active {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+        }
+
+        .nav-item:hover:not(.active) {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Main Content */
+        .main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .header {
+            height: 64px;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            color: var(--muted);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--foreground);
+        }
+
+        .card-trend {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .table-container {
+            margin-top: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.875rem;
+        }
+
+        .badge {
+            padding: 0.25rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background-color: rgba(110, 23, 153, 0.1);
+            color: var(--primary);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon"></div>
+            <span>MyPCC Admin</span>
+        </div>
+        <nav>
+            <div class="nav-item active">
+                <span>🏠</span>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item">
+                <span>👥</span>
+                <span>Users</span>
+            </div>
+            <div class="nav-item">
+                <span>💳</span>
+                <span>Transactions</span>
+            </div>
+            <div class="nav-item">
+                <span>📅</span>
+                <span>Events</span>
+            </div>
+            <div class="nav-item">
+                <span>⚙️</span>
+                <span>Settings</span>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="main">
+        <header class="header">
+            <div class="search" style="color: var(--muted)">Search anything...</div>
+            <div class="user-profile">
+                <button class="btn-primary">New Action</button>
+                <div class="avatar">MA</div>
+            </div>
+        </header>
+
+        <section class="content">
+            <h1 class="page-title animate-in">Overview</h1>
+
+            <div class="stats-grid">
+                <div class="card animate-in" style="animation-delay: 0.1s">
+                    <div class="card-title">Total Users</div>
+                    <div class="card-value">1,284</div>
+                    <div class="card-trend">↑ 12% this month</div>
+                </div>
+                <div class="card animate-in" style="animation-delay: 0.2s">
+                    <div class="card-title">Active Members</div>
+                    <div class="card-value">842</div>
+                    <div class="card-trend">↑ 5% this month</div>
+                </div>
+                <div class="card animate-in" style="animation-delay: 0.3s">
+                    <div class="card-title">Total Donations</div>
+                    <div class="card-value">$12,450</div>
+                    <div class="card-trend">↑ 18% this month</div>
+                </div>
+            </div>
+
+            <div class="card animate-in" style="animation-delay: 0.4s">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="font-weight: 600;">Recent Activity</h3>
+                    <a href="#" style="color: var(--primary); font-size: 0.875rem; text-decoration: none;">View All</a>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Mohamed Ashik</td>
+                            <td>Updated profile</td>
+                            <td>Mar 2, 2026</td>
+                            <td><span class="badge">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>Sarah Johnson</td>
+                            <td>New Donation</td>
+                            <td>Mar 1, 2026</td>
+                            <td><span class="badge">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>David Chen</td>
+                            <td>Event Registration</td>
+                            <td>Feb 28, 2026</td>
+                            <td><span class="badge">Completed</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

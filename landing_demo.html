@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canticle Landing - #6e1799 Demo</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6e1799;
+            /* The Demo Color */
+            --primary-light: rgba(110, 23, 153, 0.1);
+            --gold: #b8935a;
+            --bg: #fdfaf5;
+            --ink: #1a1510;
+            --muted: #6b6b6b;
+            --card-bg: #ffffff;
+            --border: rgba(110, 23, 153, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--ink);
+            overflow-x: hidden;
+        }
+
+        em {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+        }
+
+        /* Navigation */
+        nav {
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 48px;
+            background: rgba(253, 250, 245, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 500;
+            text-decoration: none;
+            color: var(--ink);
+        }
+
+        .logo span {
+            color: var(--primary);
+            font-style: italic;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .nav-btn {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            padding: 0 24px;
+            background: radial-gradient(circle at center, rgba(110, 23, 153, 0.05) 0%, transparent 70%);
+        }
+
+        .hero-eyebrow {
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .hero-h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 300;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+
+        .hero-h1 em {
+            color: var(--primary);
+        }
+
+        .hero-sub {
+            max-width: 600px;
+            color: var(--muted);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            padding: 16px 40px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* Sticky Section Mockup */
+        .preview-section {
+            padding: 100px 48px;
+            background: white;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: center;
+        }
+
+        .sticky-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 12px;
+            letter-spacing: 0.1em;
+        }
+
+        .sticky-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3rem;
+            line-height: 1.2;
+            margin-bottom: 24px;
+        }
+
+        .sticky-body {
+            color: var(--muted);
+            line-height: 1.7;
+            margin-bottom: 32px;
+        }
+
+        /* Card Decoration */
+        .card-preview {
+            background-color: var(--bg);
+            padding: 40px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            box-shadow: 20px 20px 60px rgba(110, 23, 153, 0.05);
+            position: relative;
+        }
+
+        .card-preview::before {
+            content: '🎵';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            background: var(--primary);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .card-hymn-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .card-hymn-author {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .progress-bar {
+            height: 2px;
+            background: #eee;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 60%;
+        }
+
+        .card-tags {
+            display: flex;
+            gap: 12px;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-weight: 600;
+        }
+
+        /* Verse Strip */
+        .verse-strip {
+            background-color: var(--ink);
+            color: var(--bg);
+            padding: 60px 24px;
+            text-align: center;
+        }
+
+        .verse-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-style: italic;
+            max-width: 800px;
+            margin: 0 auto 16px;
+            opacity: 0.9;
+        }
+
+        .verse-ref {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--primary);
+            letter-spacing: 0.2em;
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate {
+            animation: fadeUp 0.8s ease forwards;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="#" class="logo">Canti<span>cle</span></a>
+        <div class="nav-links">
+            <a href="#" class="active">Home</a>
+            <a href="#">Hymns</a>
+            <a href="#">Diary</a>
+            <a href="#">The Echo</a>
+            <a href="#">Devotionals</a>
+        </div>
+        <a href="#" class="nav-btn">Join Free</a>
+    </nav>
+
+    <header class="hero">
+        <p class="hero-eyebrow animate">A sacred space for every believer</p>
+        <h1 class="hero-h1 animate" style="animation-delay: 0.2s">Sing. Listen.<br /><em>Remember.</em></h1>
+        <p class="hero-sub animate" style="animation-delay: 0.4s">
+            Read beloved hymns, keep a personal church diary, stay connected through The Echo, and grow daily with
+            morning devotionals.
+        </p>
+        <button class="btn-primary animate" style="animation-delay: 0.6s">Explore Hymns &rarr;</button>
+    </header>
+
+    <div class="verse-strip">
+        <p class="verse-text">&ldquo;Sing to the Lord a new song; sing to the Lord, all the earth.&rdquo;</p>
+        <p class="verse-ref">Psalm 96:1</p>
+    </div>
+
+    <section class="preview-section">
+        <div class="grid">
+            <div class="text-content">
+                <p class="sticky-label">🎵 Hymns</p>
+                <h2 class="sticky-title">Ancient words,<br /><em>ever new</em></h2>
+                <p class="sticky-body">Hundreds of classic and contemporary hymns, beautifully typeset. Search by theme,
+                    scripture or season. Every word carries centuries of faith.</p>
+                <button class="btn-primary" style="padding: 12px 32px; font-size: 0.8rem;">Browse Hymns</button>
+            </div>
+            <div class="visual-content">
+                <div class="card-preview">
+                    <p class="card-hymn-author" style="margin-bottom: 4px; color: var(--primary); font-weight: 700;">
+                        Hymn #001</p>
+                    <h3 class="card-hymn-title">Amazing Grace</h3>
+                    <p class="card-hymn-author">John Newton &middot; 1779</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div class="card-tags">
+                        <span class="tag">Grace</span>
+                        <span class="tag">Faith</span>
+                        <span class="tag">Salvation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer
+        style="background: var(--ink); color: white; padding: 40px 48px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
+        <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; margin-bottom: 4px;">Canti<span
+                style="color: var(--primary); font-style: italic;">cle</span></p>
+        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.1em;">
+            &copy; 2026 PCC Admin &middot; Demo Primary: #6e1799</p>
+    </footer>
+</body>
+
+</html>

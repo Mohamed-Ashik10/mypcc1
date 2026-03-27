@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Demo - Canticle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6e1799;
+            --accent: #ffcc00;
+            --bg: #f9f9f9;
+            --text-dark: #1a1510;
+            --text-muted: #7a7060;
+            --white: #ffffff;
+            --black: #1a1510;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .pricing-header {
+            margin-bottom: 60px;
+        }
+
+        .pricing-pill {
+            display: inline-block;
+            background: var(--white);
+            padding: 12px 32px;
+            border-radius: 100px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+        }
+
+        .pricing-pill h1 {
+            font-size: 2rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+        }
+
+        /* Toggle */
+        .toggle-container {
+            display: inline-flex;
+            background: #e2e8f0;
+            padding: 4px;
+            border-radius: 100px;
+            margin-bottom: 40px;
+        }
+
+        .toggle-btn {
+            padding: 8px 24px;
+            border-radius: 100px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            background: transparent;
+            color: var(--text-muted);
+        }
+
+        .toggle-btn.active {
+            background: var(--black);
+            color: var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Grid */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            align-items: center;
+        }
+
+        .pricing-card {
+            background: var(--white);
+            padding: 48px 32px;
+            border-radius: 48px;
+            text-align: left;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        /* The "Black" effect on hover/move */
+        .pricing-card:hover {
+            background: var(--black);
+            color: var(--white);
+            transform: scale(1.02) translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            border-color: var(--black);
+        }
+
+        .pricing-card .card-head {
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .plan-price {
+            font-size: 3rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .plan-price span {
+            font-size: 1.5rem;
+            font-weight: 400;
+            opacity: 0.7;
+        }
+
+        .plan-desc {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 32px;
+            opacity: 0.8;
+            height: 60px;
+        }
+
+        .features-list {
+            list-style: none;
+            margin-bottom: 40px;
+        }
+
+        .features-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            opacity: 0.9;
+        }
+
+        .check-icon {
+            width: 20px;
+            height: 20px;
+            background: #4ade80;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .pricing-card:hover .check-icon {
+            background: var(--accent);
+            color: var(--black);
+        }
+
+        .x-icon {
+            font-size: 1.2rem;
+            opacity: 0.4;
+            color: var(--text-muted);
+            margin-right: 4px;
+        }
+
+        .pricing-card:hover .x-icon {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-trial {
+            width: 100%;
+            padding: 16px;
+            border-radius: 100px;
+            border: none;
+            background: var(--bg);
+            color: var(--black);
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pricing-card:hover .btn-trial {
+            background: var(--white);
+            color: var(--black);
+            transform: translateY(-2px);
+        }
+
+        /* Accent Badge */
+        .badge {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: var(--accent);
+            color: var(--black);
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .pricing-card:hover .badge {
+            opacity: 1;
+        }
+
+        .featured {
+            background: var(--black);
+            color: var(--white);
+            transform: scale(1.05);
+            z-index: 2;
+        }
+
+        .featured .btn-trial {
+            background: var(--white);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="pricing-pill">
+            <h1>Pricing</h1>
+        </div>
+
+        <br>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="annualBtn">Annual</button>
+            <button class="toggle-btn" id="monthlyBtn">Monthly</button>
+        </div>
+
+        <div class="pricing-grid">
+            <!-- Recruit Basic -->
+            <div class="pricing-card">
+                <div class="card-head">
+                    <div>
+                        <p class="plan-name">Recruit Basic</p>
+                        <div class="plan-price">$17 <span>/ month (USD)</span></div>
+                    </div>
+                </div>
+                <p class="plan-desc">Get started with essential tools to manage your team efficiently. Ideal for small
+                    teams.</p>
+                <ul class="features-list">
+                    <li><span class="check-icon">✓</span> Access to core HR features</li>
+                    <li><span class="check-icon">✓</span> Employee record management</li>
+                    <li><span class="check-icon">✓</span> Basic reporting tools</li>
+                    <li><span class="check-icon">✓</span> Manage up to 10 team members</li>
+                    <li><span class="x-icon">✕</span> Track employee attendance</li>
+                    <li><span class="x-icon">✕</span> Assign and monitor tasks</li>
+                </ul>
+                <button class="btn-trial">Start 7-days Free Trial</button>
+            </div>
+
+            <!-- Talent Pro (Featured) -->
+            <div class="pricing-card featured">
+                <span class="badge" style="opacity: 1;">Save 27%</span>
+                <div class="card-head">
+                    <div>
+                        <p class="plan-name">Talent Pro</p>
+                        <div class="plan-price">$19 <span>/ month (USD)</span></div>
+                    </div>
+                </div>
+                <p class="plan-desc">A comprehensive solution for growing teams, offering enhanced features to
+                    streamline HR processes.</p>
+                <ul class="features-list">
+                    <li><span class="check-icon" style="background: var(--accent); color: var(--black);">✓</span> Access
+                        to core HR features</li>
+                    <li><span class="check-icon" style="background: var(--accent); color: var(--black);">✓</span>
+                        Employee record management</li>
+                    <li><span class="check-icon" style="background: var(--accent); color: var(--black);">✓</span> Basic
+                        reporting tools</li>
+                    <li><span class="check-icon" style="background: var(--accent); color: var(--black);">✓</span> Manage
+                        up to 10 team members</li>
+                    <li><span class="check-icon" style="background: var(--accent); color: var(--black);">✓</span> Track
+                        employee attendance</li>
+                    <li><span class="check-icon" style="background: var(--accent); color: var(--black);">✓</span> Assign
+                        and monitor tasks</li>
+                </ul>
+                <button class="btn-trial">Start 7-days Free Trial</button>
+            </div>
+
+            <!-- HR Master -->
+            <div class="pricing-card">
+                <span class="badge">Popular</span>
+                <div class="card-head">
+                    <div>
+                        <p class="plan-name">HR Master</p>
+                        <div class="plan-price">$34 <span>/ month (USD)</span></div>
+                    </div>
+                </div>
+                <p class="plan-desc">Maximize team performance with premium tools and full customization options,
+                    perfect for larger organizations.</p>
+                <ul class="features-list">
+                    <li><span class="check-icon">✓</span> Access to core HR features</li>
+                    <li><span class="check-icon">✓</span> Employee record management</li>
+                    <li><span class="check-icon">✓</span> Basic reporting tools</li>
+                    <li><span class="check-icon">✓</span> Manage up to 10 team members</li>
+                    <li><span class="check-icon">✓</span> Track employee attendance</li>
+                    <li><span class="check-icon">✓</span> Assign and monitor tasks</li>
+                </ul>
+                <button class="btn-trial">Start 7-days Free Trial</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const cards = document.querySelectorAll('.pricing-card');
+        const annualBtn = document.getElementById('annualBtn');
+        const monthlyBtn = document.getElementById('monthlyBtn');
+
+        // Toggle logic
+        annualBtn.onclick = () => {
+            annualBtn.classList.add('active');
+            monthlyBtn.classList.remove('active');
+        };
+        monthlyBtn.onclick = () => {
+            monthlyBtn.classList.add('active');
+            annualBtn.classList.remove('active');
+        };
+
+        // Hover handling to ensure only one is "black" at a time if user wants that specific behavior,
+        // but default CSS hover works well too.
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                cards.forEach(c => c.classList.remove('featured'));
+                card.classList.add('featured');
+            });
+        });
+    </script>
+</body>
+
+</html>
