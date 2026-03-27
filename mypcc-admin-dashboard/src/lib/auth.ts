@@ -15,32 +15,46 @@ export const authOptions: NextAuthOptions = {
                 password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
+                console.log("[AUTH_DEBUG] Attempting login for:", credentials?.email);
+                
                 if (!credentials?.email || !credentials?.password) {
+                    console.error("[AUTH_DEBUG] Missing credentials");
                     throw new Error("Invalid credentials");
                 }
 
-                const user = await prisma.user.findUnique({
-                    where: {
-                        email: credentials.email,
-                    },
-                });
+                try {
+                    console.log("[AUTH_DEBUG] Connecting to Prisma...");
+                    const user = await prisma.user.findUnique({
+                        where: {
+                            email: credentials.email,
+                        },
+                    });
 
-                if (!user) {
-                    throw new Error("No user found with this email");
+                    if (!user) {
+                        console.error("[AUTH_DEBUG] User not found in DB:", credentials.email);
+                        throw new Error("No user found with this email");
+                    }
+
+                    console.log("[AUTH_DEBUG] Verifying password for:", user.email);
+                    const isPasswordValid = await bcrypt.compare(credentials.password, user.password || "");
+                    
+                    if (!isPasswordValid) {
+                        console.error("[AUTH_DEBUG] Password check failed");
+                        throw new Error("Invalid password");
+                    }
+
+                    console.log("[AUTH_DEBUG] Authentication Successful!");
+                    return {
+                        id: user.id,
+                        email: user.email,
+                        name: user.name,
+                        role: user.role
+                    };
+                } catch (error: any) {
+                    console.error("[AUTH_DEBUG] CRITICAL ERROR during authorize:", error.message || error);
+                    // Bubble up the actual error so we can see it in logs
+                    throw new Error(error.message || "Database connection failure");
                 }
-
-                // Verify password using bcrypt
-                const isPasswordValid = await bcrypt.compare(credentials.password, user.password || "");
-                if (!isPasswordValid) {
-                    throw new Error("Invalid password");
-                }
-
-                return {
-                    id: user.id,
-                    email: user.email,
-                    name: user.name,
-                    role: user.role
-                };
             },
         }),
         GoogleProvider({
