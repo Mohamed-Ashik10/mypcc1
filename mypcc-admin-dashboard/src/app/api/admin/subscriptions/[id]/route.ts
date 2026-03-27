@@ -6,8 +6,9 @@ import prisma from "@/lib/prisma";
 // Protected Admin API to Edit/Delete Subscriptions
 export async function PATCH(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     const userRole = (session?.user as any)?.role || "NORMAL_USER";
     const isAdmin = ["SUPER_ADMIN", "ADMIN_STAFF"].includes(userRole);
@@ -18,7 +19,6 @@ export async function PATCH(
 
     try {
         const { type, status, endDate } = await req.json();
-        const id = params.id;
 
         const updatedSub = await prisma.subscription.update({
             where: { id },
@@ -38,8 +38,9 @@ export async function PATCH(
 
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     const userRole = (session?.user as any)?.role || "NORMAL_USER";
     const isAdmin = ["SUPER_ADMIN", "ADMIN_STAFF"].includes(userRole);
@@ -49,7 +50,6 @@ export async function DELETE(
     }
 
     try {
-        const id = params.id;
         await prisma.subscription.delete({ where: { id } });
         return NextResponse.json({ success: true, message: "Subscription deleted successfully" });
     } catch (error) {

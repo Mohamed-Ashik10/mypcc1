@@ -3,7 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session || !["SUPER_ADMIN", "ADMIN_STAFF"].includes((session.user as any).role)) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -12,7 +13,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     try {
         const { section, content } = await req.json();
         const updated = await prisma.pccInfo.update({
-            where: { id: params.id },
+            where: { id },
             data: { section, content }
         });
         return NextResponse.json(updated);
@@ -21,7 +22,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session || !["SUPER_ADMIN", "ADMIN_STAFF"].includes((session.user as any).role)) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -29,7 +31,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
     try {
         await prisma.pccInfo.delete({
-            where: { id: params.id }
+            where: { id }
         });
         return NextResponse.json({ success: true });
     } catch (error) {
