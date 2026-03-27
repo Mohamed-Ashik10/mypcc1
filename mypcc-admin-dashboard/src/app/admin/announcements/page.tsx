@@ -4,11 +4,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import AnnouncementDeleteButton from "@/components/AnnouncementDeleteButton";
 import { Megaphone, Plus, Clock, ShieldCheck, ShieldAlert, Edit2 } from "lucide-react";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function AnnouncementsPage() {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions).catch(() => null);
     const userRole = (session?.user as any)?.role || "NORMAL_USER";
     const canModify = ["ADMIN_STAFF", "SUPER_ADMIN", "CONTENT_EDITOR"].includes(userRole);
 
@@ -17,7 +18,19 @@ export default async function AnnouncementsPage() {
         const query = canModify ? "" : "?activeOnly=true";
         announcements = await fetchFromBackend<any[]>(`/api/admin/announcements${query}`);
     } catch (error) {
-        console.error("Failed to fetch announcements from Spring Boot:", error);
+        console.error("Failed to fetch announcements from backend. Using Prisma Fallback.", error);
+        try {
+            const where: any = {};
+            if (!canModify) {
+                where.isActive = true;
+            }
+            announcements = await prisma.announcement.findMany({
+                where,
+                orderBy: { createdAt: 'desc' }
+            });
+        } catch (dbError) {
+            console.error("Announcements DB Fallback failed.", dbError);
+        }
     }
 
     return (

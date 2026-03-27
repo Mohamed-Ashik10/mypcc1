@@ -5,11 +5,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { MessageSquareQuote, Plus, ShieldCheck, ShieldAlert, Edit2 } from "lucide-react";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function TestimonialsAdminPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions).catch(() => null);
   const userRole = (session?.user as any)?.role || "NORMAL_USER";
   
   if (!["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR"].includes(userRole)) {
@@ -20,7 +21,14 @@ export default async function TestimonialsAdminPage() {
   try {
     testimonials = await fetchFromBackend<any[]>("/api/admin/testimonials");
   } catch (error) {
-    console.error("Failed to fetch testimonials from backend:", error);
+    console.error("Failed to fetch testimonials from backend. Using Prisma Fallback.", error);
+    try {
+        testimonials = await prisma.testimonial.findMany({
+            orderBy: { createdAt: 'desc' }
+        });
+    } catch (dbError) {
+        console.error("Testimonials DB Fallback failed.", dbError);
+    }
   }
 
   return (

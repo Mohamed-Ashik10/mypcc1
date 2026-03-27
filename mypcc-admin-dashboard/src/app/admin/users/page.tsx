@@ -4,18 +4,31 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import UserManagementClient from "@/components/UserManagementClient";
 import { ShieldAlert, Users } from "lucide-react";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function UserManagementPage() {
     // RUN IN PARALLEL: Initial security check and data fetch
-    const [session, usersResponse] = await Promise.all([
-        getServerSession(authOptions),
-        fetchFromBackend<any[]>("/api/admin/users").catch(err => {
-            console.error("Failed to fetch users from backend:", err);
-            return [];
-        })
-    ]);
+    let session = null;
+    let usersResponse: any[] = [];
+    
+    try {
+        [session, usersResponse] = await Promise.all([
+            getServerSession(authOptions),
+            fetchFromBackend<any[]>("/api/admin/users")
+        ]);
+    } catch (err) {
+        console.error("Failed to fetch users from backend. Using Prisma Fallback.", err);
+        session = await getServerSession(authOptions).catch(() => null);
+        try {
+            usersResponse = await prisma.user.findMany({
+                orderBy: { createdAt: 'desc' }
+            });
+        } catch (dbError) {
+            console.error("Users DB Fallback failed.", dbError);
+        }
+    }
 
     if (!session || (session.user as any)?.role !== "SUPER_ADMIN") {
         redirect("/admin");

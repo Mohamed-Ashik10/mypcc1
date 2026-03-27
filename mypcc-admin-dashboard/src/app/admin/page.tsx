@@ -10,13 +10,36 @@ import { fetchFromBackend } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
+import prisma from "@/lib/prisma"; // Direct DB Fallback
+
 // ─── Stats fetcher (runs async, inside Suspense) ──────────────────────────────
 async function StatCards() {
     let stats = { users: 0, hymns: 0, subscriptions: 0, totalRevenue: 0 };
     try {
         const data = await fetchFromBackend<any>("/api/admin/dashboard/stats");
         stats = { ...stats, ...data };
-    } catch {}
+    } catch (err) {
+        console.error("Dashboard Stats fetch failed. Using Prisma Fallback.", err);
+        try {
+            const [userCount, hymnCount, subCount, transactions] = await Promise.all([
+                prisma.user.count(),
+                prisma.hymn.count(),
+                prisma.subscription.count({ where: { status: "ACTIVE" } }),
+                prisma.transaction.findMany({ where: { status: "COMPLETED" }, select: { amount: true } })
+            ]);
+            
+            const totalRevenue = transactions.reduce((acc, t) => acc + t.amount, 0);
+            
+            stats = {
+                users: userCount,
+                hymns: hymnCount,
+                subscriptions: subCount,
+                totalRevenue: totalRevenue
+            };
+        } catch (dbErr) {
+            console.error("Dashboard Stats DB Fallback failed.", dbErr);
+        }
+    }
 
     const cards = [
         { label: "Total Members",  value: stats.users,                                    icon: <Users size={22} />,      color: "bg-[#7367f0]/10 text-[#7367f0]", href: "/admin/users" },

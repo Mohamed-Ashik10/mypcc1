@@ -6,6 +6,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { Music, Plus, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
+import prisma from "@/lib/prisma";
+
 export const dynamic = "force-dynamic";
 
 export default async function HymnsPage({
@@ -19,7 +21,6 @@ export default async function HymnsPage({
     const search = searchStr ?? "";
     const selectedTag = tagStr ?? "";
 
-    // RUN IN PARALLEL: Session and Content Fetch
     const query = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -27,17 +28,60 @@ export default async function HymnsPage({
         tag: selectedTag
     }).toString();
 
-    const [session, dataResponse] = await Promise.all([
-        getServerSession(authOptions),
-        fetchFromBackend<{ 
-            hymns: any[], 
-            total: number, 
-            uniqueTags: string[] 
-        }>(`/api/admin/content/hymns?${query}`).catch(err => {
-            console.error("Failed to fetch hymns from backend:", err);
-            return { hymns: [], total: 0, uniqueTags: [] };
-        })
-    ]);
+    let dataResponse: { hymns: any[], total: number, uniqueTags: string[] } = { hymns: [], total: 0, uniqueTags: [] };
+
+    try {
+        dataResponse = await fetchFromBackend<any>(`/api/admin/content/hymns?${query}`);
+    } catch (err) {
+        console.error("Failed to fetch hymns from backend. Using Prisma Fallback.", err);
+        try {
+            const skip = (page - 1) * limit;
+            const where: any = {};
+            
+            if (search) {
+                where.OR = [
+                    { title: { contains: search } },
+                    { lyrics: { contains: search } },
+                    { author: { contains: search } }
+                ];
+                if (!isNaN(parseInt(search))) {
+                    where.OR.push({ number: parseInt(search) });
+                }
+            }
+            
+            if (selectedTag) {
+                where.tags = { contains: selectedTag };
+            }
+
+            const [hymns, total, allHymns] = await Promise.all([
+                prisma.hymn.findMany({
+                    where,
+                    skip,
+                    take: limit,
+                    orderBy: { number: 'asc' }
+                }),
+                prisma.hymn.count({ where }),
+                prisma.hymn.findMany({ select: { tags: true } })
+            ]);
+
+            const tagsSet = new Set<string>();
+            allHymns.forEach(h => {
+                if (h.tags) {
+                    h.tags.split(',').forEach(t => tagsSet.add(t.trim()));
+                }
+            });
+
+            dataResponse = {
+                hymns,
+                total,
+                uniqueTags: Array.from(tagsSet)
+            };
+        } catch (dbErr) {
+            console.error("Hymns DB Fallback failed.", dbErr);
+        }
+    }
+
+    const session = await getServerSession(authOptions).catch(() => null);
 
     const userRole = (session?.user as any)?.role || "NORMAL_USER";
     const canModify = ["ADMIN_STAFF", "SUPER_ADMIN", "CONTENT_EDITOR"].includes(userRole);

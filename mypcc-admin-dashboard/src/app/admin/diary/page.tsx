@@ -6,6 +6,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { BookOpen, Plus, Calendar, Star, ShieldCheck, Clock, Edit2, Scroll, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ExternalLink } from "lucide-react";
 
+import prisma from "@/lib/prisma";
+
 export const dynamic = "force-dynamic";
 
 export default async function DiaryManagementPage({
@@ -18,7 +20,7 @@ export default async function DiaryManagementPage({
     const page = parseInt(pageStr ?? "1");
     const limit = 20;
 
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions).catch(() => null);
     const userRole = (session?.user as any)?.role || "NORMAL_USER";
     const isAdmin = ["ADMIN_STAFF", "SUPER_ADMIN", "CONTENT_EDITOR"].includes(userRole);
     const canModify = isAdmin;
@@ -55,7 +57,54 @@ export default async function DiaryManagementPage({
         monthEntriesCount = data.monthEntriesCount || 0;
         nextEntry = data.nextEntry;
     } catch (error) {
-        console.error("Failed to fetch diary entries from backend:", error);
+        console.error("Failed to fetch diary entries from backend. Using Prisma Fallback.", error);
+        try {
+            const skip = (page - 1) * limit;
+            const where: any = { userId: null }; // Only church-wide entries
+            
+            if (search) {
+                where.OR = [
+                    { title: { contains: search } },
+                    { theme: { contains: search } },
+                    { readingOne: { contains: search } },
+                    { readingTwo: { contains: search } },
+                    { readingThree: { contains: search } }
+                ];
+            }
+            
+            if (monthStr || yearStr) {
+                const start = new Date(safeYear, safeMonthIdx, 1);
+                const end = new Date(safeYear, safeMonthIdx + 1, 0);
+                where.date = { gte: start, lte: end };
+            }
+
+            const [dbEntries, dbTotal, dbTotalFull, dbMonthCount, dbNext] = await Promise.all([
+                prisma.diaryEntry.findMany({ where, skip, take: limit, orderBy: { date: 'desc' } }),
+                prisma.diaryEntry.count({ where }),
+                prisma.diaryEntry.count({ where: { userId: null } }),
+                prisma.diaryEntry.count({ 
+                    where: { 
+                        userId: null, 
+                        date: { 
+                            gte: new Date(now.getFullYear(), now.getMonth(), 1),
+                            lte: new Date(now.getFullYear(), now.getMonth() + 1, 0)
+                        } 
+                    } 
+                }),
+                prisma.diaryEntry.findFirst({
+                    where: { userId: null, date: { gt: now } },
+                    orderBy: { date: 'asc' }
+                })
+            ]);
+
+            entries = dbEntries;
+            total = dbTotal;
+            totalEntries = dbTotalFull;
+            monthEntriesCount = dbMonthCount;
+            nextEntry = dbNext;
+        } catch (dbError) {
+            console.error("Diary DB Fallback failed.", dbError);
+        }
     }
 
     const totalPages = Math.ceil(total / limit);

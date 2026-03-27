@@ -6,6 +6,8 @@ import EchoDeleteButton from "@/components/EchoDeleteButton";
 import EchoFilters from "@/components/EchoFilters";
 import { Newspaper, Upload, Search, Calendar, ShieldCheck, Lock, Star, Eye, Edit2 } from "lucide-react";
 
+import prisma from "@/lib/prisma";
+
 export const dynamic = "force-dynamic";
 
 export default async function TheEchoPage({ searchParams }: { searchParams: Promise<{ search?: string, year?: string, month?: string }> }) {
@@ -26,7 +28,31 @@ export default async function TheEchoPage({ searchParams }: { searchParams: Prom
         const data = await fetchFromBackend<{ list: any[], total: number }>(`/api/admin/content/echo?${query}`);
         issues = data.list ?? [];
     } catch (error) {
-        console.error("Failed to fetch echo issues from backend:", error);
+        console.error("Failed to fetch echo issues from backend. Using Prisma Fallback.", error);
+        try {
+            const where: any = {};
+            if (search) {
+                where.OR = [
+                    { title: { contains: search } },
+                    { excerpt: { contains: search } }
+                ];
+            }
+            if (year) {
+                const startDate = new Date(`${year}-01-01`);
+                const endDate = new Date(`${year}-12-31`);
+                where.issueMonth = {
+                    gte: startDate,
+                    lte: endDate
+                };
+            }
+            
+            issues = await prisma.theEchoIssue.findMany({
+                where,
+                orderBy: { issueMonth: 'desc' }
+            });
+        } catch (dbError) {
+            console.error("Echo DB Fallback failed.", dbError);
+        }
     }
 
     const hasAccess = true; // Placeholder for subscription check
