@@ -1,4 +1,5 @@
 import { fetchFromBackend } from "@/lib/api";
+import prisma from "@/lib/prisma";
 import Link from "next/link";
 import DevotionalDeleteButton from "@/components/DevotionalDeleteButton";
 import { getServerSession } from "next-auth";
@@ -17,7 +18,15 @@ export default async function DevotionalsPage() {
         const data = await fetchFromBackend<{ devotionals: any[] }>("/api/admin/content/devotionals?page=1&limit=50");
         devotionals = data.devotionals;
     } catch (error) {
-        console.error("Failed to fetch devotionals from backend:", error);
+        console.error("Failed to fetch devotionals from backend. Using Prisma Fallback.", error);
+        try {
+            devotionals = await prisma.devotional.findMany({
+                orderBy: { date: 'desc' },
+                take: 50
+            });
+        } catch (dbError) {
+            console.error("Devotionals DB Fallback failed.", dbError);
+        }
     }
 
     return (

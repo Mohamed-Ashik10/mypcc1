@@ -76,7 +76,37 @@ export default async function Home() {
     latestDevotional = devotionals[0] || null;
     archivedDevotionals = devotionals.slice(1);
   } catch (error) {
-    console.error("Backend fetch failed. Serving empty fallback.", error);
+    console.error("Backend fetch failed. Attempting Direct Database Fallback...", error);
+    // FALLBACK: Fetch directly from database if backend is offline
+    try {
+        const [dbHymns, dbEcho, dbTestimonials, dbAnnouncements, dbDiary, dbSettings] = await Promise.all([
+            prisma.hymn.findMany({ orderBy: { number: 'asc' } }),
+            prisma.theEchoIssue.findMany({ orderBy: { issueMonth: 'desc' } }),
+            prisma.testimonial.findMany({ where: { isActive: true } }),
+            prisma.announcement.findMany({ where: { isActive: true } }),
+            prisma.diaryEntry.findMany({ where: { userId: null }, orderBy: { date: 'desc' } }),
+            prisma.appSetting.findMany()
+        ]);
+        
+        hymns = dbHymns;
+        echoIssues = dbEcho;
+        testimonials = dbTestimonials;
+        announcements = dbAnnouncements;
+        churchDiary = dbDiary;
+        
+        const settingsMap: Record<string, string> = {};
+        dbSettings.forEach(s => settingsMap[s.key] = s.value);
+        if (settingsMap.app_name) appName = settingsMap.app_name;
+        if (settingsMap.logo_app) logoApp = settingsMap.logo_app;
+        if (settingsMap.contact_email) contactEmail = settingsMap.contact_email;
+        if (settingsMap.footer_desc) footerDesc = settingsMap.footer_desc;
+
+        const dbDevotionals = await prisma.devotional.findMany({ orderBy: { date: 'desc' } });
+        latestDevotional = dbDevotionals[0] || null;
+        archivedDevotionals = dbDevotionals.slice(1);
+    } catch (dbError) {
+        console.error("Critical: Direct Database fallback also failed.", dbError);
+    }
   }
 
   // Format Church Diary Dates safely

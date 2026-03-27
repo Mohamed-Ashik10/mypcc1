@@ -1,5 +1,6 @@
 import { fetchFromBackend } from "@/lib/api";
 import type { Metadata } from "next";
+import prisma from "@/lib/prisma";
 import { ResponsiveSidebar } from "@/components/ResponsiveSidebar";
 import { DynamicThemeProvider } from "@/components/DynamicThemeProvider";
 import { AdminTopBar } from "@/components/AdminTopBar";
@@ -10,19 +11,19 @@ export const metadata: Metadata = {
 };
 
 const navLinks = [
-    { href: "/admin",               label: "Dashboard Overview",       icon: "LayoutDashboard", roles: ["SUPER_ADMIN","ADMIN_STAFF","CONTENT_EDITOR","CHURCH_USER","NORMAL_USER"] },
-    { href: "/admin/hymns",         label: "Hymntal Library",          icon: "Music",           roles: ["SUPER_ADMIN","ADMIN_STAFF","CONTENT_EDITOR","CHURCH_USER","NORMAL_USER"] },
-    { href: "/admin/diary",         label: "Church Diary",             icon: "Book",            roles: ["SUPER_ADMIN","ADMIN_STAFF","CONTENT_EDITOR","CHURCH_USER","NORMAL_USER"] },
-    { href: "/admin/the-echo",      label: "Echo Newsletter",          icon: "Newspaper",       roles: ["SUPER_ADMIN","ADMIN_STAFF","CONTENT_EDITOR","CHURCH_USER","NORMAL_USER"] },
-    { href: "/admin/devotionals",   label: "Daily Manna",              icon: "Bird",            roles: ["SUPER_ADMIN","ADMIN_STAFF","CONTENT_EDITOR","CHURCH_USER","NORMAL_USER"] },
-    { href: "/admin/users",         label: "Account Control",          icon: "Users",           roles: ["SUPER_ADMIN"] },
-    { href: "/admin/user-logs",     label: "Access Vault",             icon: "ShieldAlert",     roles: ["SUPER_ADMIN"] },
-    { href: "/admin/subscriptions", label: "Member Tiers",             icon: "CreditCard",      roles: ["SUPER_ADMIN","ADMIN_STAFF","CHURCH_USER","NORMAL_USER"] },
-    { href: "/admin/transactions",  label: "Ministry Ledger",          icon: "DollarSign",      roles: ["SUPER_ADMIN","ADMIN_STAFF"] },
-    { href: "/admin/announcements", label: "Direct Broadcast",         icon: "Megaphone",       roles: ["SUPER_ADMIN","ADMIN_STAFF","CONTENT_EDITOR"] },
-    { href: "/admin/testimonials",  label: "Voices of Faith",          icon: "MessageCircle",   roles: ["SUPER_ADMIN","ADMIN_STAFF","CONTENT_EDITOR"] },
-    { href: "/admin/pcc-info",      label: "PCC Official Info",        icon: "Info",            roles: ["SUPER_ADMIN","ADMIN_STAFF"] },
-    { href: "/admin/settings",      label: "System Core",              icon: "Settings",        roles: ["SUPER_ADMIN","ADMIN_STAFF"] },
+    { href: "/admin", label: "Dashboard Overview", icon: "LayoutDashboard", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR", "CHURCH_USER", "NORMAL_USER"] },
+    { href: "/admin/hymns", label: "Hymntal Library", icon: "Music", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR", "CHURCH_USER", "NORMAL_USER"] },
+    { href: "/admin/diary", label: "Church Diary", icon: "Book", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR", "CHURCH_USER", "NORMAL_USER"] },
+    { href: "/admin/the-echo", label: "Echo Newsletter", icon: "Newspaper", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR", "CHURCH_USER", "NORMAL_USER"] },
+    { href: "/admin/devotionals", label: "Daily Manna", icon: "Bird", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR", "CHURCH_USER", "NORMAL_USER"] },
+    { href: "/admin/users", label: "Account Control", icon: "Users", roles: ["SUPER_ADMIN"] },
+    { href: "/admin/user-logs", label: "Access Vault", icon: "ShieldAlert", roles: ["SUPER_ADMIN"] },
+    { href: "/admin/subscriptions", label: "Member Tiers", icon: "CreditCard", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CHURCH_USER", "NORMAL_USER"] },
+    { href: "/admin/transactions", label: "Ministry Ledger", icon: "DollarSign", roles: ["SUPER_ADMIN", "ADMIN_STAFF"] },
+    { href: "/admin/announcements", label: "Direct Broadcast", icon: "Megaphone", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR"] },
+    { href: "/admin/testimonials", label: "Voices of Faith", icon: "MessageCircle", roles: ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR"] },
+    { href: "/admin/pcc-info", label: "PCC Official Info", icon: "Info", roles: ["SUPER_ADMIN", "ADMIN_STAFF"] },
+    { href: "/admin/settings", label: "System Core", icon: "Settings", roles: ["SUPER_ADMIN", "ADMIN_STAFF"] },
     { href: "http://localhost:8080/swagger-ui/index.html", label: "Backend Engine (Swagger)", icon: "ShieldAlert", roles: ["SUPER_ADMIN"] },
 ];
 
@@ -36,11 +37,23 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         if (settings) {
             if (settings.sidebar_title) sideTitle = settings.sidebar_title;
             else if (settings.app_name) sideTitle = settings.app_name; // Fallback
-            
+
             if (settings.logo_admin) sideLogo = settings.logo_admin;
         }
     } catch (err) {
-        console.error("Layout context fetch failed", err);
+        console.error("Layout context fetch failed. Using Prisma Fallback.", err);
+        try {
+            const dbSettings = await prisma.appSetting.findMany();
+            const settingsMap: Record<string, string> = {};
+            dbSettings.forEach(s => settingsMap[s.key] = s.value);
+
+            if (settingsMap.sidebar_title) sideTitle = settingsMap.sidebar_title;
+            else if (settingsMap.app_name) sideTitle = settingsMap.app_name;
+
+            if (settingsMap.logo_admin) sideLogo = settingsMap.logo_admin;
+        } catch (dbErr) {
+            console.error("Layout DB Fallback failed.", dbErr);
+        }
     }
 
     const defaultTheme = "--primary: 283 74% 35%; --primary-foreground: 210 40% 98%; --accent: 255 0% 96%;";
