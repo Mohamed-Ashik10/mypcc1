@@ -3,18 +3,32 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Wallet, CheckCircle, Clock, CreditCard, ShieldCheck, DollarSign } from "lucide-react";
 import { fetchFromBackend } from "@/lib/api";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function TransactionsPage() {
     // RUN IN PARALLEL: Session and Financial Data
-    const [session, transactionsResponse] = await Promise.all([
-        getServerSession(authOptions),
-        fetchFromBackend<any[]>("/api/admin/financials/transactions").catch(err => {
-            console.error("Failed to fetch transactions:", err);
-            return [];
-        })
-    ]);
+    let session = null;
+    let transactionsResponse: any[] = [];
+    
+    try {
+        [session, transactionsResponse] = await Promise.all([
+            getServerSession(authOptions),
+            fetchFromBackend<any[]>("/api/admin/financials/transactions")
+        ]);
+    } catch (err) {
+        console.error("Failed to fetch transactions from backend. Using Prisma Fallback.", err);
+        session = await getServerSession(authOptions).catch(() => null);
+        try {
+            transactionsResponse = await prisma.transaction.findMany({
+                include: { user: true },
+                orderBy: { createdAt: 'desc' }
+            });
+        } catch (dbError) {
+            console.error("Transactions DB Fallback failed.", dbError);
+        }
+    }
 
     const userRole = (session?.user as any)?.role;
     if (!["SUPER_ADMIN", "ADMIN_STAFF"].includes(userRole)) {

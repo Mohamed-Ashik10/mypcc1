@@ -20,7 +20,7 @@ async function main() {
         },
     });
 
-    // 2. 50 HYMNS (Large Volume for Pagination Testing)
+    // 2. 1,750 HYMNS (Full Scale Database Test)
     await prisma.hymn.deleteMany({});
     const coreHymns = [
         { number: 1, title: 'Amazing Grace', author: 'Newton', tags: 'grace, faith' },
@@ -29,24 +29,33 @@ async function main() {
         { number: 47, title: 'Be Thou My Vision', author: 'Irish', tags: 'faith' },
         { number: 58, title: 'Holy, Holy, Holy', author: 'Heber', tags: 'praise' },
         { number: 71, title: 'Blessed Assurance', author: 'Crosby', tags: 'comfort' },
-        { number: 85, title: 'Great Is Thy Faithfulness', author: 'Chisholm', tags: 'faith' },
-        { number: 93, title: 'Be Still, My Soul', author: 'Schlegel', tags: 'peace' },
     ];
 
-    const lyricsPlaceholder = (title) => `This is the lyrics for the beautiful hymn "${title}". \n\nIt contains words of praise, faith, and spiritual encouragement for all believers in the Presbyterian Church of Cameroon.\n\n[Verse 1]\nCome before Him with joyful singing.\n\n[Chorus]\nAlleluia, Praise His name!`;
+    const lyricsPlaceholder = (title, num) => `This is the sacred lyrics for hymn number ${num}: "${title}". \n\nIt is part of the comprehensive Presbyterian Church of Cameroon (PCC) digital hymnal collection.\n\n[Verse 1]\nLord of all creation, we lift our hearts to You.\n\n[Chorus]\nHallelujah, the Lord reigns forevermore!`;
 
-    const bulkHymns = Array.from({ length: 42 }).map((_, i) => ({
-        number: 100 + i,
-        title: `Sacred Hymn ${100 + i}`,
-        author: 'PCC Composer',
-        tags: i % 2 === 0 ? 'praise, worship' : 'devotion, faith',
-        lyrics: lyricsPlaceholder(`Sacred Hymn ${100 + i}`)
-    }));
+    const bulkCount = 1744; // Total = 1750
+    const allHymns = [...coreHymns.map(h => ({ ...h, lyrics: lyricsPlaceholder(h.title, h.number) }))];
 
-    const allHymns = [...coreHymns.map(h => ({ ...h, lyrics: lyricsPlaceholder(h.title) })), ...bulkHymns];
+    const authors = ['PCC Composer', 'Ancient Hymnology', 'Spiritual Heritage', 'Choir Master', 'Scriptural Melody'];
+    const tagsPool = ['praise', 'worship', 'faith', 'hope', 'grace', 'comfort', 'advent', 'holy', 'devotion'];
 
-    for (const h of allHymns) {
-        await prisma.hymn.create({ data: h });
+    for (let i = 0; i < bulkCount; i++) {
+        const num = 100 + i;
+        allHymns.push({
+            number: num,
+            title: `Divine Hymn ${num}`,
+            author: authors[i % authors.length],
+            tags: `${tagsPool[i % tagsPool.length]}, ${tagsPool[(i + 2) % tagsPool.length]}`,
+            lyrics: lyricsPlaceholder(`Divine Hymn ${num}`, num)
+        });
+    }
+
+    console.log(`Starting bulk insert of ${allHymns.length} hymns...`);
+    // Batching for performance
+    for (let i = 0; i < allHymns.length; i += 100) {
+        const batch = allHymns.slice(i, i + 100);
+        await Promise.all(batch.map(h => prisma.hymn.create({ data: h })));
+        console.log(`Seeded ${i + batch.length} hymns...`);
     }
 
     // 3. 20 DIARY ENTRIES
