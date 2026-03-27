@@ -69,7 +69,10 @@ export default async function Home() {
       if (settings.footer_desc) footerDesc = settings.footer_desc;
     }
 
-    const devotionals = await getDevotionals();
+    const devotionals = await getDevotionals().catch(e => {
+        console.warn("Devotionals fetch failed during build. Using empty list.");
+        return [];
+    });
     latestDevotional = devotionals[0] || null;
     archivedDevotionals = devotionals.slice(1);
   } catch (error) {
