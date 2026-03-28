@@ -1981,7 +1981,7 @@
                         ? `background-image: linear-gradient(to bottom, rgba(26,21,16,0.1) 0%, rgba(26,21,16,0.75) 100%), url('${d.image}'); background-size: cover; background-position: center;`
                         : `background: linear-gradient(135deg, #1a1510, #2e1f0e);`;
                     return `
-                      <div class="devo-arc-card" onclick="window.openArchiveDevotional(window.archive_db[${idx}])" style="position:relative; overflow:hidden; padding:0; border-radius:10px; cursor:pointer; min-height:220px; display:flex; flex-direction:column; justify-content:flex-end;" onmouseover="this.querySelector('.dac-bg').style.transform='scale(1.08)'" onmouseout="this.querySelector('.dac-bg').style.transform='scale(1)'">
+                      <div class="devo-arc-card" onclick="window.openArchiveDevotional(window.archive_db[${idx}], ${hasCardAccess})" style="position:relative; overflow:hidden; padding:0; border-radius:10px; cursor:pointer; min-height:220px; display:flex; flex-direction:column; justify-content:flex-end;" onmouseover="this.querySelector('.dac-bg').style.transform='scale(1.08)'" onmouseout="this.querySelector('.dac-bg').style.transform='scale(1)'">
                         <div class="dac-bg" style="position:absolute; inset:0; ${imgStyle}; transition: transform 0.4s ease-out;"></div>
                         <div style="position:relative; z-index:1; padding:22px 20px; background: linear-gradient(to top, rgba(20,16,12,0.95) 0%, rgba(20,16,12,0.8) 50%, transparent 100%);">
                           ${d.category ? `<span style="display:inline-block; background:rgba(184,147,90,0.85); color:#fff; font-size:0.55rem; letter-spacing:0.2em; text-transform:uppercase; padding:3px 10px; border-radius:50px; margin-bottom:8px;">${d.category}</span>` : ''}
@@ -2264,14 +2264,40 @@
         if (hero) hero.style.display = 'none';
 
         // Expose modal handlers
-        window.openArchiveDevotional = function (devo) {
+        window.openArchiveDevotional = function (devo, hasAccess) {
             const modal = document.getElementById('devoModal');
             const content = document.getElementById('devoModalContent');
-            if (modal && content) {
-                content.innerHTML = parseFullDevotion(devo);
+            if (!modal || !content) return;
+
+            // ── PAYWALL GATE ──────────────────────────────────────────────────
+            // If hasAccess is explicitly false (not undefined), block the open
+            if (hasAccess === false) {
+                const session = window.userSession;
+                const isLoggedIn = session && session.user;
+                const planLabel = (devo && devo.minPlan) ? devo.minPlan.charAt(0) + devo.minPlan.slice(1).toLowerCase() : 'Premium';
+
+                content.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 40px; text-align:center; min-height:350px;">
+                        <div style="font-size:3.5rem; margin-bottom:24px;">💎</div>
+                        <h2 style="font-family:'Cormorant Garamond',serif; font-size:2rem; color:#1a1510; margin-bottom:12px;">${planLabel} Content</h2>
+                        <p style="color:#6b7280; font-size:0.95rem; line-height:1.7; max-width:340px; margin-bottom:32px;">
+                            ${isLoggedIn
+                                ? 'Your current plan does not include this devotional. Upgrade to unlock the full reflection, prayer, and scripture guide.'
+                                : 'Please sign in and upgrade your plan to access this full devotional reflection.'}
+                        </p>
+                        ${isLoggedIn
+                            ? `<button onclick="window.closeDevoModal(); window.showPage('subs', document.querySelectorAll('.nav-tab')[5]);" style="padding:14px 32px; background:linear-gradient(135deg,#6e1799,#4a0f66); color:#fff; border:none; border-radius:12px; font-size:0.9rem; font-weight:700; cursor:pointer; letter-spacing:0.05em;">✨ Upgrade Plan</button>`
+                            : `<button onclick="window.location.href='/auth/login'" style="padding:14px 32px; background:linear-gradient(135deg,#6e1799,#4a0f66); color:#fff; border:none; border-radius:12px; font-size:0.9rem; font-weight:700; cursor:pointer; letter-spacing:0.05em;">🔑 Sign In to Continue</button>`}
+                    </div>`;
                 modal.classList.add('open');
                 document.body.style.overflow = 'hidden';
+                return;
             }
+            // ── END GATE ──────────────────────────────────────────────────────
+
+            content.innerHTML = parseFullDevotion(devo);
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
         };
 
         window.closeDevoModal = function () {
