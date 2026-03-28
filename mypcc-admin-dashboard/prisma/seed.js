@@ -10,7 +10,7 @@ async function main() {
     const hashedPassword = await bcrypt.hash(adminPassword, 12);
 
     console.log("Restoring Super Admin Identity...");
-    await prisma.user.upsert({
+    const adminUser = await prisma.user.upsert({
         where: { email: adminEmail },
         update: {
             role: 'SUPER_ADMIN',
@@ -120,30 +120,9 @@ async function main() {
         });
     }
 
-    console.log(`Starting resilient restoration of ${allHymns.length} professional records...`);
-    const batchSize = 10;
-    for (let i = 0; i < allHymns.length; i += batchSize) {
-        const batch = allHymns.slice(i, i + batchSize);
-        try {
-            // STRICT SEQUENTIAL SYNC (Avoids lock timeout on TiDB)
-            for (const h of batch) {
-                await prisma.hymn.upsert({
-                    where: { number: h.number },
-                    update: h,
-                    create: h
-                });
-            }
-            console.log(`Synchronized batch ending at ${Math.min(i + batchSize, allHymns.length)} / 1750...`);
-            // Cooling delay for TiDB pool
-            await new Promise(r => setTimeout(r, 400));
-        } catch (error) {
-            console.error(`Batch at index ${i} failed (Error: ${error.message}). Retrying in 3s...`);
-            await new Promise(r => setTimeout(r, 3000));
-            i -= batchSize; // Retry the same batch
-        }
-    }
 
-    // 3. DIARY ARCHIVE RESTORATION (120 ENTRIES)
+
+    // 2. DIARY ARCHIVE RESTORATION (120 ENTRIES)
     console.log("Building 4-Month Diary Archive...");
     await prisma.diaryEntry.deleteMany({});
     const diaryEntries = Array.from({ length: 120 }).map((_, i) => {
@@ -157,12 +136,12 @@ async function main() {
             readingTwo: `John ${i % 21 + 1}:1-5`,
             readingThree: `Romans ${i % 16 + 1}`,
             body: `Today we meditate on the infinite grace of the Almighty. As we walk through the journey of ${d.getFullYear()}, let our hearts be open to the spiritual guidance provided in the PCC community.`,
-            userId: null
+            userId: adminUser.id
         };
     });
     for (const de of diaryEntries) { await prisma.diaryEntry.create({ data: de }); }
 
-    // 4. DEVOTIONALS (30 DAYS)
+    // 3. DEVOTIONALS (30 DAYS)
     console.log("Seeding Daily Manna Devotionals...");
     await prisma.devotional.deleteMany({});
     const devotionals = Array.from({ length: 30 }).map((_, i) => {
@@ -183,7 +162,7 @@ async function main() {
     });
     for (const dev of devotionals) { await prisma.devotional.create({ data: dev }); }
 
-    // 5. THE ECHO ISSUES
+    // 4. THE ECHO ISSUES
     console.log("Seeding The Echo Newsletters...");
     await prisma.theEchoIssue.deleteMany({});
     const echoIssuesCount = 10;
@@ -207,7 +186,7 @@ async function main() {
     });
     for (const echo of echoIssues) { await prisma.theEchoIssue.create({ data: echo }); }
 
-    // 6. TESTIMONIALS & ANNOUNCEMENTS
+    // 5. TESTIMONIALS & ANNOUNCEMENTS
     console.log("Syncing Voices of Faith & Broadcasts...");
     await prisma.testimonial.deleteMany({});
     await prisma.testimonial.create({ data: { authorName: 'Brother Emmanuel', content: 'God has been faithful to my family throughout the planting season in Bamenda.', isActive: true } });
@@ -217,6 +196,30 @@ async function main() {
     await prisma.announcement.deleteMany({});
     await prisma.announcement.create({ data: { title: 'Annual Synod 2026', content: 'The General Synod will convene in Buea this October. All parishes are requested to send delegates.', isActive: true } });
     await prisma.announcement.create({ data: { title: 'Youth Week Celebration', content: 'Join us for a week of praise, sports, and spiritual growth starting next Sunday.', isActive: true } });
+
+    // 6. PROFESSIONAL HYMNAL RESTORATION (1,750 HYMNS) - MOVED TO LAST
+    console.log("Starting resilient restoration of 1750 HYMNAL records...");
+    const batchSize = 10;
+    for (let i = 0; i < allHymns.length; i += batchSize) {
+        const batch = allHymns.slice(i, i + batchSize);
+        try {
+            // STRICT SEQUENTIAL SYNC (Avoids lock timeout on TiDB)
+            for (const h of batch) {
+                await prisma.hymn.upsert({
+                    where: { number: h.number },
+                    update: h,
+                    create: h
+                });
+            }
+            console.log(`Synchronized batch ending at ${Math.min(i + batchSize, allHymns.length)} / 1750...`);
+            // Cooling delay for TiDB pool
+            await new Promise(r => setTimeout(r, 400));
+        } catch (error) {
+            console.error(`Batch at index ${i} failed (Error: ${error.message}). Retrying in 3s...`);
+            await new Promise(r => setTimeout(r, 3000));
+            i -= batchSize; // Retry the same batch
+        }
+    }
 
     console.log("RESTORE COMPLETED. Dashboard is now Professional and Secure.");
 }
