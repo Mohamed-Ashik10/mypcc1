@@ -684,7 +684,7 @@ export default function LandingPageClient({
                         <div style={{ maxWidth: '400px', margin: '32px auto 0', padding: '16px', borderRadius: '16px', background: 'rgba(110, 23, 153, 0.04)', border: '1px solid rgba(110, 23, 153, 0.1)', textAlign: 'center' }}>
                             <p style={{ fontSize: '0.65rem', fontWeight: 800, color: '#6e1799', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '8px' }}>✨ Limited Library Access</p>
                             <p style={{ fontSize: '0.85rem', color: 'var(--muted)', fontWeight: 300, lineHeight: 1.4, marginBottom: '16px' }}>
-                                Showing {initialHymns.length} foundational hymns for your tier. Upgrade to access all 850+ hymns.
+                                Showing {initialHymns.length} foundational hymns for your tier. Upgrade to access all 1,750+ hymns.
                             </p>
                             <button 
                                 onClick={() => (window as any).showPage('subs', document.querySelectorAll('.nav-tab')[5])}

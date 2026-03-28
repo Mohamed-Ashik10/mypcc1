@@ -223,7 +223,7 @@
             `;
             upgradeCard.innerHTML = `
                 <div style="font-size: 2rem; margin-bottom: 8px; opacity: 0.9;">✨</div>
-                <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-style: italic; font-weight: 500; margin: 0 0 8px 0;">Unlock 1,000+ Hymns</h3>
+                <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-style: italic; font-weight: 500; margin: 0 0 8px 0;">Unlock 1,750+ Hymns</h3>
                 <p style="font-size: 0.85rem; font-weight: 300; line-height: 1.4; opacity: 0.9; padding: 0 16px;">Upgrade to Pilgrims or Shepherds to access the entire sacred library.</p>
                 <button style="margin-top: 20px; background: var(--warm); color: var(--gold); border: none; padding: 8px 20px; font-weight: 500; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;">Upgrade Plan</button>
             `;

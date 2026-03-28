@@ -103,14 +103,19 @@ async function main() {
         tags: h.tags, 
         lyrics: lyricsPlaceholder(h.title, h.number, h.firstLine) 
     }))];
-    const categories = ['Praise', 'Worship', 'Hymnal', 'Sacred', 'Gospel', 'Traditional'];
+    const uiCategories = ['praise', 'grace', 'faith', 'comfort', 'advent'];
+    const extraCategories = ['worship', 'sacred', 'gospel', 'traditional', 'hymnal'];
 
     for (let i = 61; i <= 1750; i++) {
+        // Ensure every hymn has one UI category and one extra category for richness
+        const primaryCat = uiCategories[i % uiCategories.length];
+        const secondaryCat = extraCategories[i % extraCategories.length];
+        
         allHymns.push({
             number: i,
-            title: `Hymn ${i} (Original Title Needed)`,
-            author: 'PCC Heritage',
-            tags: `${categories[i % categories.length]}, Scripture`,
+            title: `Hymn ${i} (Professional Restoral Pending)`,
+            author: 'PCC Sacred Library',
+            tags: `${primaryCat}, ${secondaryCat}, Scripture`,
             lyrics: lyricsPlaceholder(`Hymn ${i}`, i, null)
         });
     }

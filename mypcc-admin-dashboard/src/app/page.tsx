@@ -214,16 +214,18 @@ export default async function Home() {
 
     hymns = finalHymns.sort((a, b) => a.number - b.number);
 
-    // --- STRICT CONTENT GATING ---
-    // 1. The Echo Gating: SEEKER and NORMAL_USER only get the latest issue
+    // --- ENHANCED CONTENT GATING (HEAVIER FREE SAMPLES) ---
     const isGoldTier = ['PILGRIM', 'SHEPHERD'].includes(subscriptionType || "");
-    if (!isGoldTier) {
-      echoIssues = echoIssues.slice(0, 1);
+    const isMember = !!subscriptionType;
+
+    // 1. The Echo Gating: Show 5 issues to everyone, Full Archive to Gold Tier
+    if (!isGoldTier && echoIssues.length > 5) {
+      echoIssues = echoIssues.slice(0, 5);
     }
 
-    // 2. Devotional Archive Gating: Only Members (Seeker+) see previous devotionals
-    if (!subscriptionType) {
-      archivedDevotionals = [];
+    // 2. Devotional Archive Gating: Show 10 previous days to everyone, Full Archive to Members
+    if (!isMember && archivedDevotionals.length > 10) {
+      archivedDevotionals = archivedDevotionals.slice(0, 10);
     }
   }
 
