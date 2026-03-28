@@ -136,7 +136,8 @@ export default function SettingsPage() {
 
     // ── Load settings on mount ──────────────────────────────────────────────
     useEffect(() => {
-        fetchFromBackend<Record<string, string>>("/api/admin/settings")
+        fetch("/api/admin/settings")
+            .then(res => res.json())
             .then((s) => {
                 if (s.app_name) setAppName(s.app_name);
                 if (s.contact_email) setContactEmail(s.contact_email);
@@ -197,10 +198,11 @@ export default function SettingsPage() {
                 sidebar_title: sidebarTitle,
             };
 
-            await fetchFromBackend("/api/admin/settings", { 
+            const res = await fetch("/api/admin/settings", { 
                 method: "POST", 
                 body: JSON.stringify(payload) 
             });
+            if (!res.ok) throw new Error(await res.text());
 
             showToast("Settings synchronized successfully.", "success");
             router.refresh();
@@ -217,10 +219,12 @@ export default function SettingsPage() {
         if (!testEmailTo) { showToast("Recipient address required.", "error"); return; }
         setTestingEmail(true);
         try {
-            const data: any = await fetchFromBackend("/api/admin/settings/test-email", {
+            const res = await fetch("/api/admin/settings/test-email", {
                 method: "PUT",
                 body: JSON.stringify({ toEmail: testEmailTo }),
             });
+            if (!res.ok) throw new Error(await res.text());
+            const data: any = await res.json();
             showToast(data.message || "Test broadcast dispatched!", "success");
         } catch (err: any) {
             showToast(err.message || "Broadcast delivery failed.", "error");
