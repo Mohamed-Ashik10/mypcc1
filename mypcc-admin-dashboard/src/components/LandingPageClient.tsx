@@ -134,6 +134,9 @@ export default function LandingPageClient({
     const [favorites, setFavorites] = useState<string[]>(initialFavorites);
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+    const [supportMessage, setSupportMessage] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         (window as any).hymnFavorites = favorites;
@@ -253,7 +256,7 @@ export default function LandingPageClient({
                     {subscriptionType === 'SHEPHERD' && (
                         <button
                             title="Priority Support"
-                            onClick={() => window.alert("As a Shepherd partner, our priority support team has been notified. We will reach out to your registered email shortly. Grace be with you!")}
+                            onClick={() => setIsSupportModalOpen(true)}
                             style={{
                                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                                 padding: '0 12px', height: '32px', borderRadius: '8px',
@@ -679,6 +682,92 @@ export default function LandingPageClient({
                     </div>
                 </footer>
             </div>
+
+            {/* PRIORITY SUPPORT MODAL */}
+            {isSupportModalOpen && (
+                <div 
+                    style={{
+                        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+                        zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+                    }}
+                >
+                    <div 
+                        style={{
+                            background: '#fff', width: '100%', maxWidth: '500px', borderRadius: '24px',
+                            overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.4)',
+                            animation: 'modalOpen 0.3s ease-out'
+                        }}
+                    >
+                        <div style={{ padding: '24px', borderBottom: '1px solid #efefef', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontSize: '1.2rem' }}>✨</span>
+                                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#1a1816' }}>Priority Help Request</h3>
+                            </div>
+                            <button 
+                                onClick={() => setIsSupportModalOpen(false)}
+                                style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999' }}
+                            >×</button>
+                        </div>
+                        
+                        <div style={{ padding: '24px' }}>
+                            <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '20px', lineHeight: 1.5 }}>
+                                As a Shepherd Partner, your requests are handled with priority. Please describe your query or technical issue below.
+                            </p>
+                            
+                            <textarea
+                                value={supportMessage}
+                                onChange={(e) => setSupportMessage(e.target.value)}
+                                placeholder="How can we assist you today?"
+                                style={{
+                                    width: '100%', height: '150px', padding: '16px', borderRadius: '12px',
+                                    border: '1px solid #ddd', fontSize: '0.9rem', outline: 'none',
+                                    resize: 'none', background: '#f9f9f9', display: 'block'
+                                }}
+                            />
+
+                            <button
+                                disabled={isSubmitting || !supportMessage.trim()}
+                                onClick={async () => {
+                                    setIsSubmitting(true);
+                                    try {
+                                        const res = await fetch('/api/feedback', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ message: supportMessage })
+                                        });
+                                        if (res.ok) {
+                                            window.alert("Your priority request has been sent to our administration team. Grace be with you!");
+                                            setIsSupportModalOpen(false);
+                                            setSupportMessage('');
+                                        } else {
+                                            window.alert("Failed to send request. Please try again later.");
+                                        }
+                                    } catch (e) {
+                                        window.alert("An error occurred. Please try again.");
+                                    } finally {
+                                        setIsSubmitting(false);
+                                    }
+                                }}
+                                style={{
+                                    width: '100%', marginTop: '20px', padding: '14px', borderRadius: '12px',
+                                    background: (isSubmitting || !supportMessage.trim()) ? '#ccc' : 'linear-gradient(135deg, #1a1816, #2d2a28)',
+                                    color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                {isSubmitting ? "Sending..." : "Submit Priority Request"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <style jsx global>{`
+                @keyframes modalOpen {
+                    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+                    to { opacity: 1; transform: scale(1) translateY(0); }
+                }
+            `}</style>
 
             {/* ══════════════════════════════════
              PAGE: HYMNS

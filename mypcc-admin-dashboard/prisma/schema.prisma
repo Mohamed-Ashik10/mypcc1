@@ -25,6 +25,7 @@ model User {
   sessions         Session[]
   subscriptions    Subscription[]
   transactions     Transaction[]
+  supportRequests  SupportRequest[]
 }
 
 model Session {
@@ -176,6 +177,22 @@ model Testimonial {
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+model SupportRequest {
+  id        String   @id @default(cuid())
+  userId    String?
+  name      String?
+  email     String?
+  subject   String?
+  message   String   @db.Text
+  status    String   @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED
+  isPriority Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  User      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
 }
 
 enum SubscriptionType {
