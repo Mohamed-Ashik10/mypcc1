@@ -1971,6 +1971,7 @@
                         <div class="dac-bg" style="position:absolute; inset:0; ${imgStyle}; transition: transform 0.4s ease-out;"></div>
                         <div style="position:relative; z-index:1; padding:22px 20px; background: linear-gradient(to top, rgba(20,16,12,0.95) 0%, rgba(20,16,12,0.8) 50%, transparent 100%);">
                           ${d.category ? `<span style="display:inline-block; background:rgba(184,147,90,0.85); color:#fff; font-size:0.55rem; letter-spacing:0.2em; text-transform:uppercase; padding:3px 10px; border-radius:50px; margin-bottom:8px;">${d.category}</span>` : ''}
+                          ${!d.isFree ? `<span style="display:inline-block; background:linear-gradient(135deg, #6e1799, #4a0f66); color:#fff; font-size:0.5rem; letter-spacing:0.15em; text-transform:uppercase; padding:3px 8px; border-radius:4px; margin-left:6px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.1); box-shadow:0 2px 4px rgba(0,0,0,0.2);">💎 Premium</span>` : ''}
                           <p class="dac-date" style="color:rgba(253,250,245,0.6); margin:0 0 4px 0;">${d.date}</p>
                           <p class="dac-title" style="color:#fdfaf5; margin:0 0 4px 0; font-size:1.1rem;">${d.title}</p>
                           <p class="dac-ref" style="color:rgba(253,250,245,0.5); margin-bottom: 8px;">${ref || d.reading || 'Daily Grace'}</p>

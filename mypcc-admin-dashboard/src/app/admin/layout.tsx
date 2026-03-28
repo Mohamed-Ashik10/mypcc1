@@ -28,7 +28,15 @@ const navLinks = [
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-    // 1. Fetch settings from backend
+    const themeMatrix: Record<string, string> = {
+        white: "--primary: 221.2 83.2% 53.3%; --primary-foreground: 210 40% 98%; --accent: 210 40% 96.1%;",
+        red: "--primary: 0 72.2% 50.6%; --primary-foreground: 0 85.7% 97.3%; --accent: 0 0% 96.1%;",
+        blue: "--primary: 199 89% 48%; --primary-foreground: 210 40% 98%; --accent: 210 40% 96.1%;",
+        gray: "--primary: 215 25% 27%; --primary-foreground: 210 40% 98%; --accent: 210 40% 96.1%;",
+        default: "--primary: 283 74% 35%; --primary-foreground: 210 40% 98%; --accent: 255 0% 96%;"
+    };
+
+    let themePreset = "default";
     let sideTitle = "Canticle";
     let sideLogo = "/logo.png";
 
@@ -39,6 +47,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             else if (settings.app_name) sideTitle = settings.app_name; // Fallback
 
             if (settings.logo_admin) sideLogo = settings.logo_admin;
+            if (settings.theme_preset) themePreset = settings.theme_preset;
         }
     } catch (err) {
         console.error("Layout context fetch failed. Using Prisma Fallback.", err);
@@ -51,16 +60,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             else if (settingsMap.app_name) sideTitle = settingsMap.app_name;
 
             if (settingsMap.logo_admin) sideLogo = settingsMap.logo_admin;
+            if (settingsMap.theme_preset) themePreset = settingsMap.theme_preset;
         } catch (dbErr) {
             console.error("Layout DB Fallback failed.", dbErr);
         }
     }
 
-    const defaultTheme = "--primary: 283 74% 35%; --primary-foreground: 210 40% 98%; --accent: 255 0% 96%;";
+    const initialStyles = themeMatrix[themePreset] || themeMatrix.default;
 
     return (
         <div className="flex h-screen overflow-hidden bg-background font-sans selection:bg-primary/10 selection:text-primary">
-            <DynamicThemeProvider initialStyles={defaultTheme} />
+            <DynamicThemeProvider initialStyles={initialStyles} />
 
             {/* Sidebar — role shown client-side via useSession in ResponsiveSidebar */}
             <ResponsiveSidebar
