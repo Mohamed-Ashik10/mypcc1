@@ -114,10 +114,25 @@ export default function SettingsPage() {
     const [logoApp, setLogoApp] = useState("/logo.png");
     const [logoPrint, setLogoPrint] = useState("/logo.png");
 
-    // Appearance settings
+    // ── Appearance settings ────────────────────────────────────────────────
     const [themePreset, setThemePreset] = useState("default");
     const [loginBg, setLoginBg] = useState("");
     const [adminLoginBg, setAdminLoginBg] = useState("");
+
+    // ── Theme Matrix Mapping ────────────────────────────────────────────────
+    const themeMatrix: Record<string, string> = {
+        white: "--primary: 221.2 83.2% 53.3%; --primary-foreground: 210 40% 98%; --accent: 210 40% 96.1%;",
+        red: "--primary: 0 72.2% 50.6%; --primary-foreground: 0 85.7% 97.3%; --accent: 0 0% 96.1%;",
+        blue: "--primary: 199 89% 48%; --primary-foreground: 210 40% 98%; --accent: 210 40% 96.1%;",
+        gray: "--primary: 215 25% 27%; --primary-foreground: 210 40% 98%; --accent: 210 40% 96.1%;",
+        default: "--primary: 283 74% 35%; --primary-foreground: 210 40% 98%; --accent: 255 0% 96%;"
+    };
+
+    // ── Preview theme instantly ─────────────────────────────────────────────
+    useEffect(() => {
+        const styles = themeMatrix[themePreset] || themeMatrix.default;
+        window.dispatchEvent(new CustomEvent("system-theme-updated", { detail: { styles } }));
+    }, [themePreset]);
 
     // ── Load settings on mount ──────────────────────────────────────────────
     useEffect(() => {
@@ -159,17 +174,6 @@ export default function SettingsPage() {
     // ── Save settings ───────────────────────────────────────────────────────
     const handleSave = async () => {
         setSaving(true);
-
-        // ── Apply theme instantly (don't wait for DB) ──────────────────────
-        const themeMatrix: Record<string, string> = {
-            white: "--primary: 221.2 83.2% 53.3%; --primary-foreground: 210 40% 98%; --accent: 210 40% 96.1%;",
-            red: "--primary: 0 72.2% 50.6%; --primary-foreground: 0 85.7% 97.3%; --accent: 0 0% 96.1%;",
-            blue: "--primary: 199 89% 48%; --primary-foreground: 210 40% 98%; --accent: 210 40% 96.1%;",
-            gray: "--primary: 215 25% 27%; --primary-foreground: 210 40% 98%; --accent: 210 40% 96.1%;",
-            default: "--primary: 283 74% 35%; --primary-foreground: 210 40% 98%; --accent: 255 0% 96%;"
-        };
-        const styles = themeMatrix[themePreset] || themeMatrix.default;
-        window.dispatchEvent(new CustomEvent("system-theme-updated", { detail: { styles } }));
 
         try {
             const payload: Record<string, string> = {
