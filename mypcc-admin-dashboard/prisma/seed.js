@@ -115,14 +115,27 @@ async function main() {
         });
     }
 
-    console.log(`Starting bulk insert of 1,750 professional records...`);
-    for (let i = 0; i < allHymns.length; i += 25) {
-        const batch = allHymns.slice(i, i + 25);
-        // Process batch sequentially to avoid pooling timeout
-        for (const h of batch) {
-            await prisma.hymn.create({ data: h });
+    console.log(`Starting resilient restoration of ${allHymns.length} professional records...`);
+    const batchSize = 10;
+    for (let i = 0; i < allHymns.length; i += batchSize) {
+        const batch = allHymns.slice(i, i + batchSize);
+        try {
+            // Use upsert to handle potential partial runs
+            await Promise.all(batch.map(h => 
+                prisma.hymn.upsert({
+                    where: { number: h.number },
+                    update: h,
+                    create: h
+                })
+            ));
+            console.log(`Synchronized batch ending at ${Math.min(i + batchSize, allHymns.length)} / 1750...`);
+            // Cooling delay for TiDB pool
+            await new Promise(r => setTimeout(r, 500));
+        } catch (error) {
+            console.error(`Batch at index ${i} failed (Error: ${error.message}). Retrying in 2s...`);
+            await new Promise(r => setTimeout(r, 2000));
+            i -= batchSize; // Retry the same batch
         }
-        console.log(`Synchronized Hymn ${i + batch.length} / 1750...`);
     }
 
     // 3. DIARY ARCHIVE RESTORATION (120 ENTRIES)

@@ -184,6 +184,13 @@ export default async function Home() {
     }
   }
 
+  // MISSION CRITICAL: Master Privilege - Admins bypass all gating
+  const isMasterAccount = ['ADMIN', 'SUPER_ADMIN'].includes((session?.user as any)?.role?.toUpperCase() || "");
+  if (isMasterAccount) {
+    targetLimit = Infinity;
+    subscriptionType = subscriptionType || 'SHEPHERD'; // For UI badges
+  }
+
   if (targetLimit < Infinity) {
     // We want a varied sample library, but the TOTAL must not exceed targetLimit.
     const sliceCount = Math.max(10, Math.floor(targetLimit / 5));
