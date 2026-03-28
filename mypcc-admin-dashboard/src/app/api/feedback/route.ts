@@ -13,7 +13,7 @@ export async function POST(req: Request) {
         }
 
         // Get user details from session if available
-        const userId = session?.user?.id;
+        const userId = (session?.user as any)?.id;
         const userEmail = email || session?.user?.email;
         const userName = name || session?.user?.name;
 
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
             }
         }
 
-        const feedback = await prisma.supportRequest.create({
+        const feedback = await (prisma as any).supportRequest.create({
             data: {
                 userId: userId || null,
                 name: userName || "Anonymous",
