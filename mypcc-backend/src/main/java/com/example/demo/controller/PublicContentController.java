@@ -3,7 +3,6 @@ package com.example.demo.controller;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -71,7 +70,7 @@ public class PublicContentController {
     @GetMapping("/settings")
     public Map<String, String> getSettings() {
         List<AppSetting> settings = appSettingRepository.findAll();
-        Set<String> publicKeys = Set.of("app_name", "logo_app", "contact_email", "footer_desc");
+        Set<String> publicKeys = Set.of("app_name", "logo_app", "contact_email", "footer_desc", "theme_preset", "logo_admin");
         
         return settings.stream()
                 .filter(s -> publicKeys.contains(s.getKey()))
