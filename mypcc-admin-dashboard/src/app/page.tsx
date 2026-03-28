@@ -45,6 +45,7 @@ export default async function Home() {
   let logoApp = "/logo.png";
   let footerDesc = "A sacred digital space for believers to read hymns, keep a spiritual diary, and grow daily in faith.";
   let contactEmail = "hello@canticle.app";
+  let themePreset = "sacred-red";
 
   try {
     const [fetchedHymns, fetchedEcho, fetchedTestimonials, fetchedAnnouncements, fetchedDiary, settings] = await Promise.all([
@@ -67,6 +68,7 @@ export default async function Home() {
       if (settings.logo_app) logoApp = settings.logo_app;
       if (settings.contact_email) contactEmail = settings.contact_email;
       if (settings.footer_desc) footerDesc = settings.footer_desc;
+      if (settings.theme_preset) themePreset = settings.theme_preset;
     }
 
     const devotionals = await getDevotionals().catch(e => {
@@ -75,6 +77,7 @@ export default async function Home() {
     });
     latestDevotional = devotionals[0] || null;
     archivedDevotionals = devotionals.slice(1);
+
   } catch (error) {
     console.error("Backend fetch failed. Attempting Direct Database Fallback...", error);
     // FALLBACK: Fetch directly from database if backend is offline
@@ -100,6 +103,7 @@ export default async function Home() {
         if (settingsMap.logo_app) logoApp = settingsMap.logo_app;
         if (settingsMap.contact_email) contactEmail = settingsMap.contact_email;
         if (settingsMap.footer_desc) footerDesc = settingsMap.footer_desc;
+        if (settingsMap.theme_preset) themePreset = settingsMap.theme_preset;
 
         const dbDevotionals = await prisma.devotional.findMany({ orderBy: { date: 'desc' } });
         latestDevotional = dbDevotionals[0] || null;
@@ -161,7 +165,8 @@ export default async function Home() {
     fullText: a.fullText || '',
     coverUrl: a.coverUrl,
     pdfUrl: a.pdfUrl,
-    isFeatured: a.isFeatured
+    isFeatured: a.isFeatured,
+    images: a.images
   }));
 
   // Format Hymns to ensure 'num' exists (legacy compat)
@@ -318,6 +323,7 @@ export default async function Home() {
       initialFavorites={formattedFavorites}
       isPaywallActive={targetLimit < Infinity}
       subscriptionType={subscriptionType}
+      themePreset={themePreset}
     />
   );
 }

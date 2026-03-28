@@ -21,7 +21,32 @@ interface LandingPageClientProps {
     logoApp?: string;
     footerDesc?: string;
     contactEmail?: string;
+    themePreset?: string;
 }
+
+// ─── Theme Configuration Matrix ───────────────────────────────────────────────
+const LandingThemeMatrix: Record<string, any> = {
+    white: {
+        gold: "#2563eb", goldL: "#3b82f6", goldD: "#1e40af",
+        border: "rgba(37, 99, 235, 0.18)", border2: "rgba(37, 99, 235, 0.08)"
+    },
+    red: {
+        gold: "#630b0b", goldL: "#8a1a1a", goldD: "#3d0707",
+        border: "rgba(99, 11, 11, 0.18)", border2: "rgba(99, 11, 11, 0.08)"
+    },
+    blue: {
+        gold: "#0369a1", goldL: "#0ea5e9", goldD: "#075985",
+        border: "rgba(3, 105, 161, 0.18)", border2: "rgba(3, 105, 161, 0.08)"
+    },
+    gray: {
+        gold: "#374151", goldL: "#4b5563", goldD: "#1f2937",
+        border: "rgba(55, 65, 81, 0.18)", border2: "rgba(55, 65, 81, 0.08)"
+    },
+    default: {
+        gold: "#6e1799", goldL: "#8e37b9", goldD: "#4e0779",
+        border: "rgba(110, 23, 153, 0.18)", border2: "rgba(110, 23, 153, 0.08)"
+    }
+};
 
 // ─── SVG Icon Components ──────────────────────────────────────────────────────
 
@@ -103,7 +128,8 @@ export default function LandingPageClient({
     appName = "Canticle",
     logoApp = "/logo.png",
     footerDesc = "A sacred digital space for believers to read hymns, keep a spiritual diary, and grow daily in faith.",
-    contactEmail = "hello@canticle.app"
+    contactEmail = "hello@canticle.app",
+    themePreset = "default"
 }: LandingPageClientProps) {
     const [favorites, setFavorites] = useState<string[]>(initialFavorites);
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
@@ -115,6 +141,18 @@ export default function LandingPageClient({
             setFavorites([...((window as any).hymnFavorites || [])]);
         };
     }, [favorites]);
+
+    useEffect(() => {
+        // --- 1. APPLY GLOBAL THEME FROM PRESET ---
+        const theme = LandingThemeMatrix[themePreset] || LandingThemeMatrix.default;
+        const root = document.documentElement;
+
+        root.style.setProperty('--gold', theme.gold);
+        root.style.setProperty('--gold-l', theme.goldL);
+        root.style.setProperty('--gold-d', theme.goldD);
+        root.style.setProperty('--border', theme.border);
+        root.style.setProperty('--border2', theme.border2);
+    }, [themePreset]);
 
     useEffect(() => {
         // Inject initial data for the legacy script
@@ -142,8 +180,8 @@ export default function LandingPageClient({
             // If already loaded, just re-trigger the initial renders since data might have changed
             if (typeof (window as any).renderHymns === 'function') {
                 (window as any).renderHymns(initialHymns);
-                (window as any).renderDiary(initialDiary);
-                (window as any).renderEcho();
+                (window as any).renderDiary && (window as any).renderDiary(initialDiary);
+                (window as any).renderEcho && (window as any).renderEcho();
                 (window as any).renderDevotional && (window as any).renderDevotional();
             }
         }
@@ -152,7 +190,7 @@ export default function LandingPageClient({
             // Do not remove the script here, as Next.js navigation might rely on it persisting,
             // or we will just let it live for the lifecycle of the SPA.
         };
-    }, [initialHymns, initialEcho, initialDevotional, initialArchive, initialDiary, initialAnnouncements]);
+    }, [initialHymns, initialEcho, initialDevotional, initialArchive, initialDiary, initialAnnouncements, subscriptionType, isPaywallActive]);
 
     return (
         <div className="landing-body">
@@ -211,6 +249,30 @@ export default function LandingPageClient({
                     >
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     </button>
+
+                    {subscriptionType === 'SHEPHERD' && (
+                        <button
+                            title="Priority Support"
+                            onClick={() => window.alert("As a Shepherd partner, our priority support team has been notified. We will reach out to your registered email shortly. Grace be with you!")}
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                padding: '0 12px', height: '32px', borderRadius: '8px',
+                                background: 'linear-gradient(135deg, #b8935a, #d4af37)', 
+                                color: '#1a1510',
+                                border: 'none',
+                                cursor: 'pointer', flexShrink: 0,
+                                fontSize: '0.65rem', fontWeight: 800,
+                                textTransform: 'uppercase', letterSpacing: '0.05em',
+                                boxShadow: '0 4px 12px rgba(184, 147, 90, 0.3)',
+                                transition: 'all .2s'
+                            }}
+                            onMouseOver={(e:any) => e.currentTarget.style.transform='translateY(-1px)'}
+                            onMouseOut={(e:any) => e.currentTarget.style.transform='translateY(0)'}
+                        >
+                            <span style={{ marginRight: '6px' }}>✨</span> Priority Help
+                        </button>
+                    )}
+
                     {session ? (
                         <>
                             <button

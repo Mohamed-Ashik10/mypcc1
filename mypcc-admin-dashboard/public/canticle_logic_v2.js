@@ -1623,7 +1623,7 @@
                   ★ Issue of the Month
                 </div>
               ` : ''}
-              ${isFeatured ? `<div class="echo-img-placeholder" style="${a.coverUrl ? `background-image:url(${a.coverUrl}); background-size:cover;` : ''}">
+              ${isFeatured ? `<div class="echo-img-placeholder" style="${a.coverUrl ? `background-image:url('${a.coverUrl}'); background-size:cover; background-position:center;` : ''}">
                 ${a.coverUrl ? '' : '✝'}
               </div>` : ''}
               <div style="${isFeatured ? '' : 'padding-top:12px;'}">
@@ -1963,6 +1963,19 @@
                             }
                         }
                     }
+
+                    // --- CHECK ACCESS FOR CARD EXCERPT ---
+                    let hasCardAccess = true;
+                    if (d.isFree === false && window.isPaywallActive !== false) {
+                        const userPlan = window.subscriptionType || "SEEKER";
+                        const planLevels = { "FREE": 0, "SEEKER": 1, "PILGRIM": 2, "SHEPHERD": 3 };
+                        const reqLevel = planLevels[d.minPlan] || 2;
+                        const curLevel = planLevels[userPlan] || 1;
+                        if (curLevel < reqLevel) {
+                            hasCardAccess = false;
+                        }
+                    }
+
                     const imgStyle = d.image
                         ? `background-image: linear-gradient(to bottom, rgba(26,21,16,0.1) 0%, rgba(26,21,16,0.75) 100%), url('${d.image}'); background-size: cover; background-position: center;`
                         : `background: linear-gradient(135deg, #1a1510, #2e1f0e);`;
@@ -1971,11 +1984,11 @@
                         <div class="dac-bg" style="position:absolute; inset:0; ${imgStyle}; transition: transform 0.4s ease-out;"></div>
                         <div style="position:relative; z-index:1; padding:22px 20px; background: linear-gradient(to top, rgba(20,16,12,0.95) 0%, rgba(20,16,12,0.8) 50%, transparent 100%);">
                           ${d.category ? `<span style="display:inline-block; background:rgba(184,147,90,0.85); color:#fff; font-size:0.55rem; letter-spacing:0.2em; text-transform:uppercase; padding:3px 10px; border-radius:50px; margin-bottom:8px;">${d.category}</span>` : ''}
-                          ${!d.isFree ? `<span style="display:inline-block; background:linear-gradient(135deg, #6e1799, #4a0f66); color:#fff; font-size:0.5rem; letter-spacing:0.15em; text-transform:uppercase; padding:3px 8px; border-radius:4px; margin-left:6px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.1); box-shadow:0 2px 4px rgba(0,0,0,0.2);">💎 Premium</span>` : ''}
+                          ${!hasCardAccess ? `<span style="display:inline-block; background:linear-gradient(135deg, #6e1799, #4a0f66); color:#fff; font-size:0.5rem; letter-spacing:0.15em; text-transform:uppercase; padding:3px 8px; border-radius:4px; margin-left:6px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.1); box-shadow:0 2px 4px rgba(0,0,0,0.2);">💎 Premium</span>` : ''}
                           <p class="dac-date" style="color:rgba(253,250,245,0.6); margin:0 0 4px 0;">${d.date}</p>
                           <p class="dac-title" style="color:#fdfaf5; margin:0 0 4px 0; font-size:1.1rem;">${d.title}</p>
                           <p class="dac-ref" style="color:rgba(253,250,245,0.5); margin-bottom: 8px;">${ref || d.reading || 'Daily Grace'}</p>
-                          ${d.excerpt ? `<p style="color:rgba(253,250,245,0.7); font-size:0.75rem; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${d.excerpt}</p>` : ''}
+                          ${d.excerpt ? `<p style="color:rgba(253,250,245,0.7); font-size:0.75rem; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${hasCardAccess ? d.excerpt : 'Unlock this full devotional reflection via upgrade.'}</p>` : ''}
                         </div>
                       </div>`;
                 }).join('');
@@ -2159,7 +2172,7 @@
             let hasAccess = true;
             if (d.isFree === false && window.isPaywallActive !== false) {
                 const userPlan = window.subscriptionType || "SEEKER";
-                const planLevels = { "SEEKER": 1, "PILGRIM": 2, "SHEPHERD": 3 };
+                const planLevels = { "FREE": 0, "SEEKER": 1, "PILGRIM": 2, "SHEPHERD": 3 };
                 const reqLevel = planLevels[d.minPlan] || 2;
                 const curLevel = planLevels[userPlan] || 1;
                 if (curLevel < reqLevel) {
