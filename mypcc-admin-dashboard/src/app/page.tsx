@@ -150,6 +150,26 @@ export default async function Home() {
     }
   }
 
+  // MISSION CRITICAL: Map Database Echo Issues to Logic Script expectations
+  const mappedEcho = echoIssues.map(a => ({
+    id: a.id,
+    cat: (a.category || 'news').toLowerCase(), // Labeled 'cat', Lowercased for UI filter matching
+    title: a.title,
+    author: a.author || 'PCC Admin',
+    date: a.issueMonth ? new Date(a.issueMonth).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No Date',
+    excerpt: a.excerpt || 'Read the latest issue of The Echo.',
+    fullText: a.fullText || '',
+    coverUrl: a.coverUrl,
+    pdfUrl: a.pdfUrl,
+    isFeatured: a.isFeatured
+  }));
+
+  // Format Hymns to ensure 'num' exists (legacy compat)
+  const mappedHymns = hymns.map(h => ({
+    ...h,
+    num: (h.number || '').toString().padStart(3, '0') // Logic script expects 'num'
+  }));
+
   // Enforce Paywall / Tier Limits
   // SEEKER = Basic, PILGRIM = Moderate, SHEPHERD = Advanced
   let targetLimit = 50; // Normal User limit
