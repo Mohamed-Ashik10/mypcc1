@@ -76,13 +76,25 @@ export const authOptions: NextAuthOptions = {
             if (user) {
                 token.id = user.id;
                 token.role = (user as any).role;
+                
+                // Fetch subscription type to store in token
+                try {
+                    const sub = await prisma.subscription.findFirst({
+                        where: { userId: user.id, status: 'ACTIVE' },
+                        orderBy: { createdAt: 'desc' }
+                    });
+                    token.subscriptionType = sub?.type || 'FREE';
+                } catch (e) {
+                    token.subscriptionType = 'FREE';
+                }
             }
             return token;
         },
         async session({ session, token }) {
             if (session.user) {
-                (session.user as any).id = token.id;
-                (session.user as any).role = token.role;
+                (session.user as any).id = token.id as string;
+                (session.user as any).role = token.role as string;
+                (session.user as any).subscriptionType = (token.subscriptionType as string) || 'FREE';
             }
             return session;
         }

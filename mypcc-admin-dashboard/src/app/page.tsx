@@ -220,17 +220,25 @@ export default async function Home() {
     hymns = finalHymns.sort((a, b) => a.number - b.number);
 
     // --- ENHANCED CONTENT GATING (HEAVIER FREE SAMPLES) ---
-    const isGoldTier = ['PILGRIM', 'SHEPHERD'].includes(subscriptionType || "");
-    const isMember = !!subscriptionType;
+    // Hierarchical access check (Shepherd > Pilgrim > Seeker > Free)
+    const isShepherd = subscriptionType === 'SHEPHERD';
+    const isPilgrim = ['PILGRIM', 'SHEPHERD'].includes(subscriptionType || "");
+    const isSeeker = ['SEEKER', 'PILGRIM', 'SHEPHERD'].includes(subscriptionType || "");
 
-    // 1. The Echo Gating: Show 5 issues to everyone, Full Archive to Gold Tier
-    if (!isGoldTier && echoIssues.length > 5) {
-      echoIssues = echoIssues.slice(0, 5);
+    // 1. The Echo Gating: Hierarchical access
+    if (!isShepherd) {
+      const limit = isPilgrim ? 20 : (isSeeker ? 10 : 5);
+      if (echoIssues.length > limit) {
+        echoIssues = echoIssues.slice(0, limit);
+      }
     }
 
-    // 2. Devotional Archive Gating: Show 10 previous days to everyone, Full Archive to Members
-    if (!isMember && archivedDevotionals.length > 10) {
-      archivedDevotionals = archivedDevotionals.slice(0, 10);
+    // 2. Devotional Grid Gating: Hierarchical access
+    if (!isShepherd) {
+      const limit = isPilgrim ? 50 : (isSeeker ? 20 : 10);
+      if (archivedDevotionals.length > limit) {
+        archivedDevotionals = archivedDevotionals.slice(0, limit);
+      }
     }
   }
 

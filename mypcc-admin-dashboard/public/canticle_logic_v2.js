@@ -1240,6 +1240,8 @@
         if (window._diaryMode === 'personal') {
             const session = window.userSession;
             const sub = session?.user?.subscriptionType || 'FREE';
+            
+            // New Tiered Limits: Free (5), Seeker (20), Pilgrim (100), Shepherd (Unlimited)
             let limit = 5;
             if (sub === 'SEEKER') limit = 20;
             else if (sub === 'PILGRIM') limit = 100;
@@ -1965,15 +1967,14 @@
                     }
 
                     // --- CHECK ACCESS FOR CARD EXCERPT ---
+                    const userPlan = window.subscriptionType || "FREE";
+                    const planLevels = { "FREE": 0, "SEEKER": 1, "PILGRIM": 2, "SHEPHERD": 3 };
+                    const reqLevel = planLevels[d.minPlan] || 0;
+                    const curLevel = planLevels[userPlan] || 0;
+                    
                     let hasCardAccess = true;
-                    if (d.isFree === false && window.isPaywallActive !== false) {
-                        const userPlan = window.subscriptionType || "SEEKER";
-                        const planLevels = { "FREE": 0, "SEEKER": 1, "PILGRIM": 2, "SHEPHERD": 3 };
-                        const reqLevel = planLevels[d.minPlan] || 2;
-                        const curLevel = planLevels[userPlan] || 1;
-                        if (curLevel < reqLevel) {
-                            hasCardAccess = false;
-                        }
+                    if (d.isFree === false && curLevel < reqLevel) {
+                        hasCardAccess = false;
                     }
 
                     const imgStyle = d.image
