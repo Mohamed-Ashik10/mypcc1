@@ -4,9 +4,10 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import prisma from "@/lib/prisma";
 
 export default async function EditTestimonialPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions).catch(() => null);
   const userRole = (session?.user as any)?.role || "NORMAL_USER";
   
   if (!["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR"].includes(userRole)) {
@@ -18,7 +19,14 @@ export default async function EditTestimonialPage({ params }: { params: Promise<
   try {
     testimonial = await fetchFromBackend(`/api/admin/testimonials/${resolvedParams.id}`);
   } catch (error) {
-    console.error("Failed to fetch testimonial from backend:", error);
+    console.error("Failed to fetch testimonial from backend. Trying Prisma fallback.", error);
+    try {
+        testimonial = await prisma.testimonial.findUnique({
+            where: { id: resolvedParams.id }
+        });
+    } catch (dbError) {
+        console.error("Testimonials DB Fallback failed.", dbError);
+    }
   }
 
   if (!testimonial) {

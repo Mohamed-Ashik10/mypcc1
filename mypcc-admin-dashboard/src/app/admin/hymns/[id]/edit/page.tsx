@@ -3,10 +3,11 @@ import { fetchFromBackend } from "@/lib/api";
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 
 export default async function EditHymnPage({ params }: { params: Promise<{ id: string }> }) {
-    const session = await getServerSession(authOptions);
-    const userRole = (session?.user as any)?.role;
+    const session = await getServerSession(authOptions).catch(() => null);
+    const userRole = (session?.user as any)?.role || "NORMAL_USER";
     if (!["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR"].includes(userRole)) {
         redirect("/admin");
     }
@@ -16,7 +17,14 @@ export default async function EditHymnPage({ params }: { params: Promise<{ id: s
     try {
         hymn = await fetchFromBackend(`/api/admin/content/hymns/${id}`);
     } catch (error) {
-        console.error("Failed to fetch hymn from backend:", error);
+        console.error("Failed to fetch hymn from backend. Trying Prisma fallback.", error);
+        try {
+            hymn = await prisma.hymn.findUnique({
+                where: { id: id }
+            });
+        } catch (dbError) {
+            console.error("DB Fallback failed:", dbError);
+        }
     }
     
     if (!hymn) return notFound();

@@ -3,10 +3,11 @@ import { fetchFromBackend } from "@/lib/api";
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 
 export default async function EditEchoIssuePage({ params }: { params: Promise<{ id: string }> }) {
-    const session = await getServerSession(authOptions);
-    const userRole = (session?.user as any)?.role;
+    const session = await getServerSession(authOptions).catch(() => null);
+    const userRole = (session?.user as any)?.role || "NORMAL_USER";
     if (!["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR"].includes(userRole)) {
         redirect("/admin");
     }
@@ -16,7 +17,14 @@ export default async function EditEchoIssuePage({ params }: { params: Promise<{ 
     try {
         issue = await fetchFromBackend(`/api/admin/content/echo/${id}`);
     } catch (error) {
-        console.error("Failed to fetch echo issue from backend:", error);
+        console.error("Failed to fetch echo issue from backend. Trying Prisma fallback.", error);
+        try {
+            issue = await prisma.theEchoIssue.findUnique({
+                where: { id: id }
+            });
+        } catch (dbError) {
+            console.error("Echo DB Fallback failed.", dbError);
+        }
     }
     
     if (!issue) return notFound();
