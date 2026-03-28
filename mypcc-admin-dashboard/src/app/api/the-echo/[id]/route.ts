@@ -1,3 +1,4 @@
+import prisma from "@/lib/prisma";
 import { fetchFromBackend } from "@/lib/api";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -9,8 +10,14 @@ export async function GET(
 ) {
     const { id } = await params;
     try {
-        const issue = await fetchFromBackend<any>(`/api/admin/content/echo/${id}`);
-        if (!issue) return NextResponse.json({ error: "Newsletter Not Found" }, { status: 404 });
+        const issue = await prisma.theEchoIssue.findUnique({
+            where: { id }
+        });
+        
+        if (!issue) {
+            return NextResponse.json({ error: "Newsletter Not Found" }, { status: 404 });
+        }
+
         return NextResponse.json(issue);
     } catch (error) {
         console.error("Echo GET Error:", error);

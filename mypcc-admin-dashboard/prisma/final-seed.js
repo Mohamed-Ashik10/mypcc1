@@ -61,10 +61,11 @@ async function main() {
     for (let i = 0; i < 12; i++) {
         const d = new Date(); d.setMonth(d.getMonth() - i);
         const story = stories[i];
+        const cats = ['testimony', 'news', 'music', 'community'];
         await prisma.theEchoIssue.create({
             data: {
                 title: story.title, issueMonth: d, pdfUrl: 'pdf', excerpt: story.excerpt, fullText: story.fullText,
-                category: i % 2 === 0 ? 'COMMUNITY' : 'NEWS', isFeatured: i === 0,
+                category: cats[i % cats.length], isFeatured: i === 0,
                 coverUrl: getUrl(i),
                 images: JSON.stringify([getUrl(i+1), getUrl(i+2), getUrl(i+3)])
             }
