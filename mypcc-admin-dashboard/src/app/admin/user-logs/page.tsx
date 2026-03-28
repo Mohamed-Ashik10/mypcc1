@@ -4,14 +4,29 @@ import { redirect } from "next/navigation";
 import { fetchFromBackend } from "@/lib/api";
 import { formatDistanceToNow } from "date-fns";
 import { ShieldAlert, Fingerprint, Lock, Zap, Database, Calendar } from "lucide-react";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function UserLogsPage() {
-    const [session, users] = await Promise.all([
-        getServerSession(authOptions),
-        fetchFromBackend<any[]>("/api/admin/users").catch(() => [])
-    ]);
+    let session = null;
+    let users: any[] = [];
+    try {
+        [session, users] = await Promise.all([
+            getServerSession(authOptions),
+            fetchFromBackend<any[]>("/api/admin/users")
+        ]);
+    } catch (err) {
+        console.error("User Logs fetch failed. Using Prisma Fallback.", err);
+        session = await getServerSession(authOptions).catch(() => null);
+        try {
+            users = await prisma.user.findMany({
+                orderBy: { createdAt: 'desc' }
+            });
+        } catch (dbError) {
+            console.error("User Logs DB Fallback failed.", dbError);
+        }
+    }
 
     if (!session || (session.user as any)?.role !== "SUPER_ADMIN") {
         redirect("/admin");

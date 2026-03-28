@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Landmark, ShieldCheck } from "lucide-react";
 import PccInfoManagement from "@/components/PccInfoManagement";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,14 @@ export default async function PccInfoPage() {
     try {
         sections = await fetchFromBackend<any[]>("/api/admin/pcc-info");
     } catch (error) {
-        console.error("Failed to fetch PCC Info from backend:", error);
+        console.error("Failed to fetch PCC Info from backend. Using Prisma Fallback.", error);
+        try {
+            sections = await prisma.pccInfo.findMany({
+                orderBy: { section: 'asc' }
+            });
+        } catch (dbError) {
+            console.error("PCC Info DB Fallback failed.", dbError);
+        }
     }
 
     return (

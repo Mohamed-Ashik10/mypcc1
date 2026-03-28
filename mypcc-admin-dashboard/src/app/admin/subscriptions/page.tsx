@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import AdminSubscriptionTable from "@/components/AdminSubscriptionTable";
 import { CreditCard, ShieldCheck, TrendingUp, Gem } from "lucide-react";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,15 @@ export default async function SubscriptionsPage() {
         try {
             subscriptions = await fetchFromBackend<any[]>("/api/admin/subscriptions");
         } catch (error) {
-            console.error("Failed to fetch subscriptions from Spring Boot:", error);
+            console.error("Failed to fetch subscriptions from Spring Boot. Using Prisma Fallback.", error);
+            try {
+                subscriptions = await prisma.subscription.findMany({
+                    include: { user: true },
+                    orderBy: { createdAt: 'desc' }
+                });
+            } catch (dbError) {
+                console.error("Subscription DB Fallback failed.", dbError);
+            }
         }
 
         return (
