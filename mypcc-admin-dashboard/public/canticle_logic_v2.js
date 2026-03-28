@@ -1623,10 +1623,10 @@
                   ★ Issue of the Month
                 </div>
               ` : ''}
-              ${isFeatured ? `<div class="echo-img-placeholder" style="${a.coverUrl ? `background-image:url('${a.coverUrl}'); background-size:cover; background-position:center;` : ''}">
+              <div class="echo-img-placeholder" style="${a.coverUrl ? `background-image:url('${a.coverUrl}'); background-size:cover; background-position:center;` : ''} ${isFeatured ? '' : 'height:160px; pointer-events:none; border-radius:12px 12px 0 0;'}">
                 ${a.coverUrl ? '' : '✝'}
-              </div>` : ''}
-              <div style="${isFeatured ? '' : 'padding-top:12px;'}">
+              </div>
+              <div style="${isFeatured ? '' : 'padding: 20px 24px 0;'}">
                 <p class="echo-card-cat">${a.cat}</p>
                 <h3 class="echo-card-title">${a.title}</h3>
                 <p class="echo-card-excerpt">${a.excerpt}</p>
