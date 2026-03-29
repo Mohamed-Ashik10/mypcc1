@@ -72,15 +72,52 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
-        async jwt({ token, user }) {
+        async signIn({ user, account, profile }) {
+            if (account?.provider === "credentials") return true;
+
+            if (account?.provider && user.email) {
+                try {
+                    const dbUser = await prisma.user.findUnique({ where: { email: user.email } });
+                    if (!dbUser) {
+                        await prisma.user.create({
+                            data: {
+                                email: user.email,
+                                name: user.name || profile?.name || "New User",
+                                image: user.image || (profile as any)?.picture || "",
+                                role: "NORMAL_USER",
+                            }
+                        });
+                    }
+                    return true;
+                } catch (error) {
+                    console.error("[AUTH] Error during OAuth sign in:", error);
+                    return false;
+                }
+            }
+            return true;
+        },
+        async jwt({ token, user, account }) {
             if (user) {
-                token.id = user.id;
-                token.role = (user as any).role;
+                if (account && account.provider !== "credentials" && user.email) {
+                    // For Google/Facebook, fetch the DB ID and Role as it was just created/found in signIn
+                    const dbUser = await prisma.user.findUnique({ where: { email: user.email } });
+                    if (dbUser) {
+                        token.id = dbUser.id;
+                        token.role = dbUser.role;
+                    } else {
+                        token.id = user.id;
+                        token.role = "NORMAL_USER";
+                    }
+                } else {
+                    // For Credentials, the ID and Role are returned directly from authorize()
+                    token.id = user.id;
+                    token.role = (user as any).role;
+                }
                 
                 // Fetch subscription type to store in token
                 try {
                     const sub = await prisma.subscription.findFirst({
-                        where: { userId: user.id, status: 'ACTIVE' },
+                        where: { userId: token.id as string, status: 'ACTIVE' },
                         orderBy: { createdAt: 'desc' }
                     });
                     token.subscriptionType = sub?.type || 'FREE';
