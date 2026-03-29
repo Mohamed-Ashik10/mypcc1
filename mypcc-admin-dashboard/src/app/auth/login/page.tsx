@@ -240,19 +240,17 @@ function LoginForm() {
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Or Login With</span>
                     <div className="h-[1px] bg-slate-200 flex-1"></div>
                 </div>
-                <div className="flex justify-center gap-8">
+                <div className="flex justify-center">
                     {[
-                        { icon: Facebook, provider: "facebook" },
-                        { icon: Twitter, provider: "twitter" },
                         { icon: Google, provider: "google" }
                     ].map((social, i) => (
                         <button
                             key={i}
                             type="button"
                             onClick={() => signIn(social.provider, { callbackUrl: "/" })}
-                            className="group/social relative w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 transition-all hover:-translate-y-1 hover:text-[#6e1799] hover:border-[#6e1799]/40 hover:bg-[#6e1799]/5 cursor-pointer"
+                            className="group/social relative w-12 h-12 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 transition-all hover:-translate-y-1 hover:text-[#6e1799] hover:border-[#6e1799]/40 hover:bg-[#6e1799]/5 cursor-pointer shadow-sm hover:shadow-md"
                         >
-                            <social.icon className="w-4 h-4" />
+                            <social.icon className="w-5 h-5 transition-transform group-hover/social:scale-110" />
                             <div className="absolute inset-0 rounded-full blur-lg bg-[#6e1799]/0 group-hover/social:bg-[#6e1799]/10 transition-colors -z-10"></div>
                         </button>
                     ))}
