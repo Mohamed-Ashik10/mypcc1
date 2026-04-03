@@ -135,11 +135,7 @@ export default function SettingsPage() {
     };
 
     // ── Preview theme instantly ─────────────────────────────────────────────
-    useEffect(() => {
-        if (!isDbLoaded) return; // Prevent overwriting accurate SSR layout before API resolves
-        const styles = themeMatrix[themePreset] || themeMatrix.default;
-        window.dispatchEvent(new CustomEvent("system-theme-updated", { detail: { styles } }));
-    }, [themePreset, isDbLoaded]);
+    // Removed: We now only dispatch theme updates AFTER the user successfully clicks Save Preferences.
 
     // ── Load settings on mount ──────────────────────────────────────────────
     useEffect(() => {
@@ -213,6 +209,11 @@ export default function SettingsPage() {
             if (!res.ok) throw new Error(await res.text());
 
             showToast("Settings synchronized successfully.", "success");
+            
+            // Apply the theme visually across the dashboard only after saving
+            const styles = themeMatrix[themePreset] || themeMatrix.default;
+            window.dispatchEvent(new CustomEvent("system-theme-updated", { detail: { styles } }));
+
             router.refresh();
         } catch (err: any) {
             // Show actual error — TiDB can be slow so we now have 30s timeout

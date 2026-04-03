@@ -61,7 +61,7 @@ export async function uploadToBackend(file: File): Promise<{ url: string }> {
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch(`${BACKEND_URL}/api/admin/upload`, {
+    const res = await fetch(`/api/admin/upload`, {
         method: "POST",
         headers: {
             'Authorization': `Basic ${AUTH_TOKEN}`,
