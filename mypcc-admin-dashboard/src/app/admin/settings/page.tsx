@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Settings, Mail, Bell, Save, ShieldCheck, Send, Globe, MapPin, Phone, Info } from "lucide-react";
+import { Settings, Mail, Bell, Save, ShieldCheck, Send, Globe, MapPin, Phone, Info, UploadCloud } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { BACKEND_URL, uploadToBackend, fetchFromBackend } from "@/lib/api";
@@ -67,7 +67,7 @@ function Field({ label, hint, type = "text", value, onChange, placeholder, onUpl
                         {uploading ? (
                             <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
                         ) : (
-                            <Save size={18} />
+                            <UploadCloud size={18} />
                         )}
                     </button>
                 )}
@@ -344,19 +344,19 @@ export default function SettingsPage() {
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-4">
-                                        <Field label="Admin Dashboard Logo" placeholder="/logo.png" value={logoAdmin} onChange={setLogoAdmin} onUpload={setLogoAdmin} hint="Displayed in the top bar and sidebar" />
+                                        <Field label="Admin Dashboard Logo" placeholder="URL or click icon ->" value={logoAdmin} onChange={setLogoAdmin} onUpload={setLogoAdmin} hint="Displayed in the top bar and sidebar" />
                                         <div className="w-20 h-20 bg-white rounded-2xl border border-[#dbdade]/50 p-2 overflow-hidden flex items-center justify-center shadow-inner">
                                             <img src={logoAdmin || "/logo.png"} alt="Preview" className="max-w-full max-h-full object-contain" onError={(e) => (e.currentTarget.src = "/logo.png")} />
                                         </div>
                                     </div>
                                     <div className="space-y-4">
-                                        <Field label="Public Application Logo" placeholder="/logo.png" value={logoApp} onChange={setLogoApp} onUpload={setLogoApp} hint="Displayed on the public website and landing page" />
+                                        <Field label="Public Application Logo" placeholder="URL or click icon ->" value={logoApp} onChange={setLogoApp} onUpload={setLogoApp} hint="Displayed on the public website and landing page" />
                                         <div className="w-20 h-20 bg-white rounded-2xl border border-[#dbdade]/50 p-2 overflow-hidden flex items-center justify-center shadow-inner">
                                             <img src={logoApp || "/logo.png"} alt="Preview" className="max-w-full max-h-full object-contain" onError={(e) => (e.currentTarget.src = "/logo.png")} />
                                         </div>
                                     </div>
                                     <div className="space-y-4">
-                                        <Field label="Print & Reporting Logo" placeholder="/logo.png" value={logoPrint} onChange={setLogoPrint} onUpload={setLogoPrint} hint="High-resolution logo for PDF exports and printed reports" />
+                                        <Field label="Print & Reporting Logo" placeholder="URL or click icon ->" value={logoPrint} onChange={setLogoPrint} onUpload={setLogoPrint} hint="High-resolution logo for PDF exports and printed reports" />
                                         <div className="w-20 h-20 bg-white rounded-2xl border border-[#dbdade]/50 p-2 overflow-hidden flex items-center justify-center shadow-inner">
                                             <img src={logoPrint || "/logo.png"} alt="Preview" className="max-w-full max-h-full object-contain" onError={(e) => (e.currentTarget.src = "/logo.png")} />
                                         </div>
@@ -398,14 +398,14 @@ export default function SettingsPage() {
                                     <div className="md:col-span-1" />
 
                                     <div className="space-y-4">
-                                        <Field label="User Login Background" placeholder="URL to image..." value={loginBg} onChange={setLoginBg} onUpload={setLoginBg} hint="Background visual for the public member login screen" />
+                                        <Field label="User Login Background" placeholder="URL or click icon ->" value={loginBg} onChange={setLoginBg} onUpload={setLoginBg} hint="Background visual for the public member login screen" />
                                         <div className="aspect-video w-full bg-[#f8f7fa] rounded-2xl border border-[#dbdade]/50 overflow-hidden relative shadow-inner">
                                             {loginBg ? <img src={loginBg} className="w-full h-full object-cover" /> : <div className="flex items-center justify-center h-full text-[#a5a3ae] text-[10px] font-black uppercase">Background Default</div>}
                                         </div>
                                     </div>
 
                                     <div className="space-y-4">
-                                        <Field label="Admin Login Background" placeholder="URL to image..." value={adminLoginBg} onChange={setAdminLoginBg} onUpload={setAdminLoginBg} hint="Custom background for the backend administration entry" />
+                                        <Field label="Admin Login Background" placeholder="URL or click icon ->" value={adminLoginBg} onChange={setAdminLoginBg} onUpload={setAdminLoginBg} hint="Custom background for the backend administration entry" />
                                         <div className="aspect-video w-full bg-[#f8f7fa] rounded-2xl border border-[#dbdade]/50 overflow-hidden relative shadow-inner">
                                             {adminLoginBg ? <img src={adminLoginBg} className="w-full h-full object-cover" /> : <div className="flex items-center justify-center h-full text-[#a5a3ae] text-[10px] font-black uppercase">Background Default</div>}
                                         </div>
