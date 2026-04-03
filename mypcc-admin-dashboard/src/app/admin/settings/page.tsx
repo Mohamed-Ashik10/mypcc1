@@ -49,7 +49,7 @@ function Field({ label, hint, type = "text", value, onChange, placeholder, onUpl
                         <input
                             type="file"
                             className="absolute inset-0 opacity-0 cursor-pointer"
-                            accept="image/*"
+                            accept="image/*,.png,.jpg,.jpeg,.gif,.webp"
                             onChange={async (e) => {
                                 const file = e.target.files?.[0];
                                 if (!file) return;
