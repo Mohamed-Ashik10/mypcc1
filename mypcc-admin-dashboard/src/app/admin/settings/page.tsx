@@ -134,8 +134,22 @@ export default function SettingsPage() {
         brown: "--primary: 25 76% 31%; --primary-foreground: 0 0% 100%; --accent: 25 76% 90%;"
     };
 
-    // ── Preview theme instantly ─────────────────────────────────────────────
-    // Removed: We now only dispatch theme updates AFTER the user successfully clicks Save Preferences.
+    // ── Preview theme instantly (Temporary Local Override) ──────────────────
+    useEffect(() => {
+        if (!isDbLoaded) return;
+        
+        // Temporarily change layout visually
+        const overrideStyles = themeMatrix[themePreset] || themeMatrix.default;
+        window.dispatchEvent(new CustomEvent("system-theme-updated", { detail: { styles: overrideStyles } }));
+
+        // If the user navigates away from this page WITHOUT clicking Save, 
+        // the unmount cleanup safely reverts the layout back to database truth.
+        return () => {
+             const originalTheme = document.documentElement.dataset.currentSavedTheme || "default";
+             const originalStyles = themeMatrix[originalTheme] || themeMatrix.default;
+             window.dispatchEvent(new CustomEvent("system-theme-updated", { detail: { styles: originalStyles } }));
+        };
+    }, [themePreset, isDbLoaded]);
 
     // ── Load settings on mount ──────────────────────────────────────────────
     useEffect(() => {
@@ -161,7 +175,10 @@ export default function SettingsPage() {
                 if (s.logo_admin) setLogoAdmin(s.logo_admin);
                 if (s.logo_app) setLogoApp(s.logo_app);
                 if (s.logo_print) setLogoPrint(s.logo_print);
-                if (s.theme_preset) setThemePreset(s.theme_preset);
+                if (s.theme_preset) {
+                    setThemePreset(s.theme_preset);
+                    document.documentElement.dataset.currentSavedTheme = s.theme_preset;
+                }
                 if (s.login_bg) setLoginBg(s.login_bg);
                 if (s.admin_login_bg) setAdminLoginBg(s.admin_login_bg);
                 if (s.footer_desc) setFooterDesc(s.footer_desc);
@@ -209,6 +226,9 @@ export default function SettingsPage() {
             if (!res.ok) throw new Error(await res.text());
 
             showToast("Settings synchronized successfully.", "success");
+            
+            // Persist the theme choice to the document dataset for clean rollback logic
+            document.documentElement.dataset.currentSavedTheme = themePreset;
             
             // Apply the theme visually across the dashboard only after saving
             const styles = themeMatrix[themePreset] || themeMatrix.default;

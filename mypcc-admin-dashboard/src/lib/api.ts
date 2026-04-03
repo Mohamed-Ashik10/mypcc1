@@ -58,29 +58,19 @@ export async function fetchFromBackend<T>(path: string, options: FetchOptions = 
  * @returns Object containing the uploaded file URL
  */
 export async function uploadToBackend(file: File): Promise<{ url: string }> {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await fetch(`/api/admin/upload`, {
-        method: "POST",
-        headers: {
-            'Authorization': `Basic ${AUTH_TOKEN}`,
-            'Accept': 'application/json',
-        },
-        body: formData,
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            if (typeof reader.result === "string") {
+                // Return the base64 encoded string directly as the 'url'
+                resolve({ url: reader.result });
+            } else {
+                reject(new Error("Failed to encode image to base64"));
+            }
+        };
+        reader.onerror = () => reject(reader.error);
+        
+        // Read the file as a data URL (base64 string)
+        reader.readAsDataURL(file);
     });
-
-    if (!res.ok) {
-        const error = await res.text();
-        throw new Error(`Upload failed: ${error}`);
-    }
-
-    const data = await res.json();
-    
-    // Ensure the URL is absolute if it's relative
-    if (data.url && data.url.startsWith('/')) {
-        data.url = `${BACKEND_URL}${data.url}`;
-    }
-    
-    return data;
 }
