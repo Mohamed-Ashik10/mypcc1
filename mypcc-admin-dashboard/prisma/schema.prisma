@@ -155,7 +155,7 @@ model Transaction {
 model AppSetting {
   id        String   @id @default(cuid())
   key       String   @unique
-  value     String   @db.Text
+  value     String   @db.LongText
   updatedAt DateTime @updatedAt
 }
 
