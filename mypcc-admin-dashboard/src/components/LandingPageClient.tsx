@@ -45,6 +45,26 @@ const LandingThemeMatrix: Record<string, any> = {
     default: {
         gold: "#6e1799", goldL: "#8e37b9", goldD: "#4e0779",
         border: "rgba(110, 23, 153, 0.18)", border2: "rgba(110, 23, 153, 0.08)"
+    },
+    emerald: {
+        gold: "#047857", goldL: "#10b981", goldD: "#064e3b",
+        border: "rgba(4, 120, 87, 0.18)", border2: "rgba(4, 120, 87, 0.08)"
+    },
+    teal: {
+        gold: "#0f766e", goldL: "#14b8a6", goldD: "#115e59",
+        border: "rgba(15, 118, 110, 0.18)", border2: "rgba(15, 118, 110, 0.08)"
+    },
+    rose: {
+        gold: "#e11d48", goldL: "#fb7185", goldD: "#be123c",
+        border: "rgba(225, 29, 72, 0.18)", border2: "rgba(225, 29, 72, 0.08)"
+    },
+    amber: {
+        gold: "#d97706", goldL: "#fbbf24", goldD: "#b45309",
+        border: "rgba(217, 119, 6, 0.18)", border2: "rgba(217, 119, 6, 0.08)"
+    },
+    brown: {
+        gold: "#78350f", goldL: "#92400e", goldD: "#451a03",
+        border: "rgba(120, 53, 15, 0.18)", border2: "rgba(120, 53, 15, 0.08)"
     }
 };
 
