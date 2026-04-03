@@ -46,7 +46,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     let sideLogo = "/logo.png";
 
     try {
-        const settings = await fetchFromBackend<any>("/api/admin/settings", { revalidate: 3600 });
+        const settings = await fetchFromBackend<any>("/api/admin/settings", { revalidate: 0 });
         if (settings) {
             if (settings.sidebar_title) sideTitle = settings.sidebar_title;
             else if (settings.app_name) sideTitle = settings.app_name; // Fallback
