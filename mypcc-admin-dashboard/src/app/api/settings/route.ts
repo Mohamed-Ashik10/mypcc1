@@ -4,16 +4,25 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import nodemailer from "nodemailer";
 
-// GET — return all settings as { key: value } map
+// GET — return settings as { key: value } map
+// MISSION CRITICAL: Special Public Access for branding assets on the Login Page
 export async function GET() {
     const session = await getServerSession(authOptions);
     const role = (session?.user as any)?.role;
-    if (!session || !["SUPER_ADMIN", "ADMIN_STAFF"].includes(role)) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const isAdmin = session && ["SUPER_ADMIN", "ADMIN_STAFF"].includes(role);
+
     const rows = await prisma.appSetting.findMany();
     const settings: Record<string, string> = {};
-    for (const row of rows) settings[row.key] = row.value;
+    
+    // Branding & UI assets are PUBLIC if not logged in
+    const publicKeys = ["app_name", "logo_app", "logo_admin", "login_bg", "admin_login_bg", "footer_desc", "sidebar_title"];
+
+    for (const row of rows) {
+        if (isAdmin || publicKeys.includes(row.key)) {
+            settings[row.key] = row.value;
+        }
+    }
+
     return NextResponse.json(settings);
 }
 
