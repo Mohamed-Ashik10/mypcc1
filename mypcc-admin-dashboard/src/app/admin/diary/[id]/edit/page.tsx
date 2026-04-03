@@ -37,6 +37,8 @@ export default async function EditDiaryEntryPage({ params }: { params: Promise<{
         readingOne: entry.readingOne ?? "",
         readingTwo: entry.readingTwo ?? "",
         readingThree: entry.readingThree ?? "",
+        isFree: entry.isFree ?? true,
+        minPlan: entry.minPlan ?? "SEEKER",
     };
 
     return (

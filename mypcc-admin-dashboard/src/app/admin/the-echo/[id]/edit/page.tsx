@@ -39,6 +39,7 @@ export default async function EditEchoIssuePage({ params }: { params: Promise<{ 
         isFeatured: issue.isFeatured,
         excerpt: issue.excerpt ?? "",
         fullText: issue.fullText ?? "",
+        minPlan: issue.minPlan ?? "SEEKER",
     };
 
     return (
