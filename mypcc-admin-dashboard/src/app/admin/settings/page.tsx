@@ -85,6 +85,7 @@ export default function SettingsPage() {
     const [testingEmail, setTestingEmail] = useState(false);
     const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
     const [testEmailTo, setTestEmailTo] = useState("");
+    const [isDbLoaded, setIsDbLoaded] = useState(false);
 
     // General settings
     const [appName, setAppName] = useState("Canticle");
@@ -130,9 +131,10 @@ export default function SettingsPage() {
 
     // ── Preview theme instantly ─────────────────────────────────────────────
     useEffect(() => {
+        if (!isDbLoaded) return; // Prevent overwriting accurate SSR layout before API resolves
         const styles = themeMatrix[themePreset] || themeMatrix.default;
         window.dispatchEvent(new CustomEvent("system-theme-updated", { detail: { styles } }));
-    }, [themePreset]);
+    }, [themePreset, isDbLoaded]);
 
     // ── Load settings on mount ──────────────────────────────────────────────
     useEffect(() => {
@@ -164,7 +166,8 @@ export default function SettingsPage() {
                 if (s.footer_desc) setFooterDesc(s.footer_desc);
                 if (s.sidebar_title) setSidebarTitle(s.sidebar_title);
             })
-            .catch(() => { });
+            .catch(() => { })
+            .finally(() => setIsDbLoaded(true));
     }, []);
 
     const showToast = (msg: string, type: "success" | "error") => {
