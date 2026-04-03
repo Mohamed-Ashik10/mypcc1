@@ -2317,14 +2317,13 @@ nav {
   padding: 32px 28px;
   border: 1px solid var(--border);
   background: var(--warm);
-  opacity: .35;
-  transform: scale(.96);
+  opacity: 1;
+  transform: scale(1);
   transition: all .5s ease;
+  border-radius: 20px;
 }
 
 .sticky-card.active {
-  opacity: 1;
-  transform: scale(1);
   box-shadow: 0 12px 40px rgba(184, 147, 90, .1);
   border-color: rgba(184, 147, 90, .35);
 }
