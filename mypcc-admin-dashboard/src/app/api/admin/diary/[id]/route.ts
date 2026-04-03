@@ -24,7 +24,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
                 readingTwo: body.readingTwo,
                 readingThree: body.readingThree,
                 body: body.body,
-                hymn: body.hymn
+                hymn: body.hymn,
+                isFree: body.isFree ?? undefined,
+                minPlan: body.minPlan ?? undefined,
             }
         });
         return NextResponse.json(updated);

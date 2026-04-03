@@ -23,6 +23,8 @@ export async function POST(req: NextRequest) {
                 readingThree: body.readingThree || "",
                 body: body.body || "",
                 hymn: body.hymn || "",
+                isFree: body.isFree ?? true,
+                minPlan: body.minPlan || "SEEKER",
                 userId: null // Admin entries are for general logs
             }
         });

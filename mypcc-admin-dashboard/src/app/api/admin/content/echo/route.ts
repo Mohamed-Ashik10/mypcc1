@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
                 isFeatured: body.isFeatured ?? false,
                 excerpt: body.excerpt || "",
                 fullText: body.fullText || "",
+                minPlan: body.minPlan || "SEEKER",
                 author: "Admin",
                 category: "news"
             }

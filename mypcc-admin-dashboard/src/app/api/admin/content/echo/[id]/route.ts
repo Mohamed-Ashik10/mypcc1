@@ -24,7 +24,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
                 isFree: body.isFree,
                 isFeatured: body.isFeatured,
                 excerpt: body.excerpt,
-                fullText: body.fullText
+                fullText: body.fullText,
+                minPlan: body.minPlan
             }
         });
         return NextResponse.json(updated);

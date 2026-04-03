@@ -13,6 +13,7 @@ interface EchoFormData {
     isFeatured: boolean;
     excerpt: string;
     fullText: string;
+    minPlan: string;
 }
 
 interface Props {
@@ -38,6 +39,7 @@ export default function EchoForm({ initialData, mode }: Props) {
         isFeatured: initialData?.isFeatured ?? false,
         excerpt: initialData?.excerpt ?? "",
         fullText: initialData?.fullText ?? "",
+        minPlan: initialData?.minPlan ?? "SEEKER",
     });
     const [error, setError] = useState("");
     const [saving, setSaving] = useState(false);
@@ -123,14 +125,42 @@ export default function EchoForm({ initialData, mode }: Props) {
                 </div>
                 <div className="flex items-end pb-2">
                     <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground cursor-pointer group">
-                        <input type="checkbox" id="isFree" name="isFree" checked={form.isFree} onChange={handleChange} className="h-4 w-4 rounded border-border bg-background text-blue-600 focus:ring-blue-500 transition-colors" />
-                        <span className="group-hover:text-foreground transition-colors mr-6">Free Access</span>
-                    </label>
-                    <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground cursor-pointer group">
                         <input type="checkbox" id="isFeatured" name="isFeatured" checked={form.isFeatured} onChange={handleChange} className="h-4 w-4 rounded border-border bg-background text-amber-600 focus:ring-amber-500 transition-colors" />
                         <span className="group-hover:text-amber-600 transition-colors">Featured Issue</span>
                     </label>
                 </div>
+            </div>
+
+            {/* ── Access Control ── */}
+            <div className="rounded-xl border border-border p-5 space-y-4 bg-background/50">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Access Level</p>
+                <div className="flex items-center gap-3">
+                    <input
+                        type="checkbox"
+                        id="isFree"
+                        checked={form.isFree}
+                        onChange={(e) => setForm(prev => ({ ...prev, isFree: e.target.checked }))}
+                        className="w-4 h-4 rounded accent-blue-600"
+                    />
+                    <label htmlFor="isFree" className="text-sm font-medium text-foreground">
+                        Free — visible to all users
+                    </label>
+                </div>
+                {!form.isFree && (
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-1">Minimum Plan Required</label>
+                        <select
+                            name="minPlan"
+                            value={form.minPlan}
+                            onChange={(e) => setForm(prev => ({ ...prev, minPlan: e.target.value }))}
+                            className="w-full bg-background border border-border rounded-xl px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                        >
+                            <option value="SEEKER">Seeker (Free)</option>
+                            <option value="PILGRIM">Pilgrim ($7/mo)</option>
+                            <option value="SHEPHERD">Shepherd ($18/mo)</option>
+                        </select>
+                    </div>
+                )}
             </div>
 
             <div className="space-y-4">

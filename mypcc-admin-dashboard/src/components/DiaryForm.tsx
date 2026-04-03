@@ -11,6 +11,8 @@ interface DiaryFormData {
     readingOne: string;
     readingTwo: string;
     readingThree: string;
+    isFree: boolean;
+    minPlan: string;
 }
 
 interface Props {
@@ -37,6 +39,8 @@ export default function DiaryForm({ initialData, mode }: Props) {
         readingOne: initialData?.readingOne ?? "",
         readingTwo: initialData?.readingTwo ?? "",
         readingThree: initialData?.readingThree ?? "",
+        isFree: initialData?.isFree ?? true,
+        minPlan: initialData?.minPlan ?? "SEEKER",
     });
     const [error, setError] = useState("");
     const [saving, setSaving] = useState(false);
@@ -140,6 +144,38 @@ export default function DiaryForm({ initialData, mode }: Props) {
             <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5 ml-1">Reading 3</label>
                 <input type="text" name="readingThree" value={form.readingThree} onChange={handleChange} placeholder="e.g. John 3:16-21" className={inputCls} />
+            </div>
+
+            {/* ── Access Control ── */}
+            <div className="rounded-xl border border-border p-5 space-y-4 bg-background/50">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Access Level</p>
+                <div className="flex items-center gap-3">
+                    <input
+                        type="checkbox"
+                        id="isFree"
+                        checked={form.isFree}
+                        onChange={(e) => setForm(prev => ({ ...prev, isFree: e.target.checked }))}
+                        className="w-4 h-4 rounded accent-blue-600"
+                    />
+                    <label htmlFor="isFree" className="text-sm font-medium text-foreground">
+                        Free — visible to all users
+                    </label>
+                </div>
+                {!form.isFree && (
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-1">Minimum Plan Required</label>
+                        <select
+                            name="minPlan"
+                            value={form.minPlan}
+                            onChange={(e) => setForm(prev => ({ ...prev, minPlan: e.target.value }))}
+                            className="w-full bg-background border border-border rounded-xl px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                        >
+                            <option value="SEEKER">Seeker (Free)</option>
+                            <option value="PILGRIM">Pilgrim ($7/mo)</option>
+                            <option value="SHEPHERD">Shepherd ($18/mo)</option>
+                        </select>
+                    </div>
+                )}
             </div>
 
             {error && (

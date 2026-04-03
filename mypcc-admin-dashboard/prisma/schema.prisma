@@ -65,6 +65,8 @@ model DiaryEntry {
   hymn         String?
   userId       String?
   user         User?    @relation(fields: [userId], references: [id])
+  isFree       Boolean  @default(true)
+  minPlan      SubscriptionType @default(SEEKER)
 
   @@index([userId])
 }
@@ -84,6 +86,7 @@ model TheEchoIssue {
   fullText   String?  @db.Text
   isFeatured Boolean  @default(false)
   images     Json?
+  minPlan    SubscriptionType @default(SEEKER)
 }
 
 model Devotional {
