@@ -22,7 +22,7 @@ const getTestimonials = () =>
   fetchFromBackend<any[]>("/api/public/testimonials", { revalidate: 3600 });
 
 const getSettings = () =>
-  fetchFromBackend<Record<string, string>>("/api/public/settings", { revalidate: 3600 });
+  fetchFromBackend<Record<string, string>>("/api/public/settings", { revalidate: 0 });
 
 // ─── Page Component ───────────────────────────────────────────────────────────
 import { getServerSession } from "next-auth";
