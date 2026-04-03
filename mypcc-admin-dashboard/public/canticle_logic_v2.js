@@ -1,4 +1,59 @@
 ; (function () {
+    // ══ MARKDOWN PARSER ══
+    function mdToHtml(str) {
+        if (!str) return '';
+        return str
+            .replace(/^### (.*$)/gim, '<h3 style="color:var(--gold); font-family:\'Cormorant Garamond\',serif; font-size:1.4rem; margin:20px 0 10px;">$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2 style="color:var(--gold); font-family:\'Cormorant Garamond\',serif; margin:25px 0 15px;">$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1 style="color:var(--gold); font-family:\'Cormorant Garamond\',serif; margin:30px 0 20px;">$1</h1>')
+            .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>');
+    }
+
+    // ══ LYRICS NORMALIZER ══
+    // Handles both old {type,text}[] array format AND new plain-string DB format
+    function parseLyrics(h) {
+        const raw = h.lyrics;
+        if (!raw) return [{ type: 'stanza', text: '(No lyrics available)' }];
+        // Already an array of objects
+        if (Array.isArray(raw)) {
+            return raw.map(l => ({
+                type: l.type || 'stanza',
+                text: typeof l.text === 'string' ? l.text : String(l)
+            }));
+        }
+        // Plain string format from DB: split on [Label] markers
+        const str = String(raw);
+        const segments = str.split(/(?=\[)/);
+        const result = [];
+        for (const seg of segments) {
+            const labelMatch = seg.match(/^\s*\[([^\]]+)\]\s*\n?/);
+            if (labelMatch) {
+                const label = labelMatch[1].toLowerCase();
+                const text = seg.slice(labelMatch[0].length).trim();
+                if (text) {
+                    const type = (label.includes('refrain') || label.includes('chorus')) ? 'refrain' : 'stanza';
+                    result.push({ type, label: labelMatch[1], text });
+                }
+            } else {
+                const text = seg.trim();
+                if (text) result.push({ type: 'stanza', text });
+            }
+        }
+        return result.length > 0 ? result : [{ type: 'stanza', text: str }];
+    }
+
+    // ══ SUBSCRIPTION HYMN LIMIT ══
+    function getSubscriptionLimit() {
+        const sub = (window.subscriptionType || (window.userSession && window.userSession.user && window.userSession.user.subscriptionType) || 'FREE').toUpperCase();
+        if (sub === 'SHEPHERD') return Infinity;
+        if (sub === 'PILGRIM')  return 400;
+        if (sub === 'SEEKER')   return 200;
+        return 50; // FREE / unauthenticated
+    }
+
     // ══ PAGE SWITCHING ══
     function showPage(id, btn) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -154,7 +209,11 @@
 
     window._activePlaylistName = null;
     function renderHymns(list) {
-        window._currentHymnList = list || [];
+        // Apply subscription-based limit
+        const limit = getSubscriptionLimit();
+        const fullList = list || [];
+        const visibleList = isFinite(limit) ? fullList.slice(0, limit) : fullList;
+        window._currentHymnList = visibleList;
         const grid = document.getElementById('hymnsGrid');
         if (!grid) return;
         grid.innerHTML = '';
@@ -178,7 +237,7 @@
         }
 
         const favs = window.hymnFavorites || [];
-        list.forEach((h, i) => {
+        visibleList.forEach((h, i) => {
             const isFav = favs.includes(h.id);
             const card = document.createElement('div');
             card.className = 'hymn-card';
@@ -312,10 +371,9 @@
         // Cache attributes on the hymn object to speed up filtering
         if (h._computedAttrs) return h._computedAttrs;
 
-        const lyricsText = Array.isArray(h.lyrics)
-            ? h.lyrics.map(l => l.text).join(' ')
-            : (typeof h.lyrics === 'string' ? h.lyrics : '');
-        const content = (h.title + ' ' + (h.author || '') + ' ' + lyricsText).toLowerCase();
+        const lyricsArr = parseLyrics(h);
+        const lyricsText = lyricsArr.map(l => l.text).join(' ');
+        const content = ((h.title || '') + ' ' + (h.author || '') + ' ' + lyricsText).toLowerCase();
 
         const detectedOccasions = occasionList.filter(occ => {
             const targetTags = occasionTags[occ];
@@ -555,9 +613,10 @@
         _progressInterval = setInterval(() => {
             if (_ttsSpeaking && !_ttsPaused) {
                 _currentTime += 0.5;
+                // If TTS is taking longer than estimated, dynamically expand the total duration
+                // so the progress bar doesn't get stuck at 100% while still singing.
                 if (_currentTime >= _totalDuration) {
-                    _currentTime = _totalDuration;
-                    clearInterval(_progressInterval);
+                    _totalDuration = _currentTime + 2.0; 
                 }
                 _updateProgressUI();
             }
@@ -592,13 +651,18 @@
         _ttsPaused = false;
         _currentTime = 0;
 
+        // Normalize lyrics into unified format
+        const lyricsArr = parseLyrics(h);
+        h._parsedLyrics = lyricsArr; // Cache for use by TTS
+
         // Duration estimation or loading
         if (h.tuneUrl) {
             _totalDuration = 0; // Will be set when audio loads
         } else {
-            const lyricsText = h.lyrics.map(l => l.text).join(' ');
+            const lyricsText = lyricsArr.map(l => l.text).join(' ');
             const wordCount = lyricsText.split(/\s+/).length;
-            _totalDuration = Math.max(30, Math.round((wordCount / 150) * 60) + 10);
+            // Chant TTS is slow (rate 0.78 + stanza pauses). Avg is ~80 wpm.
+            _totalDuration = Math.max(30, Math.round((wordCount / 85) * 60) + 12);
         }
 
         const mEyebrow = document.getElementById('m-eyebrow');
@@ -677,9 +741,13 @@
         }
 
         let lyricsHTML = '';
-        h.lyrics.forEach(l => {
+        lyricsArr.forEach(l => {
             const cls = l.type === 'refrain' ? 'refrain' : 'stanza';
-            lyricsHTML += `<div class="${cls}">${l.text.replace(/\n/g, '<br>')}</div>`;
+            let text = l.text.replace(/\n/g, '<br>');
+            // Enhanced Formatting: Detect bracketed headers [Verse 1], [Interlude], etc. 
+            // We make them look like premium golden smallcaps labels.
+            text = text.replace(/\[(.*?)\]/g, '<span style="color:#b8935a; font-size:0.8rem; font-variant:small-caps; text-transform:lowercase; letter-spacing:0.1em; display:block; margin: 20px 0 10px 0; font-weight:700; border-bottom: 1px solid rgba(184,147,90,0.15); padding-bottom: 4px; width: fit-content;">$1</span>');
+            lyricsHTML += `<div class="${cls}" style="margin-bottom:28px; line-height:1.8; font-family:\'Inter\', sans-serif; font-size:1.05rem;">${text}</div>`;
         });
         if (mLyrics) {
             mLyrics.innerHTML = lyricsHTML;
@@ -1047,7 +1115,8 @@
         // Opening announcement (title only, spoken briefly)
         singLines.push({ text: _ttsHymn.title, isTitle: true });
 
-        _ttsHymn.lyrics.forEach((l, idx) => {
+        const singLyricsArr = _ttsHymn._parsedLyrics || parseLyrics(_ttsHymn);
+        singLyricsArr.forEach((l, idx) => {
             const lineTexts = l.text.split('\n').filter(s => s.trim());
             if (l.type === 'refrain') {
                 singLines.push({ text: 'Refrain', isLabel: true });
@@ -1124,10 +1193,17 @@
                 setTimeout(_singNext, pauseMs);
             };
 
-            utt.onerror = () => {
+            utt.onerror = (e) => {
+                console.error("TTS Error on line:", lineObj.text, e);
                 setTimeout(_singNext, 200);
             };
 
+            // FIX: Prevent garbage collection of utterance in Chrome which stops TTS mid-way
+            window._ttsQueue = window._ttsQueue || [];
+            window._ttsQueue.push(utt); // Push to array so it's definitively held in memory
+            if (window._ttsQueue.length > 50) window._ttsQueue.shift(); // Keep memory clean safely
+
+            console.log(`[TTS] Speaking line ${_singLineIdx}/${singLines.length}: "${lineObj.text}"`);
             synth.speak(utt);
         }
 
@@ -1746,7 +1822,7 @@
 
         const hasFullText = a.fullText && a.fullText.trim().length > 0;
         let bodyHtml = hasFullText
-            ? a.fullText.replace(/\n/g, '<br>')
+            ? `<div class="md-content"><p>${mdToHtml(a.fullText.trim())}</p></div>`
             : `<div style="text-align:center; padding:40px 0; opacity:0.5;">
                 <p>Full article text not yet added to digital library.</p>
                </div>`;
@@ -2190,7 +2266,7 @@
                 `;
 
                 if (hasAccess) {
-                    html += `<p>${sections.reflection.trim().replace(/\n\n/g, '</p><p>')}</p></div></div>`;
+                    html += `<div class="md-content"><p>${mdToHtml(sections.reflection.trim())}</p></div></div></div>`;
                 } else {
                     const previewText = d.excerpt || (sections.reflection.trim().substring(0, 180) + '...');
                     html += `
@@ -2230,7 +2306,7 @@
                 html += `
                     <div class="devo-prayer">
                         <p class="devo-prayer-label">Prayer</p>
-                        <p class="devo-prayer-text">${sections.prayer.trim().replace(/\n\n/g, '<br><br>')}</p>
+                        <p class="devo-prayer-text">${mdToHtml(sections.prayer.trim())}</p>
                     </div>
                 `;
             }

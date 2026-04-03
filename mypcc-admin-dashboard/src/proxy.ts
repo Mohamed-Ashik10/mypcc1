@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const ADMIN_ROLES = ["SUPER_ADMIN", "ADMIN_STAFF", "CONTENT_EDITOR"];
-
 // ─── Simple, fast proxy — NO withAuth, NO external calls ─────────────────────
 // Reads the session cookie directly. Cookie existence = valid session
 // (NextAuth validates the JWT on actual API calls).
-// This proxy only handles redirects, not security enforcement.
+// This proxy only handles admin route protection, not login redirects.
 export default function proxy(req: NextRequest) {
     const path = req.nextUrl.pathname;
 
@@ -19,15 +17,13 @@ export default function proxy(req: NextRequest) {
         return NextResponse.redirect(new URL("/auth/login", req.url));
     }
 
-    // Logged-in user visiting login page → send to admin
-    if (path === "/auth/login" && hasSession) {
-        return NextResponse.redirect(new URL("/admin", req.url));
-    }
+    // No redirect for logged-in users visiting /auth/login or /auth/register.
+    // The login page itself handles role-based redirects (admin vs user) after credential check.
 
     return NextResponse.next();
 }
 
-// Only run on admin and auth paths — NOT on API routes or static assets
+// Only run on admin paths — NOT on API routes or static assets
 export const config = {
-    matcher: ["/admin/:path*", "/auth/login"],
+    matcher: ["/admin/:path*"],
 };

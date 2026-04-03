@@ -5,7 +5,7 @@ async function main() {
     const issues = await prisma.theEchoIssue.findMany();
     console.log("Found Echo Issues:", issues.length);
     issues.forEach(i => {
-        console.log(`- ${i.title} (${i.issueMonth}) | Images: ${i.images ? (typeof i.images === 'string' ? i.images.substring(0, 50) : JSON.stringify(i.images).substring(0, 50)) : 'NULL'}`);
+        console.log(`- ${i.title} (${i.issueMonth}) | FullText Length: ${i.fullText ? i.fullText.length : 0} | Images: ${i.images ? (typeof i.images === 'string' ? i.images.substring(0, 50) : JSON.stringify(i.images).substring(0, 50)) : 'NULL'}`);
     });
 }
 

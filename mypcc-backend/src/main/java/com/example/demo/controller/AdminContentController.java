@@ -134,6 +134,9 @@ public class AdminContentController {
         if (updates.containsKey("content")) d.setContent(updates.get("content").toString());
         if (updates.containsKey("excerpt")) d.setExcerpt(updates.get("excerpt") != null ? updates.get("excerpt").toString() : null);
         if (updates.containsKey("author")) d.setAuthor(updates.get("author") != null ? updates.get("author").toString() : null);
+        if (updates.containsKey("reading")) d.setReading(updates.get("reading") != null ? updates.get("reading").toString() : null);
+        if (updates.containsKey("category")) d.setCategory(updates.get("category") != null ? updates.get("category").toString() : null);
+        if (updates.containsKey("image")) d.setImage(updates.get("image") != null ? updates.get("image").toString() : null);
         if (updates.containsKey("date")) d.setDate(java.time.LocalDateTime.parse(updates.get("date").toString()));
         if (updates.containsKey("isFree")) d.setIsFree(Boolean.valueOf(updates.get("isFree").toString()));
         if (updates.containsKey("minPlan") && updates.get("minPlan") != null) {
@@ -189,8 +192,12 @@ public class AdminContentController {
         
         if (updates.containsKey("title")) i.setTitle(updates.get("title").toString());
         if (updates.containsKey("excerpt")) i.setExcerpt(updates.get("excerpt") != null ? updates.get("excerpt").toString() : null);
+        if (updates.containsKey("fullText")) i.setFullText(updates.get("fullText") != null ? updates.get("fullText").toString() : null);
+        if (updates.containsKey("author")) i.setAuthor(updates.get("author") != null ? updates.get("author").toString() : null);
+        if (updates.containsKey("category")) i.setCategory(updates.get("category") != null ? updates.get("category").toString() : null);
         if (updates.containsKey("pdfUrl")) i.setPdfUrl(updates.get("pdfUrl") != null ? updates.get("pdfUrl").toString() : null);
         if (updates.containsKey("coverUrl")) i.setCoverUrl(updates.get("coverUrl") != null ? updates.get("coverUrl").toString() : null);
+        if (updates.containsKey("images")) i.setImages(updates.get("images") != null ? updates.get("images").toString() : null);
         if (updates.containsKey("issueMonth")) i.setIssueMonth(java.time.LocalDateTime.parse(updates.get("issueMonth").toString()));
         if (updates.containsKey("isFree")) i.setIsFree(Boolean.parseBoolean(updates.get("isFree").toString()));
         if (updates.containsKey("isFeatured")) i.setIsFeatured(Boolean.parseBoolean(updates.get("isFeatured").toString()));

@@ -303,7 +303,7 @@ export default function LandingPageClient({
                                     {subscriptionType}
                                 </button>
                             )}
-                            {session.user?.role?.toLowerCase() !== 'user' && (
+                            {['SUPER_ADMIN', 'ADMIN_STAFF', 'CONTENT_EDITOR'].includes(session.user?.role) && (
                                 <a
                                     href="/admin"
                                     title="Admin Dashboard"
@@ -324,7 +324,7 @@ export default function LandingPageClient({
                     ) : (
                         <>
                             <button className="nav-sign" onClick={() => window.location.href = '/auth/login'}>Sign In</button>
-                            <button className="nav-join" onClick={() => window.location.href = '/auth/login'}>Join Free</button>
+                            <button className="nav-join" onClick={() => window.location.href = '/auth/register'}>Join Free</button>
                         </>
                     )}
                 </div>
@@ -362,7 +362,7 @@ export default function LandingPageClient({
                 
                 {!session ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <button className="nav-join" style={{ width: '100%' }} onClick={() => window.location.href = '/auth/login'}>Join Free</button>
+                        <button className="nav-join" style={{ width: '100%' }} onClick={() => window.location.href = '/auth/register'}>Join Free</button>
                         <button className="nav-sign" style={{ width: '100%', textAlign: 'center' }} onClick={() => window.location.href = '/auth/login'}>Sign In</button>
                     </div>
                 ) : (

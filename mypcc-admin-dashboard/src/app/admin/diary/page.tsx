@@ -109,7 +109,7 @@ export default async function DiaryManagementPage({
 
     const totalPages = Math.ceil(total / limit);
     const todayStr = now.toISOString().slice(0, 10);
-    const todayEntry = entries.find(e => e.date.toISOString().slice(0, 10) === todayStr);
+    const todayEntry = entries.find(e => new Date(e.date).toISOString().slice(0, 10) === todayStr);
 
     const grouped: Record<string, typeof entries> = {};
     for (const entry of entries) {
@@ -254,7 +254,7 @@ export default async function DiaryManagementPage({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
                         {entries.map((entry) => {
                             const entryDate = new Date(entry.date);
-                            const isToday = entry.date.toISOString().slice(0, 10) === todayStr;
+                            const isToday = new Date(entry.date).toISOString().slice(0, 10) === todayStr;
                             return (
                                 <div key={entry.id} className={`bg-card rounded-[2rem] p-7 border transition-all ${isToday ? 'border-[#6e1799] shadow-lg shadow-[#6e1799]/5 scale-[1.02]' : 'border-border shadow-sm hover:border-[#6e1799]'}`}>
                                     <div className="flex items-center justify-between mb-6">
@@ -308,7 +308,7 @@ export default async function DiaryManagementPage({
                                     </thead>
                                     <tbody className="divide-y divide-[#dbdade]/20">
                                         {monthEntries.map((entry) => {
-                                            const isToday = entry.date.toISOString().slice(0, 10) === todayStr;
+                                            const isToday = new Date(entry.date).toISOString().slice(0, 10) === todayStr;
                                             return (
                                                 <tr key={entry.id} className={`transition-colors group ${isToday ? 'bg-[#6e1799]/[0.03]' : 'hover:bg-[#6e1799]/[0.01]'}`}>
                                                     <td className="px-8 py-5 whitespace-nowrap">

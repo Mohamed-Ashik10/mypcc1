@@ -49,10 +49,15 @@ public class UserActivityController {
             favoriteRepository.deleteByUserIdAndHymnId(userId, hymnId);
             return ResponseEntity.ok(Map.of("message", "Removed from favorites", "action", "removed"));
         } else {
-            String favId = "fav_" + System.currentTimeMillis() + "_" + UUID.randomUUID().toString().substring(0, 5);
-            HymnFavourite fav = new HymnFavourite(favId, userId, hymnId);
-            favoriteRepository.save(fav);
-            return ResponseEntity.status(201).body(Map.of("message", "Added to favorites", "action", "added"));
+            try {
+                String favId = "fav_" + System.currentTimeMillis() + "_" + UUID.randomUUID().toString().substring(0, 5);
+                HymnFavourite fav = new HymnFavourite(favId, userId, hymnId);
+                favoriteRepository.save(fav);
+                return ResponseEntity.status(201).body(Map.of("message", "Added to favorites", "action", "added"));
+            } catch (org.springframework.dao.DataIntegrityViolationException e) {
+                // Duplicate key — another concurrent request already added it. Treat as success.
+                return ResponseEntity.ok(Map.of("message", "Already in favorites", "action", "added"));
+            }
         }
     }
 
