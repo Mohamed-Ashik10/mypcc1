@@ -33,7 +33,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         red: "--primary: 0 72.2% 50.6%; --primary-foreground: 0 85.7% 97.3%; --accent: 0 0% 96.1%;",
         blue: "--primary: 199 89% 48%; --primary-foreground: 210 40% 98%; --accent: 210 40% 96.1%;",
         gray: "--primary: 215 25% 27%; --primary-foreground: 210 40% 98%; --accent: 210 40% 96.1%;",
-        default: "--primary: 283 74% 35%; --primary-foreground: 210 40% 98%; --accent: 255 0% 96%;"
+        default: "--primary: 283 74% 35%; --primary-foreground: 210 40% 98%; --accent: 255 0% 96%;",
+        emerald: "--primary: 142.1 76.2% 36.3%; --primary-foreground: 355.7 100% 97.3%; --accent: 142.1 76.2% 90%;",
+        teal: "--primary: 171 100% 29%; --primary-foreground: 0 0% 100%; --accent: 171 100% 90%;",
+        rose: "--primary: 346.8 77.2% 49.8%; --primary-foreground: 0 0% 100%; --accent: 346.8 77.2% 90%;",
+        amber: "--primary: 38 92% 50%; --primary-foreground: 0 0% 100%; --accent: 38 92% 90%;",
+        brown: "--primary: 25 76% 31%; --primary-foreground: 0 0% 100%; --accent: 25 76% 90%;"
     };
 
     let themePreset = "default";
