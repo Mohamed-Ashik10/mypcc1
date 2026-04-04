@@ -105,6 +105,8 @@ export default async function Home() {
         announcements = dbAnnouncements || [];
         churchDiary = dbDiary || [];
         
+        console.log(`[DB Fallback] Hymns: ${hymns.length}, Echo: ${echoIssues.length}, Diary: ${churchDiary.length}, Devotionals: ${(dbDevotionals || []).length}, Settings: ${(dbSettings || []).length}`);
+        
         if (dbDevotionals && dbDevotionals.length > 0) {
             latestDevotional = dbDevotionals[0];
             archivedDevotionals = dbDevotionals.slice(1);
@@ -295,6 +297,8 @@ export default async function Home() {
     isFree: d.isFree,
     minPlan: d.minPlan
   }));
+
+  console.log(`[Page Render] formattedHymns: ${formattedHymns.length}, formattedEcho: ${formattedEcho.length}, formattedDiary: ${formattedDiary.length}, devotional: ${formattedDevotional ? 'yes' : 'no'}, archive: ${formattedArchive.length}, theme: ${themePreset}`);
 
   return (
     <LandingPageClient
