@@ -763,11 +763,22 @@
         let lyricsHTML = '';
         lyricsArr.forEach(l => {
             const cls = l.type === 'refrain' ? 'refrain' : 'stanza';
-            let text = l.text.replace(/\n/g, '<br>');
-            // Enhanced Formatting: Detect bracketed headers [Verse 1], [Interlude], etc. 
-            // We make them look like premium golden smallcaps labels.
-            text = text.replace(/\[(.*?)\]/g, '<span style="color:#b8935a; font-size:0.8rem; font-variant:small-caps; text-transform:lowercase; letter-spacing:0.1em; display:block; margin: 20px 0 10px 0; font-weight:700; border-bottom: 1px solid rgba(184,147,90,0.15); padding-bottom: 4px; width: fit-content;">$1</span>');
-            lyricsHTML += `<div class="${cls}" style="margin-bottom:28px; line-height:1.8; font-family:\'Inter\', sans-serif; font-size:1.05rem;">${text}</div>`;
+            let text = l.text;
+            
+            // Seamless Display: Remove [Verse X] labels for a more immersive reading flow
+            // But KEEP [Refrain] / [Chorus] / [Bridge] labels as they guide the singer
+            text = text.replace(/\[\s*Verse\s*\d+\s*\]/gi, '');
+            text = text.trim();
+            if (!text) return;
+
+            let htmlText = text.replace(/\n/g, '<br>');
+            // Render other labels (Refrain etc) in style
+            htmlText = htmlText.replace(/\[(.*?)\]/g, '<span style="display:block; font-size:0.65rem; color:var(--gold); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:8px; font-weight:600; opacity:0.8;">$1</span>');
+            
+            lyricsHTML += `
+                <div class="${cls}" style="margin-bottom:32px; position:relative; line-height:1.8; letter-spacing:0.01em; animation: fadeUp 0.8s ease backwards;">
+                    ${htmlText}
+                </div>`;
         });
         if (mLyrics) {
             mLyrics.innerHTML = lyricsHTML;
