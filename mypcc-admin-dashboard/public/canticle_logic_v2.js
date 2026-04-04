@@ -17,26 +17,29 @@
     function parseLyrics(h) {
         const raw = h.lyrics;
         if (!raw) return [{ type: 'stanza', text: '(No lyrics available)' }];
-        // --- INSTANT CLEAN LOGIC: Strip HGTA refrain from other hymns ---
-        const hTitleLower = (h.title || "").toLowerCase();
-        const isActuallyHGTA = hTitleLower.includes("how great thou art");
-        const duplicatedRefrainRegex = /\n?\s*Then sings my soul, my Savior God, to Thee[\s\S]*How great Thou art!\s*/gi;
-
         // Already an array of objects
         if (Array.isArray(raw)) {
-            return raw.map(l => {
-                let txt = typeof l.text === 'string' ? l.text : String(l);
-                if (!isActuallyHGTA) {
-                    txt = txt.replace(duplicatedRefrainRegex, "").trim();
-                }
-                return { type: l.type || 'stanza', text: txt };
-            }).filter(l => l.text.length > 0);
+            const hTitleLower = (h.title || "").toLowerCase();
+            const isActuallyHGTA = hTitleLower.includes("how great thou art");
+            
+            return raw.map(l => ({
+                type: l.type || 'stanza',
+                text: (typeof l.text === 'string' ? l.text : String(l)).trim()
+            })).filter(l => {
+                if (isActuallyHGTA) return l.text.length > 0;
+                // EXCLUDE any block containing the duplicated HGTA refrain
+                return l.text.length > 0 && !l.text.includes("Then sings my soul") && !l.text.includes("How great Thou art");
+            });
         }
 
         // Plain string format from DB
         let str = String(raw);
+        const hTitleLower = (h.title || "").toLowerCase();
+        const isActuallyHGTA = hTitleLower.includes("how great thou art");
         if (!isActuallyHGTA) {
-            str = str.replace(duplicatedRefrainRegex, "").trim();
+            // Remove the refrain if it's buried in a raw string
+            const hgtaRefrainRegex = /\n?\s*Then sings my soul, my Savior God, to Thee[\s\S]*How great Thou art![\s\S]*?\n?/gi;
+            str = str.replace(hgtaRefrainRegex, "").trim();
         }
 
         const segments = str.split(/(?=\[)/);
@@ -46,13 +49,15 @@
             if (labelMatch) {
                 const label = labelMatch[1].toLowerCase();
                 const text = seg.slice(labelMatch[0].length).trim();
-                if (text) {
+                const isDuplicated = !isActuallyHGTA && (text.includes("Then sings my soul") || text.includes("How great Thou art"));
+                if (text && !isDuplicated) {
                     const type = (label.includes('refrain') || label.includes('chorus')) ? 'refrain' : 'stanza';
                     result.push({ type, label: labelMatch[1], text });
                 }
             } else {
                 const text = seg.trim();
-                if (text) result.push({ type: 'stanza', text });
+                const isDuplicated = !isActuallyHGTA && (text.includes("Then sings my soul") || text.includes("How great Thou art"));
+                if (text && !isDuplicated) result.push({ type: 'stanza', text });
             }
         }
         return result.length > 0 ? result : [{ type: 'stanza', text: str }];
