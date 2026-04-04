@@ -43,6 +43,9 @@ public class TheEchoIssue {
     @Column(name = "isFeatured", nullable = false)
     private Boolean isFeatured = false;
 
+    @Column(columnDefinition = "TEXT")
+    private String images;
+
     @CreationTimestamp
     @Column(name = "createdAt", updatable = false)
     private LocalDateTime createdAt;
@@ -76,6 +79,8 @@ public class TheEchoIssue {
     public void setFullText(String fullText) { this.fullText = fullText; }
     public Boolean getIsFeatured() { return isFeatured; }
     public void setIsFeatured(Boolean isFeatured) { this.isFeatured = isFeatured; }
+    public String getImages() { return images; }
+    public void setImages(String images) { this.images = images; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

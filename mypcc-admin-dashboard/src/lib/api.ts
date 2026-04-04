@@ -20,7 +20,7 @@ export async function fetchFromBackend<T>(path: string, options: FetchOptions = 
     
     const controller = new AbortController();
     const isWrite = options.method && options.method !== "GET";
-    const timeoutMs = isWrite ? 30000 : 10000; // 30s for writes, 10s for reads
+    const timeoutMs = 30000; // Unified 30s timeout to avoid 'fetch failed' on high-latency cold starts
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
@@ -29,6 +29,7 @@ export async function fetchFromBackend<T>(path: string, options: FetchOptions = 
             'Content-Type': 'application/json',
         };
 
+        // console.log(`[Backend Fetch] Requesting: ${url}`);
         const res = await fetch(url, {
             ...options,
             signal: controller.signal,
@@ -43,10 +44,18 @@ export async function fetchFromBackend<T>(path: string, options: FetchOptions = 
 
         if (!res.ok) {
             const errorText = await res.text();
+            console.error(`[Backend Fetch] Failed: ${url} (Status: ${res.status})`);
             throw new Error(`Backend Error (${res.status}): ${errorText || res.statusText}`);
         }
 
         return res.json() as Promise<T>;
+    } catch (error: any) {
+        if (error.name === 'AbortError') {
+            console.error(`[Backend Fetch] Timeout/Abort: ${url}`);
+        } else {
+            console.error(`[Backend Fetch] ERROR: ${url} -> ${error.message}`);
+        }
+        throw error;
     } finally {
         clearTimeout(timeoutId);
     }

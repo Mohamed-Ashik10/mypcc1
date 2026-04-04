@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Settings, Mail, Bell, Save, ShieldCheck, Send, Globe, MapPin, Phone, Info, UploadCloud } from "lucide-react";
+import { Settings, Mail, Bell, Save, ShieldCheck, Send, Globe, MapPin, Phone, Info, UploadCloud, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { BACKEND_URL, uploadToBackend, fetchFromBackend } from "@/lib/api";
@@ -39,6 +39,21 @@ function Field({ label, hint, type = "text", value, onChange, placeholder, onUpl
                     placeholder={placeholder}
                     className="flex-1 bg-white border border-[#dbdade] rounded-xl px-4 py-2.5 text-[13px] text-[#5d596c] placeholder-[#dbdade] focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none"
                 />
+                
+                {value && (
+                    <button
+                        type="button"
+                        onClick={() => {
+                            onChange("");
+                            if (onUpload) onUpload("");
+                        }}
+                        className="p-2.5 bg-red-50 text-red-500 border border-red-100 rounded-xl hover:bg-red-500 hover:text-white transition-all flex items-center justify-center min-w-[40px]"
+                        title="Clear Content"
+                    >
+                        <Trash2 size={18} />
+                    </button>
+                )}
+
                 {onUpload && (
                     <button
                         type="button"
