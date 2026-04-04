@@ -2841,11 +2841,139 @@ nav {
     justify-content: center;
   }
   
+  .hymn-search {
+    flex-direction: column !important;
+    padding: 12px !important;
+    gap: 8px !important;
+    border-radius: 20px !important;
+  }
+  
+  .hymn-search input {
+    width: 100% !important;
+    padding: 12px !important;
+    text-align: center !important;
+  }
+  
+  #search-btn-main {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 14px !important;
+  }
+
   .hymn-advanced-filters {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
+}
+
+/* --------------------------------------
+   AMAZON-STYLE RESPONSIVE OVERHAUL
+----------------------------------------- */
+
+/* Desktop & Tablets (Wide) */
+@media screen and (min-width: 1024px) {
+  .mobile-menu-toggle { display: none !important; }
+  .nav-tabs { display: flex !important; }
+}
+
+/* Tablets & Below */
+@media screen and (max-width: 1023px) {
+  nav { padding: 0 20px; }
+  .nav-tabs { display: none !important; }
+  .mobile-menu-toggle { display: flex !important; align-items: center; justify-content: center; order: -1; margin-right: 12px; }
+  .logo { flex: 1; text-align: left; font-size: 1.1rem; }
+  .nav-right { gap: 8px; }
+  .nav-join { display: none !important; } /* Hide in nav, show in mobile menu */
+  .nav-sign { display: none !important; } /* Hide in nav, show in mobile menu */
+  
+  .hymns-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    padding: 0 16px !important;
+  }
+}
+
+/* Mobile Phones (Compact) */
+@media screen and (max-width: 767px) {
+  .hero-h1 { font-size: 2.8rem; line-height: 1.1; }
+  .hero-sub { font-size: 0.95rem; margin-top: 24px; padding: 0 10px; }
+  
+  .hymns-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 0 20px !important;
+    background: transparent !important;
+    border: none !important;
+  }
+  
+  .hymn-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 20px;
+  }
+
+  /* Sticky Section Overhaul */
+  .sticky-section {
+    flex-direction: column !important;
+    height: auto !important;
+    position: static !important;
+    display: block !important;
+  }
+  
+  .sticky-left, .sticky-right {
+    width: 100% !important;
+    height: auto !important;
+    position: static !important;
+    padding: 40px 24px !important;
+  }
+  
+  .sticky-panel {
+    opacity: 1 !important;
+    transform: none !important;
+    margin-bottom: 60px;
+    position: static !important;
+  }
+  
+  .sticky-cards-wrap {
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 24px;
+  }
+  
+  .sticky-card {
+    opacity: 1 !important;
+    transform: none !important;
+    position: static !important;
+    width: 100% !important;
+    min-height: 300px !important;
+    pointer-events: auto !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+  }
+
+  .announcements-section { padding: 48px 24px; }
+  .how-it-works-section { padding: 60px 24px !important; }
+  .testimonials-section { padding: 60px 24px !important; }
+  .giving-section { padding: 60px 24px !important; }
+  
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+    text-align: center;
+  }
+  
+  .footer-grid > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* Ultra-Fine Mobile Polish */
+@media screen and (max-width: 380px) {
+  .logo { font-size: 1rem; }
+  .nav-sign { font-size: 0.6rem; }
+  .hero-h1 { font-size: 2.2rem; }
 }
 
 /* --------------------------------------
