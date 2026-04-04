@@ -17,15 +17,28 @@
     function parseLyrics(h) {
         const raw = h.lyrics;
         if (!raw) return [{ type: 'stanza', text: '(No lyrics available)' }];
+        // --- INSTANT CLEAN LOGIC: Strip HGTA refrain from other hymns ---
+        const hTitleLower = (h.title || "").toLowerCase();
+        const isActuallyHGTA = hTitleLower.includes("how great thou art");
+        const duplicatedRefrainRegex = /\n?\s*Then sings my soul, my Savior God, to Thee[\s\S]*How great Thou art!\s*/gi;
+
         // Already an array of objects
         if (Array.isArray(raw)) {
-            return raw.map(l => ({
-                type: l.type || 'stanza',
-                text: typeof l.text === 'string' ? l.text : String(l)
-            }));
+            return raw.map(l => {
+                let txt = typeof l.text === 'string' ? l.text : String(l);
+                if (!isActuallyHGTA) {
+                    txt = txt.replace(duplicatedRefrainRegex, "").trim();
+                }
+                return { type: l.type || 'stanza', text: txt };
+            }).filter(l => l.text.length > 0);
         }
-        // Plain string format from DB: split on [Label] markers
-        const str = String(raw);
+
+        // Plain string format from DB
+        let str = String(raw);
+        if (!isActuallyHGTA) {
+            str = str.replace(duplicatedRefrainRegex, "").trim();
+        }
+
         const segments = str.split(/(?=\[)/);
         const result = [];
         for (const seg of segments) {
@@ -670,13 +683,6 @@
         _updateProgressUI();
         _ttsPaused = false;
         _currentTime = 0;
-
-        // --- INSTANT CLEAN LOGIC: Strip accidentally duplicated 'How Great Thou Art' refrain ---
-        const hTitleLower = (h.title || "").toLowerCase();
-        if (typeof h.lyrics === 'string' && !hTitleLower.includes("how great thou art")) {
-            const duplicatedRefrainRegex = /\n?\s*Then sings my soul, my Savior God, to Thee[\s\S]*How great Thou art!\s*/gi;
-            h.lyrics = h.lyrics.replace(duplicatedRefrainRegex, "").trim();
-        }
 
         const lyricsArr = parseLyrics(h);
         h._parsedLyrics = lyricsArr;
