@@ -68,9 +68,11 @@
             num: '001', title: 'Amazing Grace', author: 'John Newton · 1779', tags: ['grace', 'faith', 'Psalm 103'],
             lyrics: [
                 { type: 'stanza', text: 'Amazing grace! How sweet the sound\nThat saved a wretch like me!\nI once was lost, but now am found;\nWas blind, but now I see.' },
-                { type: 'stanza', text: 'Twas grace that taught my heart to fear,\nAnd grace my fears relieved;\nHow precious did that grace appear\nThe hour I first believed.' },
-                { type: 'refrain', text: 'My chains are gone, I have been set free\nMy God, my Savior has ransomed me\nAnd like a flood His mercy rains\nUnending love, Amazing Grace' },
+                { type: 'stanza', text: "'Twas grace that taught my heart to fear,\nAnd grace my fears relieved;\nHow precious did that grace appear\nThe hour I first believed." },
                 { type: 'stanza', text: "Through many dangers, toils and snares,\nI have already come;\n'Tis grace hath brought me safe thus far,\nAnd grace will lead me home." },
+                { type: 'stanza', text: "The Lord has promised good to me,\nHis word my hope secures;\nHe will my shield and portion be,\nAs long as life endures." },
+                { type: 'stanza', text: "Yea, when this flesh and heart shall fail,\nAnd mortal life shall cease,\nI shall possess, within the veil,\nA life of joy and peace." },
+                { type: 'stanza', text: "When we've been there ten thousand years,\nBright shining as the sun,\nWe've no less days to sing God's praise\nThan when we'd first begun." },
             ]
         },
         {
@@ -79,6 +81,8 @@
                 { type: 'stanza', text: 'When peace like a river attendeth my way,\nWhen sorrows like sea billows roll;\nWhatever my lot, Thou hast taught me to say,\nIt is well, it is well with my soul.' },
                 { type: 'refrain', text: 'It is well (it is well)\nWith my soul (with my soul)\nIt is well, it is well with my soul.' },
                 { type: 'stanza', text: 'Though Satan should buffet, though trials should come,\nLet this blest assurance control;\nThat Christ hath regarded my helpless estate,\nAnd hath shed His own blood for my soul.' },
+                { type: 'stanza', text: 'My sin, oh, the bliss of this glorious thought!\nMy sin, not in part but the whole,\nIs nailed to the cross, and I bear it no more,\nPraise the Lord, praise the Lord, O my soul!' },
+                { type: 'stanza', text: 'And Lord, haste the day when my faith shall be sight,\nThe clouds be rolled back as a scroll;\nThe trump shall resound, and the Lord shall descend,\nEven so, it is well with my soul.' },
             ]
         },
         {
@@ -86,6 +90,9 @@
             lyrics: [
                 { type: 'stanza', text: 'O Lord my God, when I in awesome wonder\nConsider all the worlds Thy hands have made;\nI see the stars, I hear the rolling thunder,\nThy power throughout the universe displayed.' },
                 { type: 'refrain', text: 'Then sings my soul, my Savior God, to Thee;\nHow great Thou art, how great Thou art!\nThen sings my soul, my Savior God, to Thee;\nHow great Thou art, how great Thou art!' },
+                { type: 'stanza', text: 'When through the woods, and forest glades I wander,\nAnd hear the birds sing sweetly in the trees.\nWhen I look down from lofty mountain grandeur\nAnd hear the brook, and feel the gentle breeze.' },
+                { type: 'stanza', text: 'And when I think, that God, His Son not sparing;\nSent Him to die, I scarce can take it in;\nThat on the Cross, my burden gladly bearing,\nHe bled and died to take away my sin.' },
+                { type: 'stanza', text: "When Christ shall come, with shout of acclamation,\nAnd lead me home, what joy shall fill my heart.\nThen I shall bow, in humble adoration,\nAnd then proclaim: 'My God, how great Thou art!'" },
             ]
         },
         {
@@ -93,6 +100,8 @@
             lyrics: [
                 { type: 'stanza', text: 'Be Thou my vision, O Lord of my heart;\nNought be all else to me, save that Thou art;\nThou my best thought by day or by night,\nWaking or sleeping, Thy presence my light.' },
                 { type: 'stanza', text: 'Be Thou my wisdom, and Thou my true word;\nI ever with Thee and Thou with me, Lord;\nThou my great Father, and I Thy true son,\nThou in me dwelling, and I with Thee one.' },
+                { type: 'stanza', text: 'Be Thou my battle shield, sword for my fight;\nBe Thou my dignity, Thou my delight;\nThou my soul’s shelter, Thou my high tower:\nRaise Thou me heavenward, O Power of my power.' },
+                { type: 'stanza', text: 'High King of Heaven, my victory won,\nMay I reach Heaven’s joys, O bright Heaven’s Sun!\nHeart of my own heart, whatever befall,\nStill be my vision, O Ruler of all.' },
             ]
         },
         {
@@ -100,6 +109,8 @@
             lyrics: [
                 { type: 'stanza', text: 'Holy, holy, holy! Lord God Almighty!\nEarly in the morning our song shall rise to Thee;\nHoly, holy, holy! Merciful and mighty!\nGod in three Persons, blessed Trinity!' },
                 { type: 'stanza', text: 'Holy, holy, holy! All the saints adore Thee,\nCasting down their golden crowns around the glassy sea;\nCherubim and seraphim falling down before Thee,\nWho wert and art and evermore shalt be.' },
+                { type: 'stanza', text: 'Holy, holy, holy! though the darkness hide Thee,\nThough the eye of sinful man Thy glory may not see;\nOnly Thou art holy; there is none beside Thee,\nPerfect in power, in love, and purity.' },
+                { type: 'stanza', text: 'Holy, holy, holy! Lord God Almighty!\nAll Thy works shall praise Thy name, in earth, and sky, and sea;\nHoly, holy, holy; merciful and mighty!\nGod in three Persons, blessed Trinity!' },
             ]
         },
         {
@@ -107,6 +118,8 @@
             lyrics: [
                 { type: 'stanza', text: 'Blessed assurance, Jesus is mine!\nO what a foretaste of glory divine!\nHeir of salvation, purchase of God,\nBorn of His Spirit, washed in His blood.' },
                 { type: 'refrain', text: 'This is my story, this is my song,\nPraising my Savior all the day long;\nThis is my story, this is my song,\nPraising my Savior all the day long.' },
+                { type: 'stanza', text: 'Perfect submission, perfect delight,\nVisions of rapture now burst on my sight;\nAngels descending, bring from above\nEchoes of mercy, whispers of love.' },
+                { type: 'stanza', text: 'Perfect submission, all is at rest,\nI in my Savior am happy and blest;\nWatching and waiting, looking above,\nFilled with His goodness, lost in His love.' },
             ]
         },
         {
@@ -114,12 +127,16 @@
             lyrics: [
                 { type: 'stanza', text: 'Great is Thy faithfulness, O God my Father,\nThere is no shadow of turning with Thee;\nThou changest not, Thy compassions, they fail not;\nAs Thou hast been, Thou forever wilt be.' },
                 { type: 'refrain', text: 'Great is Thy faithfulness! Great is Thy faithfulness!\nMorning by morning new mercies I see;\nAll I have needed Thy hand hath provided;\nGreat is Thy faithfulness, Lord, unto me!' },
+                { type: 'stanza', text: 'Summer and winter, and springtime and harvest,\nSun, moon and stars in their courses above,\nJoin with all nature in manifold witness\nTo Thy great faithfulness, mercy and love.' },
+                { type: 'stanza', text: 'Pardon for sin and a peace that endureth,\nThine own dear presence to cheer and to guide;\nStrength for today and bright hope for tomorrow,\nBlessings all mine, with ten thousand beside!' },
             ]
         },
         {
             num: '093', title: 'Be Still, My Soul', author: 'Katharina von Schlegel · 1752', tags: ['comfort', 'peace', 'advent'],
             lyrics: [
                 { type: 'stanza', text: 'Be still, my soul: the Lord is on thy side;\nBear patiently the cross of grief or pain;\nLeave to thy God to order and provide;\nIn every change He faithful will remain.' },
+                { type: 'stanza', text: 'Be still, my soul: thy God doth undertake\nTo guide the future as He has the past.\nThy hope, thy confidence let nothing shake;\nAll now mysterious shall be bright at last.' },
+                { type: 'stanza', text: 'Be still, my soul: the hour is hastening on\nWhen we shall be forever with the Lord.\nWhen disappointment, grief and fear are gone,\nSorrow forgot, love’s purest joys restored.' },
             ]
         },
     ];
