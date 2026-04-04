@@ -1129,34 +1129,37 @@
         }
 
         let verseCounter = 1;
+        let isFirstStanza = true;
+
         singLyricsArr.forEach((l, idx) => {
             const lineTexts = l.text.split('\n').filter(s => s.trim());
             if (lineTexts.length === 0) return;
 
-            // Only add "Verse X" or "Refrain" markers if helpful
-            if (l.type === 'refrain' || l.type === 'chorus') {
+            const isRefrain = l.type === 'refrain' || l.type === 'chorus';
+            
+            if (isRefrain) {
+                singLines.push({ pause: true }); // extra gap before refrain
                 singLines.push({ text: 'Refrain', isLabel: true });
-            } else if (idx === 0) {
-                // If we already announced title, and first line contains the title, skip "Verse 1" label
-                const firstLineInStanza = lineTexts[0].toLowerCase();
-                const isRedundant = singLines.some(sl => sl.isTitle) && firstLineInStanza.includes(titleText);
+                isFirstStanza = false;
+            } else if (isFirstStanza) {
+                // Determine if we should say "Verse 1"
+                const firstLine = lineTexts[0].toLowerCase();
+                const isRedundant = singLines.some(sl => sl.isTitle) && firstLine.includes(titleText);
                 if (!isRedundant) {
                    singLines.push({ text: 'Verse ' + (verseCounter++), isLabel: true });
-                } else {
-                   verseCounter++; // Still increment to skip "Verse 1" and keep numbering consistent if we had others
                 }
+                isFirstStanza = false;
             } else if (l.label) {
-                // If the user explicitly provided a label (e.g. [Verse 3]), honor it
+                // User provided an explicit label like [Verse 3]
                 singLines.push({ text: l.label, isLabel: true });
-                if (l.label.toLowerCase().includes('verse')) verseCounter++;
             } else {
-                // For consecutive stanzas with no labels, just keep reading (no "Verse 2" interruption)
-                // This satisfies the user request: "put verse 1 itself few more lines"
-                singLines.push({ pause: true }); 
+                // Continuation stanza: No "Verse 2" label, just a small pause to simulate a musical breath
+                // This merges stanzas into "Verse 1" effectively.
+                singLines.push({ pause: true });
             }
 
             lineTexts.forEach(line => singLines.push({ text: line.trim() }));
-            singLines.push({ pause: true }); // breath
+            singLines.push({ pause: true }); // Stanza break
         });
 
         // ── CALCULATE EXACT TIMELINE FOR PRECISE SEEKING ──
