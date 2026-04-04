@@ -31,8 +31,12 @@ const LandingThemeMatrix: Record<string, any> = {
         border: "rgba(37, 99, 235, 0.18)", border2: "rgba(37, 99, 235, 0.08)"
     },
     red: {
-        gold: "#630b0b", goldL: "#8a1a1a", goldD: "#3d0707",
-        border: "rgba(99, 11, 11, 0.18)", border2: "rgba(99, 11, 11, 0.08)"
+        gold: "#c0392b", goldL: "#e74c3c", goldD: "#962d22",
+        border: "rgba(192, 57, 43, 0.18)", border2: "rgba(192, 57, 43, 0.08)"
+    },
+    'sacred-red': {
+        gold: "#c0392b", goldL: "#e74c3c", goldD: "#962d22",
+        border: "rgba(192, 57, 43, 0.18)", border2: "rgba(192, 57, 43, 0.08)"
     },
     blue: {
         gold: "#0369a1", goldL: "#0ea5e9", goldD: "#075985",
@@ -404,8 +408,8 @@ export default function LandingPageClient({
                         <div className="ring"></div>
                         <div className="ring"></div>
                         <svg style={{ position: 'absolute', opacity: .04, animation: 'rotateSlow 80s linear infinite' }} width="700" height="700" viewBox="0 0 700 700">
-                            <line x1="350" y1="0" x2="350" y2="700" stroke="#6e1799" strokeWidth="1" />
-                            <line x1="0" y1="233" x2="700" y2="233" stroke="#6e1799" strokeWidth="1" />
+                            <line x1="350" y1="0" x2="350" y2="700" stroke="var(--gold)" strokeWidth="1" />
+                            <line x1="0" y1="233" x2="700" y2="233" stroke="var(--gold)" strokeWidth="1" />
                         </svg>
                     </div>
                     {/* Floating hero SVG icons */}
@@ -452,7 +456,7 @@ export default function LandingPageClient({
 
                 {/* MARQUEE TICKER */}
                 <div className="marquee-section reveal from-bottom">
-                    <p style={{ fontSize: '.62rem', letterSpacing: '.28em', textTransform: 'uppercase', color: '#6e1799', textAlign: 'center', marginBottom: '32px', fontWeight: 300 }}>
+                    <p style={{ fontSize: '.62rem', letterSpacing: '.28em', textTransform: 'uppercase', color: 'var(--gold)', textAlign: 'center', marginBottom: '32px', fontWeight: 300 }}>
                         From the hymn library
                     </p>
                     <div className="marquee-wrap" style={{ marginBottom: '12px' }}>
@@ -503,17 +507,17 @@ export default function LandingPageClient({
                         <div className="sticky-cards-wrap">
                             <div className="sticky-card active" data-card="0" style={{ backgroundImage: "linear-gradient(rgba(26, 21, 16, 0.75), rgba(26, 21, 16, 0.95)), url('/worship_hymns.png')", backgroundSize: 'cover', backgroundPosition: 'center', color: 'var(--cream)', borderColor: 'rgba(255,255,255,0.1)' }}>
                                 <div className="sc-icon" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--cream)' }}><SvgMusic size={22} /></div>
-                                <p className="sc-num" style={{ color: '#b8935a' }}>{initialHymns.length}+ Hymns</p>
+                                <p className="sc-num" style={{ color: 'var(--gold)' }}>{initialHymns.length}+ Hymns</p>
                                 <p className="sc-title" style={{ color: 'var(--cream)' }}>{initialHymns[0]?.title || 'Amazing Grace'}</p>
                                 <p className="sc-sub" style={{ color: 'rgba(247,243,236,0.6)' }}>{initialHymns[0]?.author || 'John Newton · 1779'}</p>
-                                <div className="sc-bar"><div className="sc-bar-fill" style={{ background: '#b8935a' }}></div></div>
+                                <div className="sc-bar"><div className="sc-bar-fill" style={{ background: 'var(--gold)' }}></div></div>
                                 <p className="sc-tag" style={{ color: 'rgba(247,243,236,0.6)' }}>
                                     {(Array.isArray(initialHymns[0]?.tags) ? initialHymns[0]?.tags : (initialHymns[0]?.tags || '').split(/[,;]\s*/)).filter(Boolean).join(' · ') || 'Grace · Faith · Salvation'}
                                 </p>
                             </div>
                             <div className="sticky-card" data-card="1" style={{ backgroundImage: "linear-gradient(rgba(26, 21, 16, 0.8), rgba(26, 21, 16, 0.95)), url('/church_diary.png')", backgroundSize: 'cover', backgroundPosition: 'center', color: 'var(--cream)', borderColor: 'rgba(255,255,255,0.1)' }}>
                                 <div className="sc-icon" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--cream)' }}><SvgBook size={22} /></div>
-                                <p className="sc-num" style={{ color: '#b8935a' }}>Diary Entry &middot; {initialDiary[0] ? new Date(initialDiary[0].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Feb 25'}</p>
+                                <p className="sc-num" style={{ color: 'var(--gold)' }}>Diary Entry &middot; {initialDiary[0] ? new Date(initialDiary[0].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Feb 25'}</p>
                                 <p className="sc-title" style={{ color: 'var(--cream)' }}>{initialDiary[0]?.title || 'Morning of Quiet Grace'}</p>
                                 <p className="sc-sub" style={{ color: 'rgba(247,243,236,0.6)' }}>{initialDiary[0]?.hymn || 'Great Is Thy Faithfulness'}</p>
                                 <p className="sc-body" style={{ color: 'rgba(247,243,236,0.8)' }}>&ldquo;{initialDiary[0]?.body?.substring(0, 60) || 'The second verse felt like a letter written directly to me...'}...&rdquo;</p>
@@ -523,7 +527,7 @@ export default function LandingPageClient({
                             </div>
                             <div className="sticky-card" data-card="2" style={{ backgroundImage: "linear-gradient(rgba(26, 21, 16, 0.8), rgba(26, 21, 16, 0.95)), url('/echo_community.png')", backgroundSize: 'cover', backgroundPosition: 'center', color: 'var(--cream)', borderColor: 'rgba(255,255,255,0.1)' }}>
                                 <div className="sc-icon" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--cream)' }}><SvgNewspaper size={22} /></div>
-                                <p className="sc-num" style={{ color: '#b8935a' }}>The Echo &middot; Latest</p>
+                                <p className="sc-num" style={{ color: 'var(--gold)' }}>The Echo &middot; Latest</p>
                                 <p className="sc-title" style={{ color: 'var(--cream)' }}>{initialEcho[0]?.title || 'From Doubt to Devotion'}</p>
                                 <p className="sc-sub" style={{ color: 'rgba(247,243,236,0.6)' }}>{initialEcho[0]?.author || 'Sarah M.'} &middot; {initialEcho[0]?.date || 'Feb 22, 2026'}</p>
                                 <p className="sc-body" style={{ color: 'rgba(247,243,236,0.8)' }}>&ldquo;{initialEcho[0]?.excerpt?.substring(0, 60) || 'Then one Sunday morning, a single hymn changed everything…'}...&rdquo;</p>
@@ -531,7 +535,7 @@ export default function LandingPageClient({
                             </div>
                             <div className="sticky-card" data-card="3" style={{ backgroundImage: "linear-gradient(rgba(26, 21, 16, 0.8), rgba(26, 21, 16, 0.95)), url('/daily_devo.png')", backgroundSize: 'cover', backgroundPosition: 'center', color: 'var(--cream)', borderColor: 'rgba(255,255,255,0.1)' }}>
                                 <div className="sc-icon" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--cream)' }}><SvgPray size={22} /></div>
-                                <p className="sc-num" style={{ color: '#b8935a' }}>Today's Devotional</p>
+                                <p className="sc-num" style={{ color: 'var(--gold)' }}>Today's Devotional</p>
                                 <p className="sc-title" style={{ color: 'var(--cream)' }}>{initialDevotional?.title || 'Still Waters'}</p>
                                 <p className="sc-sub" style={{ color: 'rgba(247,243,236,0.6)' }}>{initialDevotional?.date || 'Feb 25, 2026'}</p>
                                 <p className="sc-body" style={{ color: 'rgba(247,243,236,0.8)' }}>&ldquo;{initialDevotional?.content?.split('### Reflection')[1]?.replace(/[#>\[\]!\n"]/g, ' ')?.substring(0, 75).trim() || 'He leads me beside quiet waters, he refreshes my soul.'}...&rdquo;</p>
@@ -630,8 +634,8 @@ export default function LandingPageClient({
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                         <span style={{ fontSize: '40vw', color: 'rgba(255,255,255,.015)', fontFamily: "'Cormorant Garamond',serif", lineHeight: 1 }}>✝</span>
                     </div>
-                    <p style={{ fontSize: '.65rem', letterSpacing: '.3em', textTransform: 'uppercase', color: '#b8935a', fontWeight: 300, marginBottom: '16px' }}>Begin today</p>
-                    <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(2.5rem,5vw,4rem)', fontWeight: 300, color: '#f7f3ec', lineHeight: 1.2, marginBottom: '20px' }}>Your sacred practice<br /><em style={{ fontStyle: 'italic', color: '#6e1799' }}>starts here.</em></h2>
+                    <p style={{ fontSize: '.65rem', letterSpacing: '.3em', textTransform: 'uppercase', color: 'var(--gold)', fontWeight: 300, marginBottom: '16px' }}>Begin today</p>
+                    <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(2.5rem,5vw,4rem)', fontWeight: 300, color: '#f7f3ec', lineHeight: 1.2, marginBottom: '20px' }}>Your sacred practice<br /><em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>starts here.</em></h2>
                     <p style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(247,243,236,.45)', marginBottom: '44px' }}>Free to join. No commitment required. Just you and the music of faith.</p>
                     <button onClick={(e) => { e.preventDefault(); (window as any).showPage('subs', document.querySelectorAll('.nav-tab')[5]); }} style={{ padding: '14px 40px', background: '#6e1799', color: '#fdfaf5', border: 'none', cursor: 'pointer', fontSize: '.72rem', letterSpacing: '.18em', textTransform: 'uppercase', fontWeight: 300, transition: 'background .3s' }}>Join Free Today</button>
                 </section>
@@ -641,11 +645,11 @@ export default function LandingPageClient({
                     <div style={{ position: 'absolute', top: 0, right: 0, width: '400px', height: '400px', background: 'rgba(110, 23, 153, 0.02)', borderRadius: '50%', filter: 'blur(80px)', marginRight: '-200px', marginTop: '-200px' }}></div>
                     <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
                         <div style={{ marginBottom: '48px' }}>
-                            <p style={{ fontSize: '.65rem', letterSpacing: '.35em', textTransform: 'uppercase', color: '#b8935a', fontWeight: 300, marginBottom: '16px' }}>Faith in Action</p>
+                            <p style={{ fontSize: '.65rem', letterSpacing: '.35em', textTransform: 'uppercase', color: 'var(--gold)', fontWeight: 300, marginBottom: '16px' }}>Faith in Action</p>
                             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 'clamp(2.5rem, 4vw, 3.5rem)', color: 'var(--ink)', fontWeight: 300, lineHeight: 1.1 }}>
-                                Graceful <em style={{ color: '#6e1799', fontStyle: 'italic', fontWeight: 400 }}>Giving</em>
+                                Graceful <em style={{ color: 'var(--gold)', fontStyle: 'italic', fontWeight: 400 }}>Giving</em>
                             </h2>
-                            <div style={{ width: '40px', height: '3px', background: '#6e1799', margin: '24px auto', borderRadius: '2px', opacity: 0.3 }}></div>
+                            <div style={{ width: '40px', height: '3px', background: 'var(--gold)', margin: '24px auto', borderRadius: '2px', opacity: 0.3 }}></div>
                             <p style={{ fontSize: '.95rem', color: 'var(--muted)', fontWeight: 300, lineHeight: 1.8, maxWidth: '600px', margin: '0 auto' }}>
                                 Your generosity fuels our mission to bring the music of faith to every corner of the world. Support our community projects and digital ministry.
                             </p>
@@ -667,7 +671,7 @@ export default function LandingPageClient({
 
                         <button 
                             onClick={() => (window as any).showPage('subs', document.querySelectorAll('.nav-tab')[5])}
-                            style={{ padding: '16px 48px', background: '#6e1799', color: '#fff', border: 'none', borderRadius: '0', fontSize: '.75rem', letterSpacing: '.2em', textTransform: 'uppercase', fontWeight: 300, cursor: 'pointer', boxShadow: '0 20px 40px rgba(110, 23, 153, 0.2)' }}
+                            style={{ padding: '16px 48px', background: 'var(--gold)', color: '#fff', border: 'none', borderRadius: '0', fontSize: '.75rem', letterSpacing: '.2em', textTransform: 'uppercase', fontWeight: 300, cursor: 'pointer', boxShadow: '0 20px 40px rgba(110, 23, 153, 0.2)' }}
                         >
                             Give a Gift of Faith &rarr;
                         </button>
@@ -682,13 +686,13 @@ export default function LandingPageClient({
                 <footer className="landing-footer">
                     <div className="footer-grid">
                         <div>
-                            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '1.6rem', fontWeight: 300, marginBottom: '14px' }}>{appName.substring(0, Math.max(0, appName.length - 3))}<span style={{ color: '#6e1799', fontStyle: 'italic' }}>{appName.substring(Math.max(0, appName.length - 3))}</span></div>
+                            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '1.6rem', fontWeight: 300, marginBottom: '14px' }}>{appName.substring(0, Math.max(0, appName.length - 3))}<span style={{ color: 'var(--gold)', fontStyle: 'italic' }}>{appName.substring(Math.max(0, appName.length - 3))}</span></div>
                             <p style={{ fontSize: '.8rem', fontWeight: 300, lineHeight: 1.9, color: 'rgba(247,243,236,.5)', maxWidth: '260px', marginBottom: '28px' }}>
                                 {footerDesc}
                             </p>
                         </div>
                         <div>
-                            <p style={{ fontSize: '.6rem', letterSpacing: '.28em', textTransform: 'uppercase', color: '#6e1799', marginBottom: '18px' }}>Explore</p>
+                            <p style={{ fontSize: '.6rem', letterSpacing: '.28em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '18px' }}>Explore</p>
                             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '11px' }}>
                                 <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgMusic size={13} /> Hymns</a></li>
                                 <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('diary', document.querySelectorAll('.nav-tab')[2]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgBook size={13} /> Church Diary</a></li>
@@ -696,7 +700,7 @@ export default function LandingPageClient({
                             </ul>
                         </div>
                         <div>
-                            <p style={{ fontSize: '.6rem', letterSpacing: '.28em', textTransform: 'uppercase', color: '#6e1799', marginBottom: '18px' }}>Contact</p>
+                            <p style={{ fontSize: '.6rem', letterSpacing: '.28em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '18px' }}>Contact</p>
                             <p style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.55)', lineHeight: 1.7 }}>{contactEmail}</p>
                         </div>
                     </div>

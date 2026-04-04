@@ -1,8 +1,6 @@
 import { fetchFromBackend } from "@/lib/api";
 
 // ─── Backend Fetchers ────────────────────────────────────────────────────────
-// Using fetchFromBackend with standard revalidation tags
-
 const getHymns = () => 
   fetchFromBackend<any[]>("/api/public/hymns", { revalidate: 3600 });
 
@@ -27,11 +25,10 @@ const getSettings = () =>
 // ─── Page Component ───────────────────────────────────────────────────────────
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import prisma from "@/lib/prisma"; // Still used for user-specific data for now
+import prisma from "@/lib/prisma"; 
 import LandingPageClient from "@/components/LandingPageClient";
 
 export default async function Home() {
-
   const session = await getServerSession(authOptions);
 
   let hymns: any[] = [];
@@ -48,13 +45,23 @@ export default async function Home() {
   let themePreset = "sacred-red";
 
   try {
-    const [fetchedHymns, fetchedEcho, fetchedTestimonials, fetchedAnnouncements, fetchedDiary, settings] = await Promise.all([
+    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8080";
+    const isVercel = process.env.VERCEL === "1" || !!process.env.VERCEL;
+    const isLocalBackend = BACKEND_URL.includes("127.0.0.1") || BACKEND_URL.includes("localhost");
+    
+    // In Vercel, we cannot reach a local backend. 
+    if (isVercel && isLocalBackend) {
+        throw new Error("Production environment cannot reach local backend. Skipping to Database Fallback.");
+    }
+
+    const [fetchedHymns, fetchedEcho, fetchedTestimonials, fetchedAnnouncements, fetchedDiary, settings, fetchedDevotionals] = await Promise.all([
       getHymns(),
       getEcho(),
       getTestimonials(),
       getAnnouncements(),
       getDiary(),
-      getSettings()
+      getSettings(),
+      getDevotionals()
     ]);
 
     hymns = fetchedHymns || [];
@@ -62,6 +69,11 @@ export default async function Home() {
     testimonials = fetchedTestimonials || [];
     announcements = fetchedAnnouncements || [];
     churchDiary = fetchedDiary || [];
+    
+    if (fetchedDevotionals && fetchedDevotionals.length > 0) {
+        latestDevotional = fetchedDevotionals[0];
+        archivedDevotionals = fetchedDevotionals.slice(1);
+    }
 
     if (settings) {
       if (settings.app_name) appName = settings.app_name;
@@ -71,31 +83,29 @@ export default async function Home() {
       if (settings.theme_preset) themePreset = settings.theme_preset;
     }
 
-    const devotionals = await getDevotionals().catch(e => {
-        console.warn("Devotionals fetch failed during build. Using empty list.");
-        return [];
-    });
-    latestDevotional = devotionals[0] || null;
-    archivedDevotionals = devotionals.slice(1);
-
   } catch (error) {
     console.error("Backend fetch failed. Attempting Direct Database Fallback...", error);
-    // FALLBACK: Fetch directly from database if backend is offline
     try {
-        const [dbHymns, dbEcho, dbTestimonials, dbAnnouncements, dbDiary, dbSettings] = await Promise.all([
+        const [dbHymns, dbEcho, dbTestimonials, dbAnnouncements, dbDiary, dbSettings, dbDevotionals] = await Promise.all([
             prisma.hymn.findMany({ orderBy: { number: 'asc' } }),
             prisma.theEchoIssue.findMany({ orderBy: { issueMonth: 'desc' } }),
             prisma.testimonial.findMany({ where: { isActive: true } }),
             prisma.announcement.findMany({ where: { isActive: true } }),
             prisma.diaryEntry.findMany({ where: { userId: null }, orderBy: { date: 'desc' } }),
-            prisma.appSetting.findMany()
+            prisma.appSetting.findMany(),
+            prisma.devotional.findMany({ orderBy: { date: 'desc' } })
         ]);
         
-        hymns = dbHymns;
-        echoIssues = dbEcho;
-        testimonials = dbTestimonials;
-        announcements = dbAnnouncements;
-        churchDiary = dbDiary;
+        hymns = dbHymns || [];
+        echoIssues = dbEcho || [];
+        testimonials = dbTestimonials || [];
+        announcements = dbAnnouncements || [];
+        churchDiary = dbDiary || [];
+        
+        if (dbDevotionals && dbDevotionals.length > 0) {
+            latestDevotional = dbDevotionals[0];
+            archivedDevotionals = dbDevotionals.slice(1);
+        }
         
         const settingsMap: Record<string, string> = {};
         dbSettings.forEach(s => settingsMap[s.key] = s.value);
@@ -105,16 +115,13 @@ export default async function Home() {
         if (settingsMap.footer_desc) footerDesc = settingsMap.footer_desc;
         if (settingsMap.theme_preset) themePreset = settingsMap.theme_preset;
 
-        const dbDevotionals = await prisma.devotional.findMany({ orderBy: { date: 'desc' } });
-        latestDevotional = dbDevotionals[0] || null;
-        archivedDevotionals = dbDevotionals.slice(1);
-    } catch (dbError) {
-        console.error("Critical: Direct Database fallback also failed.", dbError);
+    } catch (dbErr) {
+        console.error("Critical: Direct Database fallback also failed.", dbErr);
     }
   }
 
   // Format Church Diary Dates safely
-  const formattedDiary = churchDiary.map(d => ({
+  const formattedDiary = (churchDiary || []).map(d => ({
     id: d.id,
     title: d.title,
     body: d.body,
@@ -140,9 +147,9 @@ export default async function Home() {
 
       hasActiveSubscription = !!userSub;
       if (userSub) subscriptionType = userSub.type;
-      formattedFavorites = userFavs.map(f => f.hymnId);
+      formattedFavorites = (userFavs || []).map(f => f.hymnId);
 
-      userDiary = personalEntries.map(e => ({
+      userDiary = (personalEntries || []).map(e => ({
         id: e.id,
         title: e.title,
         body: e.body,
@@ -154,30 +161,8 @@ export default async function Home() {
     }
   }
 
-  // MISSION CRITICAL: Map Database Echo Issues to Logic Script expectations
-  const mappedEcho = echoIssues.map(a => ({
-    id: a.id,
-    cat: (a.category || 'news').toLowerCase(), // Labeled 'cat', Lowercased for UI filter matching
-    title: a.title,
-    author: a.author || 'PCC Admin',
-    date: a.issueMonth ? new Date(a.issueMonth).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No Date',
-    excerpt: a.excerpt || 'Read the latest issue of The Echo.',
-    fullText: a.fullText || '',
-    coverUrl: a.coverUrl,
-    pdfUrl: a.pdfUrl,
-    isFeatured: a.isFeatured,
-    images: a.images
-  }));
-
-  // Format Hymns to ensure 'num' exists (legacy compat)
-  const mappedHymns = hymns.map(h => ({
-    ...h,
-    num: (h.number || '').toString().padStart(3, '0') // Logic script expects 'num'
-  }));
-
   // Enforce Paywall / Tier Limits
-  // SEEKER = Basic, PILGRIM = Moderate, SHEPHERD = Advanced
-  let targetLimit = 50; // Normal User limit
+  let targetLimit = 50; 
 
   if (hasActiveSubscription) {
     if (subscriptionType === 'SEEKER') {
@@ -185,19 +170,17 @@ export default async function Home() {
     } else if (subscriptionType === 'PILGRIM') {
       targetLimit = 400;
     } else if (subscriptionType === 'SHEPHERD') {
-      targetLimit = Infinity; // Give them all hymns
+      targetLimit = Infinity;
     }
   }
 
-  // MISSION CRITICAL: Master Privilege - Admins bypass all gating
   const isMasterAccount = ['ADMIN', 'SUPER_ADMIN'].includes((session?.user as any)?.role?.toUpperCase() || "");
   if (isMasterAccount) {
     targetLimit = Infinity;
-    subscriptionType = subscriptionType || 'SHEPHERD'; // For UI badges
+    subscriptionType = subscriptionType || 'SHEPHERD'; 
   }
 
   if (targetLimit < Infinity) {
-    // We want a varied sample library, but the TOTAL must not exceed targetLimit.
     const sliceCount = Math.max(10, Math.floor(targetLimit / 5));
 
     const praise = hymns.filter(h => typeof h.tags === 'string' && h.tags.toLowerCase().includes('praise')).slice(0, sliceCount);
@@ -210,22 +193,19 @@ export default async function Home() {
     const uniqueMap = new Map();
     combined.forEach(h => uniqueMap.set(h.id, h)); 
     
-    let finalHymns = Array.from(uniqueMap.values());
-    if (finalHymns.length < targetLimit) {
-        const remainingNeeded = targetLimit - finalHymns.length;
+    let samplingHymns = Array.from(uniqueMap.values());
+    if (samplingHymns.length < targetLimit) {
+        const remainingNeeded = targetLimit - samplingHymns.length;
         const extraHymns = hymns.filter(h => !uniqueMap.has(h.id)).slice(0, remainingNeeded);
-        finalHymns = [...finalHymns, ...extraHymns];
+        samplingHymns = [...samplingHymns, ...extraHymns];
     }
 
-    hymns = finalHymns.sort((a, b) => a.number - b.number);
+    hymns = samplingHymns.sort((a, b) => (Number(a.number) || 0) - (Number(b.number) || 0));
 
-    // --- ENHANCED CONTENT GATING (HEAVIER FREE SAMPLES) ---
-    // Hierarchical access check (Shepherd > Pilgrim > Seeker > Free)
     const isShepherd = subscriptionType === 'SHEPHERD';
     const isPilgrim = ['PILGRIM', 'SHEPHERD'].includes(subscriptionType || "");
     const isSeeker = ['SEEKER', 'PILGRIM', 'SHEPHERD'].includes(subscriptionType || "");
 
-    // 1. The Echo Gating: Hierarchical access
     if (!isShepherd) {
       const limit = isPilgrim ? 20 : (isSeeker ? 10 : 5);
       if (echoIssues.length > limit) {
@@ -233,7 +213,6 @@ export default async function Home() {
       }
     }
 
-    // 2. Devotional Grid Gating: Hierarchical access
     if (!isShepherd) {
       const limit = isPilgrim ? 50 : (isSeeker ? 20 : 10);
       if (archivedDevotionals.length > limit) {
@@ -243,18 +222,19 @@ export default async function Home() {
   }
 
   // Format data for the client
-  const formattedHymns = (hymns || []).map((h: any, index: number) => {
+  const formattedHymns = (hymns || []).map((h: any) => {
     if (!h) return null;
     const num = typeof h.number === 'number' ? h.number.toString().padStart(3, '0') : 
                 (typeof h.num === 'string' ? h.num : '000');
     
-    const lyricsArr = typeof h.lyrics === 'string' ? h.lyrics.split(/\n\s*\n/).filter(Boolean).map((part: string) => ({
+    const lyricsString = h.lyrics || "";
+    const lyricsArr = typeof lyricsString === 'string' ? lyricsString.split(/\n\s*\n/).filter(Boolean).map((part: string) => ({
       type: /\[refrain\]/i.test(part) ? 'refrain' : 'stanza',
-      text: part.replace(/\[REFRAIN\]\n?/i, '').trim()
-    })) : (Array.isArray(h.lyrics) ? h.lyrics : []);
+      text: part.replace(/\[REFRAIN\]\n?/i, '').replace(/\[stanza\]\n?/i, '').trim()
+    })) : [];
 
-    const tagsArr = h.tags ? (typeof h.tags === 'string' ? h.tags.split(',').map((t: string) => t.trim()) : h.tags) : ["faith", "praise"];
-    const searchContent = [num, h.title, h.author, ...tagsArr, ...lyricsArr.map((l: any) => l.text)].join(' ').toLowerCase();
+    const tagsArr = h.tags ? (typeof h.tags === 'string' ? h.tags.split(/[,;]\s*/).map((t: string) => t.trim()) : h.tags) : ["faith", "praise"];
+    const searchContent = [num, h.title, h.author, ...tagsArr].join(' ').toLowerCase();
 
     return {
       id: h.id || `h-${Math.random()}`,
@@ -267,7 +247,7 @@ export default async function Home() {
     };
   }).filter(Boolean);
 
-  const formattedEcho = echoIssues.map((issue: any) => {
+  const formattedEcho = (echoIssues || []).map((issue: any) => {
     const d = issue.issueMonth ? new Date(issue.issueMonth) : null;
     const isValid = d && !isNaN(d.getTime());
     return {
@@ -299,7 +279,7 @@ export default async function Home() {
     minPlan: latestDevotional.minPlan
   } : null;
 
-  const formattedArchive = archivedDevotionals.map((d: any) => ({
+  const formattedArchive = (archivedDevotionals || []).map((d: any) => ({
     id: d.id,
     title: d.title,
     date: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
