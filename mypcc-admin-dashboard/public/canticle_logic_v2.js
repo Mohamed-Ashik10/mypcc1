@@ -1163,7 +1163,7 @@
 
             if (lineObj.pause) {
                 // Stanza break: longer musical pause
-                setTimeout(_singNext, 1100);
+                _singTimer = setTimeout(_singNext, 1100);
                 return;
             }
 
@@ -1195,10 +1195,6 @@
 
             if (_singTimer) clearTimeout(_singTimer);
             utt.onend = () => {
-                // Advance progress proportionally
-                _currentTime = Math.min(_totalDuration, _currentTime + (_totalDuration / Math.max(singLines.length, 1)));
-                _updateProgressUI();
-
                 // Make the pause between lines feel like a musical breath
                 const pauseMs = lineObj.isTitle ? 800 : lineObj.isLabel ? 400 : 600;
                 _singTimer = setTimeout(_singNext, pauseMs);
