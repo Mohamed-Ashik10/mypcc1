@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma";
 import { ResponsiveSidebar } from "@/components/ResponsiveSidebar";
 import { DynamicThemeProvider } from "@/components/DynamicThemeProvider";
 import { AdminTopBar } from "@/components/AdminTopBar";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export const metadata: Metadata = {
     title: "Canticle Admin Dashboard",
@@ -28,6 +30,9 @@ const navLinks = [
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+    const session = await getServerSession(authOptions);
+    const userRole = (session?.user as any)?.role || "NORMAL_USER";
+
     const themeMatrix: Record<string, string> = {
         white: "--primary: 221.2 83.2% 53.3%; --primary-foreground: 210 40% 98%; --accent: 210 40% 96.1%;",
         red: "--primary: 0 72.2% 50.6%; --primary-foreground: 0 85.7% 97.3%; --accent: 0 0% 96.1%;",
@@ -80,7 +85,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             {/* Sidebar — role shown client-side via useSession in ResponsiveSidebar */}
             <ResponsiveSidebar
                 navLinks={navLinks}
-                userRole="SUPER_ADMIN"
+                userRole={userRole}
                 appName={sideTitle}
                 logoAdmin={sideLogo}
             />

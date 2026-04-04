@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Settings, Mail, Bell, Save, ShieldCheck, Send, Globe, MapPin, Phone, Info, UploadCloud, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 import { BACKEND_URL, uploadToBackend, fetchFromBackend } from "@/lib/api";
 
@@ -277,13 +278,23 @@ export default function SettingsPage() {
         }
     };
 
-    const tabs: { id: Tab; label: string; icon: any }[] = [
+    const { data: session } = useSession();
+    const userRole = (session?.user as any)?.role || "NORMAL_USER";
+
+    const allTabs: { id: Tab; label: string; icon: any }[] = [
         { id: "general", label: "General Ledger", icon: Settings },
         { id: "branding", label: "Brand Identity", icon: Globe },
         { id: "appearance", label: "Visual Theme", icon: Info },
         { id: "email", label: "SMTP Gateway", icon: Mail },
         { id: "notifications", label: "Alert Matrix", icon: Bell },
     ];
+
+    const tabs = allTabs.filter(tab => {
+        if (userRole === "SUPER_ADMIN") return true;
+        if (userRole === "ADMIN_STAFF") return ["general", "branding", "appearance"].includes(tab.id);
+        if (userRole === "CONTENT_EDITOR") return ["appearance"].includes(tab.id);
+        return false;
+    });
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
