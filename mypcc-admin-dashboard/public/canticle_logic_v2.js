@@ -1140,11 +1140,24 @@
             singLines.push({ pause: true }); // stanza break
         });
 
-        // Finalize duration estimate based on line count
-        _totalDuration = Math.max(1, singLines.length * 5.5); // Average 5.5s per line
+        // ── CALCULATE EXACT TIMELINE FOR PRECISE SEEKING ──
+        let timeCursor = 0;
+        singLines.forEach(line => {
+            line.startTime = timeCursor;
+            if (line.pause) {
+                timeCursor += 1.1; 
+            } else {
+                const speechTime = line.text.length / 15;
+                const pauseTime = line.isLabel ? 0.4 : 0.6;
+                timeCursor += speechTime + pauseTime;
+            }
+        });
+        _totalDuration = Math.max(1, timeCursor);
 
-        _singLineIdx = Math.floor((_currentTime / Math.max(_totalDuration, 1)) * Math.max(singLines.length, 1));
-        _singLineIdx = Math.max(0, Math.min(singLines.length - 1, _singLineIdx));
+        // Find the specific line that matches the current timestamp
+        _singLineIdx = singLines.findIndex(l => l.startTime >= (_currentTime - 0.5));
+        if (_singLineIdx === -1) _singLineIdx = singLines.length - 1;
+        _singLineIdx = Math.max(0, _singLineIdx);
         
         _ttsSpeaking = true;
         _ttsPaused = false;
