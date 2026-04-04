@@ -1,5 +1,6 @@
 import { fetchFromBackend } from "@/lib/api";
 import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -7,7 +8,11 @@ export async function GET(request: NextRequest) {
         const data = await fetchFromBackend<any>(`/api/admin/content/echo?${searchParams.toString()}`);
         return NextResponse.json(data.issues || data);
     } catch (error) {
-        return NextResponse.json({ error: "Backend communication failed" }, { status: 500 });
+        console.warn("Backend echo fetch failed, using Prisma fallback");
+        const issues = await prisma.theEchoIssue.findMany({
+            orderBy: { issueMonth: 'desc' }
+        });
+        return NextResponse.json(issues);
     }
 }
 
@@ -20,14 +25,24 @@ export async function POST(request: NextRequest) {
             body.issueMonth = new Date(body.issueMonth).toISOString();
         }
 
-        const issue = await fetchFromBackend<any>("/api/admin/content/echo", {
-            method: "POST",
-            body: JSON.stringify(body),
-        });
-
-        return NextResponse.json(issue, { status: 201 });
+        try {
+            const issue = await fetchFromBackend<any>("/api/admin/content/echo", {
+                method: "POST",
+                body: JSON.stringify(body),
+            });
+            return NextResponse.json(issue, { status: 201 });
+        } catch (backendError) {
+            console.warn("Backend echo creation failed, using Prisma direct creation");
+            const issue = await prisma.theEchoIssue.create({
+                data: {
+                    ...body,
+                    issueMonth: new Date(body.issueMonth)
+                }
+            });
+            return NextResponse.json(issue, { status: 201 });
+        }
     } catch (error) {
         console.error("Create Echo Error:", error);
-        return NextResponse.json({ error: "Failed to create issue in backend." }, { status: 500 });
+        return NextResponse.json({ error: "Failed to create issue. Database error." }, { status: 500 });
     }
 }
