@@ -1111,17 +1111,27 @@
 
         // ── Build line-by-line singing structure ──
         synth.cancel();
+        if (_singTimer) clearTimeout(_singTimer);
         const singLines = [];
-        // Opening announcement (title only, spoken briefly)
-        singLines.push({ text: _ttsHymn.title, isTitle: true });
-
+        
         const singLyricsArr = _ttsHymn._parsedLyrics || parseLyrics(_ttsHymn);
-        singLyricsArr.forEach((l, idx) => {
+        
+        // Opening announcement (skip if matches first line to avoid "Verse 1 twice" feel)
+        const firstStanza = singLyricsArr.find(l => l.type === 'stanza');
+        const firstLine = firstStanza ? firstStanza.text.split('\n')[0].trim().toLowerCase() : '';
+        const titleText = (_ttsHymn.title || '').trim().toLowerCase();
+        
+        if (titleText && !firstLine.includes(titleText)) {
+            singLines.push({ text: _ttsHymn.title, isTitle: true });
+        }
+
+        let verseCounter = 1;
+        singLyricsArr.forEach((l) => {
             const lineTexts = l.text.split('\n').filter(s => s.trim());
-            if (l.type === 'refrain') {
+            if (l.type === 'refrain' || l.type === 'chorus') {
                 singLines.push({ text: 'Refrain', isLabel: true });
             } else {
-                singLines.push({ text: 'Verse ' + (idx + 1), isLabel: true });
+                singLines.push({ text: 'Verse ' + (verseCounter++), isLabel: true });
             }
             lineTexts.forEach(line => singLines.push({ text: line.trim() }));
             singLines.push({ pause: true }); // stanza break
@@ -1183,6 +1193,7 @@
                 utt.volume = 1.0;
             }
 
+            if (_singTimer) clearTimeout(_singTimer);
             utt.onend = () => {
                 // Advance progress proportionally
                 _currentTime = Math.min(_totalDuration, _currentTime + (_totalDuration / Math.max(singLines.length, 1)));
@@ -1190,12 +1201,12 @@
 
                 // Make the pause between lines feel like a musical breath
                 const pauseMs = lineObj.isTitle ? 800 : lineObj.isLabel ? 400 : 600;
-                setTimeout(_singNext, pauseMs);
+                _singTimer = setTimeout(_singNext, pauseMs);
             };
 
             utt.onerror = (e) => {
                 console.error("TTS Error on line:", lineObj.text, e);
-                setTimeout(_singNext, 200);
+                _singTimer = setTimeout(_singNext, 200);
             };
 
             // FIX: Prevent garbage collection of utterance in Chrome which stops TTS mid-way
@@ -1207,6 +1218,7 @@
             synth.speak(utt);
         }
 
+        if (_singTimer) clearTimeout(_singTimer);
         _singNext();
     }
 
@@ -1214,6 +1226,7 @@
     let _singOscCtx = null;
     let _singGainNode = null;
     let _singLineIdx = 0;
+    let _singTimer = null;
 
     function _startOrganDrone() {
         try {

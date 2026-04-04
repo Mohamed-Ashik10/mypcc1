@@ -26,6 +26,7 @@ model User {
   subscriptions    Subscription[]
   transactions     Transaction[]
   supportRequests  SupportRequest[]
+  auditLogs        AuditLog[]
 }
 
 model Session {
@@ -234,4 +235,17 @@ enum User_role {
   CHURCH_USER
   NORMAL_USER
   USER
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  details   String?  @db.Text
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
 }

@@ -117,7 +117,7 @@ export default async function Home() {
         const dbSettings = extract(results[5], 'Settings');
         const dbDevotionals = extract(results[6], 'Devotionals');
         
-        console.log(`[DB Fallback] Hymns: ${hymns.length}, Echo: ${echoIssues.length}, Diary: ${churchDiary.length}, Devotionals: ${dbDevotionals.length}, Settings: ${dbSettings.length}`);
+        console.log(`[PROD-DB] Hymns: ${hymns.length}, Echo: ${echoIssues.length}, Diary: ${churchDiary.length}, Devotionals: ${dbDevotionals.length}, Settings: ${dbSettings.length}`);
         
         if (dbDevotionals.length > 0) {
             latestDevotional = dbDevotionals[0];
