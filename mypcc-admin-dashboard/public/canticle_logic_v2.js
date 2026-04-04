@@ -1129,15 +1129,34 @@
         }
 
         let verseCounter = 1;
-        singLyricsArr.forEach((l) => {
+        singLyricsArr.forEach((l, idx) => {
             const lineTexts = l.text.split('\n').filter(s => s.trim());
+            if (lineTexts.length === 0) return;
+
+            // Only add "Verse X" or "Refrain" markers if helpful
             if (l.type === 'refrain' || l.type === 'chorus') {
                 singLines.push({ text: 'Refrain', isLabel: true });
+            } else if (idx === 0) {
+                // If we already announced title, and first line contains the title, skip "Verse 1" label
+                const firstLineInStanza = lineTexts[0].toLowerCase();
+                const isRedundant = singLines.some(sl => sl.isTitle) && firstLineInStanza.includes(titleText);
+                if (!isRedundant) {
+                   singLines.push({ text: 'Verse ' + (verseCounter++), isLabel: true });
+                } else {
+                   verseCounter++; // Still increment to skip "Verse 1" and keep numbering consistent if we had others
+                }
+            } else if (l.label) {
+                // If the user explicitly provided a label (e.g. [Verse 3]), honor it
+                singLines.push({ text: l.label, isLabel: true });
+                if (l.label.toLowerCase().includes('verse')) verseCounter++;
             } else {
-                singLines.push({ text: 'Verse ' + (verseCounter++), isLabel: true });
+                // For consecutive stanzas with no labels, just keep reading (no "Verse 2" interruption)
+                // This satisfies the user request: "put verse 1 itself few more lines"
+                singLines.push({ pause: true }); 
             }
+
             lineTexts.forEach(line => singLines.push({ text: line.trim() }));
-            singLines.push({ pause: true }); // stanza break
+            singLines.push({ pause: true }); // breath
         });
 
         // ── CALCULATE EXACT TIMELINE FOR PRECISE SEEKING ──
