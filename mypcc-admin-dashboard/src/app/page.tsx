@@ -89,31 +89,43 @@ export default async function Home() {
   } catch (error) {
     console.error("Backend fetch failed. Attempting Direct Database Fallback...", error);
     try {
-        const [dbHymns, dbEcho, dbTestimonials, dbAnnouncements, dbDiary, dbSettings, dbDevotionals] = await Promise.all([
+        // Use Promise.allSettled so one failing query doesn't kill all data
+        const results = await Promise.allSettled([
             prisma.hymn.findMany({ orderBy: { number: 'asc' } }),
-            prisma.theEchoIssue.findMany({ orderBy: { issueMonth: 'desc' } }),
+            prisma.theEchoIssue.findMany({ 
+              orderBy: { issueMonth: 'desc' },
+              select: { id: true, title: true, issueMonth: true, pdfUrl: true, coverUrl: true, isFree: true, author: true, category: true, excerpt: true, fullText: true, isFeatured: true, images: true }
+            }),
             prisma.testimonial.findMany({ where: { isActive: true } }),
             prisma.announcement.findMany({ where: { isActive: true } }),
             prisma.diaryEntry.findMany({ where: { userId: null }, orderBy: { date: 'desc' } }),
             prisma.appSetting.findMany(),
             prisma.devotional.findMany({ orderBy: { date: 'desc' } })
         ]);
+
+        const extract = (r: PromiseSettledResult<any>, label: string) => {
+          if (r.status === 'fulfilled') return r.value || [];
+          console.error(`[DB Fallback] ${label} query failed:`, r.reason?.message || r.reason);
+          return [];
+        };
         
-        hymns = dbHymns || [];
-        echoIssues = dbEcho || [];
-        testimonials = dbTestimonials || [];
-        announcements = dbAnnouncements || [];
-        churchDiary = dbDiary || [];
+        hymns = extract(results[0], 'Hymns');
+        echoIssues = extract(results[1], 'Echo');
+        testimonials = extract(results[2], 'Testimonials');
+        announcements = extract(results[3], 'Announcements');
+        churchDiary = extract(results[4], 'Diary');
+        const dbSettings = extract(results[5], 'Settings');
+        const dbDevotionals = extract(results[6], 'Devotionals');
         
-        console.log(`[DB Fallback] Hymns: ${hymns.length}, Echo: ${echoIssues.length}, Diary: ${churchDiary.length}, Devotionals: ${(dbDevotionals || []).length}, Settings: ${(dbSettings || []).length}`);
+        console.log(`[DB Fallback] Hymns: ${hymns.length}, Echo: ${echoIssues.length}, Diary: ${churchDiary.length}, Devotionals: ${dbDevotionals.length}, Settings: ${dbSettings.length}`);
         
-        if (dbDevotionals && dbDevotionals.length > 0) {
+        if (dbDevotionals.length > 0) {
             latestDevotional = dbDevotionals[0];
             archivedDevotionals = dbDevotionals.slice(1);
         }
         
         const settingsMap: Record<string, string> = {};
-        dbSettings.forEach(s => settingsMap[s.key] = s.value);
+        dbSettings.forEach((s: any) => settingsMap[s.key] = s.value);
         if (settingsMap.app_name) appName = settingsMap.app_name;
         if (settingsMap.logo_app) logoApp = settingsMap.logo_app;
         if (settingsMap.contact_email) contactEmail = settingsMap.contact_email;
@@ -126,13 +138,17 @@ export default async function Home() {
   }
 
   // Format Church Diary Dates safely
-  const formattedDiary = (churchDiary || []).map(d => ({
+  const formattedDiary = (churchDiary || []).map((d: any) => ({
     id: d.id,
     title: d.title,
     body: d.body,
     author: d.author,
     hymn: d.hymn,
     category: d.category,
+    theme: d.theme || null,
+    readingOne: d.readingOne || null,
+    readingTwo: d.readingTwo || null,
+    readingThree: d.readingThree || null,
     date: d.date ? new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No Date'
   }));
 
