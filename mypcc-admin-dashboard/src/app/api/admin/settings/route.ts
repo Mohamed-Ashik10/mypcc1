@@ -25,18 +25,20 @@ export async function POST(req: NextRequest) {
 
     try {
         const body: Record<string, string> = await req.json();
-        const results = [];
+        const settingsToUpdate = Object.entries(body);
 
-        for (const [key, value] of Object.entries(body)) {
-            const setting = await prisma.appSetting.upsert({
-                where: { key: key },
-                update: { value: value },
-                create: { key: key, value: value }
-            });
-            results.push(setting);
-        }
+        // Optimization: Use a transaction to bundle multiple upserts into a batch
+        await prisma.$transaction(
+            settingsToUpdate.map(([key, value]) =>
+                prisma.appSetting.upsert({
+                    where: { key: key },
+                    update: { value: value },
+                    create: { key: key, value: value }
+                })
+            )
+        );
 
-        return NextResponse.json({ success: true, count: results.length });
+        return NextResponse.json({ success: true, count: settingsToUpdate.length });
     } catch (err: any) {
         console.error("Settings Update error:", err);
         return NextResponse.json({ error: err.message }, { status: 500 });
