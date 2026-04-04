@@ -671,9 +671,15 @@
         _ttsPaused = false;
         _currentTime = 0;
 
-        // Normalize lyrics into unified format
+        // --- INSTANT CLEAN LOGIC: Strip accidentally duplicated 'How Great Thou Art' refrain ---
+        const hTitleLower = (h.title || "").toLowerCase();
+        if (typeof h.lyrics === 'string' && !hTitleLower.includes("how great thou art")) {
+            const duplicatedRefrainRegex = /\n?\s*Then sings my soul, my Savior God, to Thee[\s\S]*How great Thou art!\s*/gi;
+            h.lyrics = h.lyrics.replace(duplicatedRefrainRegex, "").trim();
+        }
+
         const lyricsArr = parseLyrics(h);
-        h._parsedLyrics = lyricsArr; // Cache for use by TTS
+        h._parsedLyrics = lyricsArr;
 
         // Duration estimation or loading
         if (h.tuneUrl) {
