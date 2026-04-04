@@ -23,6 +23,9 @@ const getSettings = () =>
   fetchFromBackend<Record<string, string>>("/api/public/settings", { revalidate: 0 });
 
 // ─── Page Component ───────────────────────────────────────────────────────────
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma"; 
