@@ -1137,7 +1137,9 @@
             singLines.push({ pause: true }); // stanza break
         });
 
-        _singLineIdx = 0;
+        _singLineIdx = Math.floor((_currentTime / Math.max(_totalDuration, 1)) * Math.max(singLines.length, 1));
+        _singLineIdx = Math.max(0, Math.min(singLines.length - 1, _singLineIdx));
+        
         _ttsSpeaking = true;
         _ttsPaused = false;
         btn.textContent = '⏸ Pause';
