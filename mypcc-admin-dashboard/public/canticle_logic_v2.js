@@ -1453,7 +1453,7 @@
                         <div style="width:${percent}%; height:100%; background:${isFull ? 'var(--gold)' : 'var(--ink2)'}; transition:width 0.5s ease;"></div>
                     </div>
                     ${isFull ? `
-                        <p style="margin:8px 0 0 0; font-size:0.6rem; color:var(--gold); font-weight:600; cursor:pointer;" onclick="document.querySelector('a[href*=\\'pricing\\']')?.click() || alert('Please visit the pricing section to upgrade.')">Limit reached! Upgrade plan to save more &rarr;</p>
+                        <p style="margin:8px 0 0 0; font-size:0.6rem; color:var(--gold); font-weight:600; cursor:pointer;" onclick="renderPlans(); document.querySelector('#pricing-section')?.scrollIntoView({behavior:'smooth'})">Limit reached! Upgrade plan to save more &rarr;</p>
                     ` : ''}
                 </div>
             `;
@@ -1588,14 +1588,8 @@
             return;
         }
 
-        const session = window.userSession;
-        if (!session || !session.user) {
-            showToast("Please sign in to save reflections to your personal cloud journal.");
-            setTimeout(() => {
-                if (confirm("Would you like to sign in now to save your journal entries?")) {
-                    window.location.href = '/auth/login';
-                }
-            }, 500);
+        if (!window.userSession || !window.userSession.user) {
+            showAuthRequiredModal("Would you like to sign in now to save your journal entries?");
             return;
         }
 
