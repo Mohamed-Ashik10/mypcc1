@@ -648,6 +648,9 @@
         _ttsHymn = h;
         window._ttsHymn = h;
         _ttsSpeaking = false;
+        _currentTime = 0;
+        _totalDuration = 0;
+        _updateProgressUI();
         _ttsPaused = false;
         _currentTime = 0;
 
@@ -1136,6 +1139,9 @@
             lineTexts.forEach(line => singLines.push({ text: line.trim() }));
             singLines.push({ pause: true }); // stanza break
         });
+
+        // Finalize duration estimate based on line count
+        _totalDuration = Math.max(1, singLines.length * 5.5); // Average 5.5s per line
 
         _singLineIdx = Math.floor((_currentTime / Math.max(_totalDuration, 1)) * Math.max(singLines.length, 1));
         _singLineIdx = Math.max(0, Math.min(singLines.length - 1, _singLineIdx));
