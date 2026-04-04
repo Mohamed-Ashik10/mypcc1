@@ -19,28 +19,14 @@
         if (!raw) return [{ type: 'stanza', text: '(No lyrics available)' }];
         // Already an array of objects
         if (Array.isArray(raw)) {
-            const hTitleLower = (h.title || "").toLowerCase();
-            const isActuallyHGTA = hTitleLower.includes("how great thou art");
-            
             return raw.map(l => ({
                 type: l.type || 'stanza',
                 text: (typeof l.text === 'string' ? l.text : String(l)).trim()
-            })).filter(l => {
-                if (isActuallyHGTA) return l.text.length > 0;
-                // EXCLUDE any block containing the duplicated HGTA refrain
-                return l.text.length > 0 && !l.text.includes("Then sings my soul") && !l.text.includes("How great Thou art");
-            });
+            })).filter(l => l.text.length > 0);
         }
 
         // Plain string format from DB
-        let str = String(raw);
-        const hTitleLower = (h.title || "").toLowerCase();
-        const isActuallyHGTA = hTitleLower.includes("how great thou art");
-        if (!isActuallyHGTA) {
-            // Remove the refrain if it's buried in a raw string
-            const hgtaRefrainRegex = /\n?\s*Then sings my soul, my Savior God, to Thee[\s\S]*How great Thou art![\s\S]*?\n?/gi;
-            str = str.replace(hgtaRefrainRegex, "").trim();
-        }
+        let str = String(raw).trim();
 
         const segments = str.split(/(?=\[)/);
         const result = [];
@@ -49,15 +35,13 @@
             if (labelMatch) {
                 const label = labelMatch[1].toLowerCase();
                 const text = seg.slice(labelMatch[0].length).trim();
-                const isDuplicated = !isActuallyHGTA && (text.includes("Then sings my soul") || text.includes("How great Thou art"));
-                if (text && !isDuplicated) {
+                if (text) {
                     const type = (label.includes('refrain') || label.includes('chorus')) ? 'refrain' : 'stanza';
                     result.push({ type, label: labelMatch[1], text });
                 }
             } else {
                 const text = seg.trim();
-                const isDuplicated = !isActuallyHGTA && (text.includes("Then sings my soul") || text.includes("How great Thou art"));
-                if (text && !isDuplicated) result.push({ type: 'stanza', text });
+                if (text) result.push({ type: 'stanza', text });
             }
         }
         return result.length > 0 ? result : [{ type: 'stanza', text: str }];
@@ -166,13 +150,7 @@
 
         // NEW: Proactive Login Check
         if (!window.userSession || !window.userSession.user) {
-            showToast("Please sign in to save your favorite hymns to your cloud library.");
-            // Optional: Redirect them to the login page after a short delay
-            setTimeout(() => {
-                if (confirm("Would you like to sign in now to save your favorites?")) {
-                    window.location.href = '/auth/login';
-                }
-            }, 500);
+            showAuthRequiredModal("Choose how you'd like to access your cloud library.");
             return;
         }
 
@@ -778,24 +756,49 @@
         }
 
         let lyricsHTML = '';
+        let lineGlobalIdx = 0;
+        
+        // Count pre-stanza lines (Title + Verse Label)
+        // Title:
+        const firstStanzaTextForCheck = lyricsArr[0] ? lyricsArr[0].text : '';
+        const firstLineForCheck = firstStanzaTextForCheck.split('\n')[0].trim().toLowerCase();
+        const hTitleLower = (h.title || '').trim().toLowerCase();
+        if (hTitleLower && !firstLineForCheck.includes(hTitleLower)) {
+            lineGlobalIdx++; // Index 0 for title
+        }
+        // Initial Verse Label:
+        lineGlobalIdx++; // Index 1 for 'Verse 1'
+
         lyricsArr.forEach(l => {
             const cls = l.type === 'refrain' ? 'refrain' : 'stanza';
             let text = l.text;
             
-            // Seamless Display: Remove [Verse X] labels for a more immersive reading flow
-            // But KEEP [Refrain] / [Chorus] / [Bridge] labels as they guide the singer
             text = text.replace(/\[\s*Verse\s*\d+\s*\]/gi, '');
             text = text.trim();
             if (!text) return;
 
-            let htmlText = text.replace(/\n/g, '<br>');
-            // Render other labels (Refrain etc) in style
-            htmlText = htmlText.replace(/\[(.*?)\]/g, '<span style="display:block; font-size:0.65rem; color:var(--gold); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:8px; font-weight:600; opacity:0.8;">$1</span>');
+            // Render other labels (Refrain etc)
+            const labelRegex = /\[(.*?)\]/g;
+            if (labelRegex.test(text)) {
+                lineGlobalIdx++; // For the label itself (Refrain etc)
+            }
             
+            const lines = text.replace(/\[.*?\]/g, '').split('\n').filter(s => s.trim());
+            const spans = lines.map(line => {
+                const idx = lineGlobalIdx++;
+                return `<span id="sing-line-${idx}" style="display:block; transition: all 0.5s ease; padding: 4px 12px; border-radius: 4px; border-left: 3px solid transparent;">${line.trim()}</span>`;
+            }).join('');
+            
+            const labelMatch = text.match(/\[(.*?)\]/);
+            const labelHtml = labelMatch ? `<span style="display:block; font-size:0.65rem; color:var(--gold); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:8px; font-weight:600; opacity:0.8;">${labelMatch[1]}</span>` : '';
+
             lyricsHTML += `
                 <div class="${cls}" style="margin-bottom:32px; position:relative; line-height:1.8; letter-spacing:0.01em; animation: fadeUp 0.8s ease backwards;">
-                    ${htmlText}
+                    ${labelHtml}
+                    ${spans}
                 </div>`;
+            
+            lineGlobalIdx++; // For the stanza break pause
         });
         if (mLyrics) {
             mLyrics.innerHTML = lyricsHTML;
@@ -1248,6 +1251,22 @@
             }
 
             const lineObj = singLines[_singLineIdx++];
+
+            // ── HIGHLIGHT CURRENT LINE ──
+            document.querySelectorAll('[id^="sing-line-"]').forEach(el => {
+                el.style.color = '';
+                el.style.backgroundColor = '';
+                el.style.borderLeftColor = 'transparent';
+                el.style.fontWeight = '400';
+            });
+            const currentEl = document.getElementById(`sing-line-${_singLineIdx - 1}`);
+            if (currentEl) {
+                currentEl.style.color = 'var(--gold)';
+                currentEl.style.backgroundColor = 'rgba(184, 147, 90, 0.08)';
+                currentEl.style.borderLeftColor = 'var(--gold)';
+                currentEl.style.fontWeight = '500';
+                currentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
 
             if (lineObj.pause) {
                 // Stanza break: longer musical pause
@@ -2541,8 +2560,7 @@
         try { sessionRes = await fetch('/api/auth/session'); } catch (e) { }
         const sessionData = sessionRes ? await sessionRes.json() : null;
         if (!sessionData || !sessionData.user) {
-            showCanticleToast('Please sign in to subscribe ✦', 'info');
-            setTimeout(() => { window.location.href = '/auth/login'; }, 1200);
+            showAuthRequiredModal("Choose how you'd like to proceed with your subscription.");
             return;
         }
 
@@ -2611,6 +2629,35 @@
         toast.textContent = message;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3500);
+    }
+
+    function showAuthRequiredModal(message) {
+        const existing = document.getElementById('authReqModal');
+        if (existing) existing.remove();
+
+        const modal = document.createElement('div');
+        modal.id = 'authReqModal';
+        modal.style.cssText = `
+            position: fixed; inset: 0; background: rgba(10, 8, 6, 0.85); 
+            backdrop-filter: blur(8px); z-index: 9999; 
+            display: flex; align-items: center; justify-content: center;
+            animation: pageIn .3s ease both;
+        `;
+        modal.innerHTML = `
+            <div style="background: #fdfaf5; max-width: 380px; width: 85%; padding: 40px 32px; border: 1px solid rgba(184, 147, 90, 0.3); position: relative; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+                <button onclick="document.getElementById('authReqModal').remove()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.1rem; color: #a09585; cursor: pointer;">&times;</button>
+                <div style="font-size: 2rem; margin-bottom: 15px; color: #b8935a;">✧</div>
+                <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 400; color: #1a1510; margin-bottom: 10px; line-height: 1.1;">Sign Up First</h3>
+                <p style="font-family: 'Jost', sans-serif; font-size: 0.82rem; color: #7a7060; margin-bottom: 30px; line-height: 1.5;">${message}</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="/auth/register?callbackUrl=${encodeURIComponent(window.location.href)}" style="background: #1a1510; color: #fdfaf5; padding: 14px; text-decoration: none; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; transition: all .3s;">Sign Up First ✨</a>
+                    <a href="/auth/login?callbackUrl=${encodeURIComponent(window.location.href)}" style="background: transparent; color: #1a1510; padding: 13px; border: 1px solid rgba(26, 21, 16, 0.2); text-decoration: none; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; transition: all .3s;" onmouseover="this.style.borderColor='#1a1510'" onmouseout="this.style.borderColor='rgba(26,21,16,0.2)'">Already have an account? Log In</a>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     }
 
     // ══ INIT ══
