@@ -70,11 +70,25 @@ nav {
   letter-spacing: .08em;
   color: var(--ink);
   text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.logo:hover {
+  opacity: 0.75;
 }
 
 .logo span {
   color: var(--gold);
   font-style: italic;
+}
+
+.mobile-logo {
+  display: none;
+}
+
+.desktop-logo {
+  display: inline;
 }
 
 .nav-tabs {
@@ -2882,7 +2896,9 @@ nav {
   nav { padding: 0 20px; }
   .nav-tabs { display: none !important; }
   .mobile-menu-toggle { display: flex !important; align-items: center; justify-content: center; order: -1; margin-right: 12px; }
-  .logo { flex: 1; text-align: left; font-size: 1.1rem; }
+  .logo { flex: 1; text-align: left; }
+  .desktop-logo { display: none !important; }
+  .mobile-logo { display: inline-block !important; font-size: 0.95rem; font-weight: 500; white-space: nowrap; }
   .nav-right { gap: 8px; }
   .nav-join { display: none !important; } /* Hide in nav, show in mobile menu */
   .nav-sign { display: none !important; } /* Hide in nav, show in mobile menu */
@@ -2971,7 +2987,8 @@ nav {
 
 /* Ultra-Fine Mobile Polish */
 @media screen and (max-width: 380px) {
-  .logo { font-size: 1rem; }
+  .logo { font-size: 0.85rem; }
+  .mobile-logo { font-size: 0.85rem !important; }
   .nav-sign { font-size: 0.6rem; }
   .hero-h1 { font-size: 2.2rem; }
 }
@@ -2994,4 +3011,25 @@ nav {
 @keyframes barFill {
   from { width: 0 }
   to { width: 65% }
+}
+
+@keyframes logoPulse {
+  0% { transform: scale(1); }
+  35% { transform: scale(0.85); opacity: 0.5; filter: brightness(1.2); }
+  65% { transform: scale(1.1); opacity: 1; filter: brightness(1); }
+  100% { transform: scale(1); }
+}
+
+.logo-active-effect {
+  animation: logoPulse 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pageRefreshed {
+  0% { opacity: 1; filter: blur(0px); }
+  30% { opacity: 0.4; filter: blur(2px); }
+  100% { opacity: 1; filter: blur(0px); }
+}
+
+.page-refresh-anim {
+  animation: pageRefreshed 0.6s ease-out forwards;
 }

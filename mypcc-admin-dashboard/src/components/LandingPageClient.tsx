@@ -225,7 +225,42 @@ export default function LandingPageClient({
             <div id="scrollBar"></div>
             <div id="parallaxCross">✝</div>
             <nav className="landing-nav">
-                <a className="logo" href="#">{appName.substring(0, Math.max(0, appName.length - 3))}<span>{appName.substring(Math.max(0, appName.length - 3))}</span></a>
+                <a 
+                    className="logo" 
+                    href="#" 
+                    onClick={(e) => { 
+                        e.preventDefault(); 
+                        const homePage = document.getElementById('page-home');
+                        const isHome = homePage && homePage.classList.contains('active');
+                        
+                        if (typeof (window as any).showPage === 'function') {
+                            (window as any).showPage('home', document.querySelector('.nav-tab'));
+                        }
+
+                        if (isHome) {
+                            const el = e.currentTarget;
+                            el.classList.add('logo-active-effect');
+                            setTimeout(() => el.classList.remove('logo-active-effect'), 500);
+
+                            // Only apply page refresh effect for Home page when clicking logo
+                            if (homePage) {
+                                homePage.classList.remove('page-refresh-anim');
+                                void (homePage as HTMLElement).offsetWidth;
+                                homePage.classList.add('page-refresh-anim');
+                            }
+                        }
+                        
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        setIsMobileMenuOpen(false);
+                    }}
+                >
+                    <span className="desktop-logo">
+                        {appName.substring(0, Math.max(0, appName.length - 3))}<span>{appName.substring(Math.max(0, appName.length - 3))}</span>
+                    </span>
+                    <span className="mobile-logo">
+                        Presbyterian Church <span>in Cameroon</span>
+                    </span>
+                </a>
                 
                 {/* Mobile Menu Button */}
                 <button 
@@ -247,12 +282,12 @@ export default function LandingPageClient({
                 </button>
 
                 <div className="nav-tabs">
-                    <button className="nav-tab active" onClick={(e) => (window as any).showPage('home', e.currentTarget)}><SvgHome size={15} /> Home<div className="dot"></div></button>
-                    <button className="nav-tab" onClick={(e) => (window as any).showPage('hymns', e.currentTarget)}><SvgMusic size={15} /> Hymns<div className="dot"></div></button>
-                    <button className="nav-tab" onClick={(e) => (window as any).showPage('diary', e.currentTarget)}><SvgBook size={15} /> Church Diary<div className="dot"></div></button>
-                    <button className="nav-tab" onClick={(e) => (window as any).showPage('echo', e.currentTarget)}><SvgNewspaper size={15} /> The Echo<div className="dot"></div></button>
-                    <button className="nav-tab" onClick={(e) => (window as any).showPage('devo', e.currentTarget)}><SvgPray size={15} /> Devotionals<div className="dot"></div></button>
-                    <button className="nav-tab" onClick={(e) => (window as any).showPage('subs', e.currentTarget)}>
+                    <button className="nav-tab active" onClick={(e) => { (window as any).showPage('home', e.currentTarget); window.scrollTo({ top: 0, behavior: 'smooth' }); }}><SvgHome size={15} /> Home<div className="dot"></div></button>
+                    <button className="nav-tab" onClick={(e) => { (window as any).showPage('hymns', e.currentTarget); window.scrollTo({ top: 0, behavior: 'smooth' }); }}><SvgMusic size={15} /> Hymns<div className="dot"></div></button>
+                    <button className="nav-tab" onClick={(e) => { (window as any).showPage('diary', e.currentTarget); window.scrollTo({ top: 0, behavior: 'smooth' }); }}><SvgBook size={15} /> Church Diary<div className="dot"></div></button>
+                    <button className="nav-tab" onClick={(e) => { (window as any).showPage('echo', e.currentTarget); window.scrollTo({ top: 0, behavior: 'smooth' }); }}><SvgNewspaper size={15} /> The Echo<div className="dot"></div></button>
+                    <button className="nav-tab" onClick={(e) => { (window as any).showPage('devo', e.currentTarget); window.scrollTo({ top: 0, behavior: 'smooth' }); }}><SvgPray size={15} /> Devotionals<div className="dot"></div></button>
+                    <button className="nav-tab" onClick={(e) => { (window as any).showPage('subs', e.currentTarget); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
                         <SvgCard size={15} /> Subscriptions 
                         {subscriptionType && <span className="ml-1 text-[8px] animate-pulse">✨</span>}
                         <div className="dot"></div>
@@ -374,12 +409,12 @@ export default function LandingPageClient({
                     pointerEvents: isMobileMenuOpen ? 'auto' : 'none'
                 }}
             >
-                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('home'); setIsMobileMenuOpen(false); }}><SvgHome size={20} /> Home</button>
-                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('hymns'); setIsMobileMenuOpen(false); }}><SvgMusic size={20} /> Hymns</button>
-                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('diary'); setIsMobileMenuOpen(false); }}><SvgBook size={20} /> Church Diary</button>
-                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('echo'); setIsMobileMenuOpen(false); }}><SvgNewspaper size={20} /> The Echo</button>
-                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('devo'); setIsMobileMenuOpen(false); }}><SvgPray size={20} /> Devotionals</button>
-                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('subs'); setIsMobileMenuOpen(false); }}><SvgCard size={20} /> Subscriptions</button>
+                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('home'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgHome size={20} /> Home</button>
+                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('hymns'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgMusic size={20} /> Hymns</button>
+                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('diary'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgBook size={20} /> Church Diary</button>
+                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('echo'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgNewspaper size={20} /> The Echo</button>
+                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('devo'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgPray size={20} /> Devotionals</button>
+                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('subs'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgCard size={20} /> Subscriptions</button>
                 
                 <div style={{ height: '1px', background: 'var(--border2)', margin: '20px 0' }}></div>
                 
@@ -688,7 +723,37 @@ export default function LandingPageClient({
                 <footer className="landing-footer">
                     <div className="footer-grid">
                         <div>
-                            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '1.6rem', fontWeight: 300, marginBottom: '14px' }}>{appName.substring(0, Math.max(0, appName.length - 3))}<span style={{ color: 'var(--gold)', fontStyle: 'italic' }}>{appName.substring(Math.max(0, appName.length - 3))}</span></div>
+                            <a 
+                                className="logo"
+                                href="#" 
+                                onClick={(e) => { 
+                                    e.preventDefault(); 
+                                    const homePage = document.getElementById('page-home');
+                                    const isHome = homePage && homePage.classList.contains('active');
+
+                                    if (isHome) {
+                                        const el = e.currentTarget;
+                                        el.classList.add('logo-active-effect');
+                                        setTimeout(() => el.classList.remove('logo-active-effect'), 500);
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    } else if (typeof (window as any).showPage === 'function') {
+                                        (window as any).showPage('home', document.querySelector('.nav-tab'));
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }
+                                }}
+                                style={{ 
+                                    fontSize: '1.6rem', 
+                                    marginBottom: '14px',
+                                    display: 'block',
+                                }}
+                            >
+                                <span className="desktop-logo">
+                                    {appName.substring(0, Math.max(0, appName.length - 3))}<span>{appName.substring(Math.max(0, appName.length - 3))}</span>
+                                </span>
+                                <span className="mobile-logo">
+                                    Presbyterian Church <span>in Cameroon</span>
+                                </span>
+                            </a>
                             <p style={{ fontSize: '.8rem', fontWeight: 300, lineHeight: 1.9, color: 'rgba(247,243,236,.5)', maxWidth: '260px', marginBottom: '28px' }}>
                                 {footerDesc}
                             </p>
