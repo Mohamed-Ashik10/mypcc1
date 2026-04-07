@@ -7,8 +7,9 @@ import com.example.demo.repository.HymnRepository;
 import com.example.demo.repository.DevotionalRepository;
 import com.example.demo.repository.TheEchoRepository;
 
+import com.example.demo.service.AuditLogService;
 import org.springframework.web.bind.annotation.*;
-
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -21,13 +22,16 @@ public class AdminContentController {
     private final HymnRepository hymnRepository;
     private final DevotionalRepository devotionalRepository;
     private final TheEchoRepository theEchoRepository;
+    private final AuditLogService auditLogService;
 
     public AdminContentController(HymnRepository hymnRepository, 
                                   DevotionalRepository devotionalRepository,
-                                  TheEchoRepository theEchoRepository) {
+                                  TheEchoRepository theEchoRepository,
+                                  AuditLogService auditLogService) {
         this.hymnRepository = hymnRepository;
         this.devotionalRepository = devotionalRepository;
         this.theEchoRepository = theEchoRepository;
+        this.auditLogService = auditLogService;
     }
 
     // --- HYMNS ---
@@ -70,12 +74,14 @@ public class AdminContentController {
     }
 
     @PostMapping("/hymns")
-    public Hymn createHymn(@RequestBody Hymn hymn) {
-        return hymnRepository.save(hymn);
+    public Hymn createHymn(@RequestBody Hymn hymn, HttpServletRequest request) {
+        Hymn saved = hymnRepository.save(hymn);
+        auditLogService.logAction("SYSTEM", "CREATE_HYMN", "Created hymn: " + saved.getTitle() + " (#" + saved.getNumber() + ")", request);
+        return saved;
     }
 
     @PatchMapping("/hymns/{id}")
-    public Hymn updateHymn(@PathVariable String id, @RequestBody Map<String, Object> updates) {
+    public Hymn updateHymn(@PathVariable String id, @RequestBody Map<String, Object> updates, HttpServletRequest request) {
         Hymn hymn = hymnRepository.findById(id).orElseThrow(() -> new RuntimeException("Hymn not found"));
         
         if (updates.containsKey("number")) hymn.setNumber(Integer.parseInt(updates.get("number").toString()));
@@ -85,12 +91,18 @@ public class AdminContentController {
         if (updates.containsKey("tags")) hymn.setTags(updates.get("tags") != null ? updates.get("tags").toString() : null);
         if (updates.containsKey("tuneUrl")) hymn.setTuneUrl(updates.get("tuneUrl") != null ? updates.get("tuneUrl").toString() : null);
         
-        return hymnRepository.save(hymn);
+        Hymn updated = hymnRepository.save(hymn);
+        auditLogService.logAction("SYSTEM", "UPDATE_HYMN", "Updated hymn: " + updated.getTitle() + " (ID: " + id + ")", request);
+        return updated;
     }
 
     @DeleteMapping("/hymns/{id}")
-    public void deleteHymn(@PathVariable String id) {
+    public void deleteHymn(@PathVariable String id, HttpServletRequest request) {
+        Hymn h = hymnRepository.findById(id).orElse(null);
         hymnRepository.deleteById(id);
+        if (h != null) {
+            auditLogService.logAction("SYSTEM", "DELETE_HYMN", "Deleted hymn: " + h.getTitle(), request);
+        }
     }
 
     // --- DEVOTIONALS ---
@@ -127,7 +139,7 @@ public class AdminContentController {
     }
 
     @PatchMapping("/devotionals/{id}")
-    public Devotional updateDevotional(@PathVariable String id, @RequestBody Map<String, Object> updates) {
+    public Devotional updateDevotional(@PathVariable String id, @RequestBody Map<String, Object> updates, HttpServletRequest request) {
         Devotional d = devotionalRepository.findById(id).orElseThrow(() -> new RuntimeException("Devotional not found"));
         
         if (updates.containsKey("title")) d.setTitle(updates.get("title").toString());
@@ -143,7 +155,9 @@ public class AdminContentController {
             d.setMinPlan(com.example.demo.model.SubscriptionType.valueOf(updates.get("minPlan").toString()));
         }
         
-        return devotionalRepository.save(d);
+        Devotional updated = devotionalRepository.save(d);
+        auditLogService.logAction("SYSTEM", "UPDATE_DEVOTIONAL", "Updated devotional: " + updated.getTitle(), request);
+        return updated;
     }
 
     @DeleteMapping("/devotionals/{id}")
@@ -206,7 +220,11 @@ public class AdminContentController {
     }
 
     @DeleteMapping("/echo/{id}")
-    public void deleteEchoIssue(@PathVariable String id) {
+    public void deleteEchoIssue(@PathVariable String id, HttpServletRequest request) {
+        TheEchoIssue i = theEchoRepository.findById(id).orElse(null);
         theEchoRepository.deleteById(id);
+        if (i != null) {
+            auditLogService.logAction("SYSTEM", "DELETE_ECHO", "Deleted Echo issue: " + i.getTitle(), request);
+        }
     }
 }

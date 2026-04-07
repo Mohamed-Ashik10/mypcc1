@@ -2,7 +2,9 @@ package com.example.demo.controller;
 
 import com.example.demo.model.DiaryEntry;
 import com.example.demo.repository.DiaryRepository;
+import com.example.demo.service.AuditLogService;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 
 @RestController
@@ -10,9 +12,11 @@ import org.springframework.web.bind.annotation.*;
 public class AdminDiaryController {
 
     private final DiaryRepository diaryRepository;
+    private final AuditLogService auditLogService;
 
-    public AdminDiaryController(DiaryRepository diaryRepository) {
+    public AdminDiaryController(DiaryRepository diaryRepository, AuditLogService auditLogService) {
         this.diaryRepository = diaryRepository;
+        this.auditLogService = auditLogService;
     }
 
     @GetMapping
@@ -58,12 +62,14 @@ public class AdminDiaryController {
     }
 
     @PostMapping
-    public DiaryEntry createEntry(@RequestBody DiaryEntry entry) {
-        return diaryRepository.save(entry);
+    public DiaryEntry createEntry(@RequestBody DiaryEntry entry, HttpServletRequest request) {
+        DiaryEntry saved = diaryRepository.save(entry);
+        auditLogService.logAction("SYSTEM", "CREATE_DIARY", "Created diary entry: " + saved.getTitle(), request);
+        return saved;
     }
 
     @PatchMapping("/{id}")
-    public DiaryEntry updateEntry(@PathVariable String id, @RequestBody java.util.Map<String, Object> updates) {
+    public DiaryEntry updateEntry(@PathVariable String id, @RequestBody java.util.Map<String, Object> updates, HttpServletRequest request) {
         DiaryEntry e = diaryRepository.findById(id).orElseThrow(() -> new RuntimeException("Diary entry not found"));
         
         if (updates.containsKey("title")) e.setTitle(updates.get("title").toString());
@@ -73,11 +79,17 @@ public class AdminDiaryController {
         if (updates.containsKey("readingTwo")) e.setReadingTwo(updates.get("readingTwo") != null ? updates.get("readingTwo").toString() : null);
         if (updates.containsKey("readingThree")) e.setReadingThree(updates.get("readingThree") != null ? updates.get("readingThree").toString() : null);
         
-        return diaryRepository.save(e);
+        DiaryEntry updated = diaryRepository.save(e);
+        auditLogService.logAction("SYSTEM", "UPDATE_DIARY", "Updated diary entry: " + updated.getTitle(), request);
+        return updated;
     }
 
     @DeleteMapping("/{id}")
-    public void deleteEntry(@PathVariable String id) {
+    public void deleteEntry(@PathVariable String id, HttpServletRequest request) {
+        DiaryEntry d = diaryRepository.findById(id).orElse(null);
         diaryRepository.deleteById(id);
+        if (d != null) {
+            auditLogService.logAction("SYSTEM", "DELETE_DIARY", "Deleted diary entry: " + d.getTitle(), request);
+        }
     }
 }
