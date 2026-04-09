@@ -401,7 +401,7 @@ export default function LandingPageClient({
                 <div className="nav-right" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <div 
                         className="lang-toggle hide-on-mobile" 
-                        onClick={() => setLang(l => l === 'en' ? 'fr' : 'en')}
+                        onClick={() => setLang(lang === 'en' ? 'fr' : 'en')}
                     >
                         <span className={lang === 'en' ? 'active' : ''}>EN</span>
                         <div className="divider"></div>
@@ -531,7 +531,7 @@ export default function LandingPageClient({
             >
                 <div 
                     className="lang-toggle" 
-                    onClick={() => setLang(l => l === 'en' ? 'fr' : 'en')}
+                    onClick={() => setLang(lang === 'en' ? 'fr' : 'en')}
                     style={{ margin: '0 0 20px 0', width: 'fit-content' }}
                 >
                     <span className={lang === 'en' ? 'active' : ''}>EN</span>
