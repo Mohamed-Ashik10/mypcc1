@@ -2632,7 +2632,7 @@ nav {
   }
 
   .nav-tabs {
-    display: flex !important;
+    display: none !important;
     order: 3;
     width: 100%;
     overflow-x: auto;
