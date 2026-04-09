@@ -131,6 +131,8 @@ export const translations = {
         joinFree: "Join Free",
         signOut: "Sign Out",
         priorityHelp: "Priority Help",
+        supportSuccess: "Your priority request has been sent to our team. Grace be with you!",
+        supportError: "Failed to send request. Please try again later.",
 
         heroBtnPrimary: "Primary Action",
         heroBtnGhost: "Secondary Action",
