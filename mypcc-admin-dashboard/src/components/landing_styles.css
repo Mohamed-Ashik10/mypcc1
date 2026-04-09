@@ -3102,3 +3102,28 @@ nav {
     display: none;
   }
 }
+
+/* --- MOBILE HEADER SYNC --- */
+@media screen and (max-width: 1023px) {
+  .page {
+    padding-top: 100px !important;
+  }
+  #scrollBar {
+    top: 96px !important;
+  }
+  #parallaxCross {
+    top: 96px !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .page {
+    padding-top: 120px !important;
+  }
+  #scrollBar {
+    top: 110px !important;
+  }
+  #parallaxCross {
+    top: 110px !important;
+  }
+}
