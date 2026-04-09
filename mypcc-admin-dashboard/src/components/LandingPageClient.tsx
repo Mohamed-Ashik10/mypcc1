@@ -398,7 +398,7 @@ export default function LandingPageClient({
                         <div className="dot"></div>
                     </button>
                 </div>
-                <div className="nav-right" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <div className="nav-right" style={{ display: isMobileMenuOpen ? 'none' : 'flex', gap: '8px', alignItems: 'center' }}>
                     <div 
                         className="lang-toggle hide-on-mobile" 
                         onClick={() => setLang(lang === 'en' ? 'fr' : 'en')}
