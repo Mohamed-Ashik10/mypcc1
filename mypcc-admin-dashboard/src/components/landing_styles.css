@@ -2625,10 +2625,28 @@ nav {
   .desktop-only { display: none !important; }
 
   nav {
-    padding: 0 16px;
-    height: auto;
+    padding: 10px 16px;
+    height: auto !important;
+    min-height: 64px;
     flex-wrap: wrap;
-    padding-bottom: 8px;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+  }
+
+  nav.hidden {
+    transform: translateY(-100%);
+  }
+
+  .logo {
+    max-width: 70%;
+  }
+
+  .mobile-logo {
+    display: inline-block !important;
+    font-size: 0.9rem !important;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .nav-tabs {

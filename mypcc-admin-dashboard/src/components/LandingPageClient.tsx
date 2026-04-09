@@ -168,6 +168,23 @@ export default function LandingPageClient({
     const [supportMessage, setSupportMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+    const [lastScrollY, setLastScrollY] = useState(0);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                setIsHeaderVisible(false);
+            } else {
+                setIsHeaderVisible(true);
+            }
+            setLastScrollY(currentScrollY);
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [lastScrollY]);
+
     useEffect(() => {
         const timer = setTimeout(() => setIsLoadingInitial(false), 1500);
         return () => clearTimeout(timer);
@@ -300,7 +317,7 @@ export default function LandingPageClient({
             {/* ══ NAV ══ */}
             <div id="scrollBar"></div>
             <div id="parallaxCross">✝</div>
-            <nav className="landing-nav">
+            <nav className={`landing-nav ${!isHeaderVisible ? 'hidden' : ''}`}>
                 <a 
                     className="logo" 
                     href="#" 
