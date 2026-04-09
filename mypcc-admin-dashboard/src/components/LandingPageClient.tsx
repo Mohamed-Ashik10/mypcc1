@@ -135,6 +135,8 @@ const SvgSparkle = ({ size = 16 }: { size?: number }) => (
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
+import { useTranslation } from "@/lib/LanguageContext";
+import { TranslationKey } from "@/lib/translations";
 
 export default function LandingPageClient({
     session,
@@ -158,16 +160,39 @@ export default function LandingPageClient({
     const [favorites, setFavorites] = useState<string[]>(initialFavorites);
     const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const { lang, setLang, t } = useTranslation();
+    const [isSearching, setIsSearching] = useState(false);
+    const [activeTab, setActiveTab] = useState('home');
+    const [isLoadingInitial, setIsLoadingInitial] = useState(true);
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
     const [supportMessage, setSupportMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        (window as any).hymnFavorites = favorites;
-        (window as any).refreshFavoritesModal = () => {
-            setFavorites([...((window as any).hymnFavorites || [])]);
-        };
+        const timer = setTimeout(() => setIsLoadingInitial(false), 1500);
+        return () => clearTimeout(timer);
+    }, []);
+
+    useEffect(() => {
+        if (favorites) {
+            (window as any).hymnFavorites = favorites;
+            (window as any).refreshFavoritesModal = () => {
+                setFavorites([...((window as any).hymnFavorites || [])]);
+            };
+        }
     }, [favorites]);
+
+    // ── PREVENT BACKGROUND SCROLL WHEN MODALS/MENU ARE OPEN ──
+    useEffect(() => {
+        if (isMobileMenuOpen || isFavoritesOpen || isSupportModalOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isMobileMenuOpen, isFavoritesOpen, isSupportModalOpen]);
 
     useEffect(() => {
         // --- 1. APPLY GLOBAL THEME FROM PRESET ---
@@ -219,8 +244,59 @@ export default function LandingPageClient({
         };
     }, [initialHymns, initialEcho, initialDevotional, initialArchive, initialDiary, initialAnnouncements, subscriptionType, isPaywallActive]);
 
+    // ── RE-RENDER LEGACY COMPONENTS ON LANGUAGE CHANGE ──
+    useEffect(() => {
+        // Sync language to legacy script's global
+        (window as any).currentLang = lang;
+
+        // Small delay to ensure the script is loaded and functions are available
+        const timer = setTimeout(() => {
+            try {
+                if (typeof (window as any).renderHymns === 'function' && (window as any).hymns_db) {
+                    (window as any).renderHymns((window as any).hymns_db);
+                }
+            } catch(e) { /* silent */ }
+            try {
+                if (typeof (window as any).renderDiary === 'function') {
+                    (window as any).renderDiary(0);
+                }
+            } catch(e) { /* silent */ }
+            try {
+                if (typeof (window as any).renderEcho === 'function') {
+                    (window as any).renderEcho();
+                }
+            } catch(e) { /* silent */ }
+            try {
+                if (typeof (window as any).renderDevotional === 'function') {
+                    (window as any).renderDevotional();
+                }
+            } catch(e) { /* silent */ }
+        }, 100);
+
+        return () => clearTimeout(timer);
+    }, [lang]);
+
     return (
         <div className="landing-body">
+            {isLoadingInitial && (
+                <div style={{ position: 'fixed', inset: 0, background: '#1a1510', zIndex: 20000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
+                   <div style={{ width: '100%', maxWidth: '1000px' }}>
+                        <div className="skeleton-circle skeleton" style={{ margin: '0 auto 40px', width: '80px', height: '800px', maxWidth: '80px', maxHeight: '80px' }}></div>
+                        <div className="skeleton-title skeleton" style={{ margin: '0 auto 20px', width: '60%', height: '40px' }}></div>
+                        <div className="skeleton-text skeleton" style={{ margin: '0 auto 60px', width: '40%', height: '20px' }}></div>
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '30px' }}>
+                            {[1, 2, 3].map(i => (
+                                <div key={i} style={{ padding: '30px', background: 'rgba(253, 250, 245, 0.03)', borderRadius: '24px' }}>
+                                    <div className="skeleton-title skeleton" style={{ width: '80%', height: '20px' }}></div>
+                                    <div className="skeleton-text skeleton" style={{ marginBottom: '10px' }}></div>
+                                    <div className="skeleton-text skeleton" style={{ width: '60%' }}></div>
+                                </div>
+                            ))}
+                        </div>
+                   </div>
+                </div>
+            )}
             {/* ══ NAV ══ */}
             <div id="scrollBar"></div>
             <div id="parallaxCross">✝</div>
@@ -258,7 +334,7 @@ export default function LandingPageClient({
                         {appName.substring(0, Math.max(0, appName.length - 3))}<span>{appName.substring(Math.max(0, appName.length - 3))}</span>
                     </span>
                     <span className="mobile-logo">
-                        Presbyterian Church <span>in Cameroon</span>
+                        {t('pccFull').split(' in ')[0]} <span>{t('pccFull').split(' in ')[1] || 'Cameroon'}</span>
                     </span>
                 </a>
                 
@@ -282,39 +358,83 @@ export default function LandingPageClient({
                 </button>
 
                 <div className="nav-tabs">
-                    <button className="nav-tab active" onClick={(e) => { (window as any).showPage('home', e.currentTarget); window.scrollTo({ top: 0, behavior: 'smooth' }); }}><SvgHome size={15} /> Home<div className="dot"></div></button>
-                    <button className="nav-tab" onClick={(e) => { (window as any).showPage('hymns', e.currentTarget); window.scrollTo({ top: 0, behavior: 'smooth' }); }}><SvgMusic size={15} /> Hymns<div className="dot"></div></button>
-                    <button className="nav-tab" onClick={(e) => { (window as any).showPage('diary', e.currentTarget); window.scrollTo({ top: 0, behavior: 'smooth' }); }}><SvgBook size={15} /> Church Diary<div className="dot"></div></button>
-                    <button className="nav-tab" onClick={(e) => { (window as any).showPage('echo', e.currentTarget); window.scrollTo({ top: 0, behavior: 'smooth' }); }}><SvgNewspaper size={15} /> The Echo<div className="dot"></div></button>
-                    <button className="nav-tab" onClick={(e) => { (window as any).showPage('devo', e.currentTarget); window.scrollTo({ top: 0, behavior: 'smooth' }); }}><SvgPray size={15} /> Devotionals<div className="dot"></div></button>
-                    <button className="nav-tab" onClick={(e) => { (window as any).showPage('subs', e.currentTarget); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-                        <SvgCard size={15} /> Subscriptions 
+                    <button className={`nav-tab ${activeTab === 'home' ? 'active' : ''}`} onClick={(e) => { 
+                        setActiveTab('home');
+                        (window as any).showPage('home', e.currentTarget); 
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}><SvgHome size={15} /> {t('home')}<div className="dot"></div></button>
+                    
+                    <button className={`nav-tab ${activeTab === 'hymns' ? 'active' : ''}`} onClick={(e) => { 
+                        setActiveTab('hymns');
+                        (window as any).showPage('hymns', e.currentTarget); 
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}><SvgMusic size={15} /> {t('hymns')}<div className="dot"></div></button>
+                    
+                    <button className={`nav-tab ${activeTab === 'diary' ? 'active' : ''}`} onClick={(e) => { 
+                        setActiveTab('diary');
+                        (window as any).showPage('diary', e.currentTarget); 
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}><SvgBook size={15} /> {t('diary')}<div className="dot"></div></button>
+                    
+                    <button className={`nav-tab ${activeTab === 'echo' ? 'active' : ''}`} onClick={(e) => { 
+                        setActiveTab('echo');
+                        (window as any).showPage('echo', e.currentTarget); 
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}><SvgNewspaper size={15} /> {t('echo')}<div className="dot"></div></button>
+                    
+                    <button className={`nav-tab ${activeTab === 'devo' ? 'active' : ''}`} onClick={(e) => { 
+                        setActiveTab('devo');
+                        (window as any).showPage('devo', e.currentTarget); 
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}><SvgPray size={15} /> {t('devo')}<div className="dot"></div></button>
+                    
+                    <button className={`nav-tab ${activeTab === 'subs' ? 'active' : ''}`} onClick={(e) => { 
+                        setActiveTab('subs');
+                        (window as any).showPage('subs', e.currentTarget); 
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}>
+                        <SvgCard size={15} /> {t('subs')} 
                         {subscriptionType && <span className="ml-1 text-[8px] animate-pulse">✨</span>}
                         <div className="dot"></div>
                     </button>
                 </div>
                 <div className="nav-right" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <div 
+                        className="lang-toggle hide-on-mobile" 
+                        onClick={() => setLang(l => l === 'en' ? 'fr' : 'en')}
+                    >
+                        <span className={lang === 'en' ? 'active' : ''}>EN</span>
+                        <div className="divider"></div>
+                        <span className={lang === 'fr' ? 'active' : ''}>FR</span>
+                    </div>
+
                     <button
-                        title="Global Master Search"
-                        onClick={() => (window as any).openMasterSearch && (window as any).openMasterSearch()}
+                        title={t('search')}
+                        onClick={() => {
+                            setIsSearching(true);
+                            if((window as any).openMasterSearch) (window as any).openMasterSearch();
+                            setTimeout(() => setIsSearching(false), 1200);
+                        }}
                         style={{
                             display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                             width: '32px', height: '32px', borderRadius: '8px',
-                            background: 'rgba(0, 0, 0, 0.05)', color: 'var(--ink)',
+                            background: isSearching ? 'rgba(184, 147, 90, 0.2)' : 'rgba(0, 0, 0, 0.05)', 
+                            color: isSearching ? 'var(--gold)' : 'var(--ink)',
                             border: '1px solid rgba(0, 0, 0, 0.1)',
                             cursor: 'pointer', flexShrink: 0,
                             transition: 'all .2s'
                         }}
                         onMouseOver={(e:any) => e.currentTarget.style.background='rgba(0, 0, 0, 0.1)'}
-                        onMouseOut={(e:any) => e.currentTarget.style.background='rgba(0, 0, 0, 0.05)'}
+                        onMouseOut={(e:any) => e.currentTarget.style.background=isSearching ? 'rgba(184, 147, 90, 0.2)' : 'rgba(0, 0, 0, 0.05)'}
                     >
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     </button>
 
                     {subscriptionType === 'SHEPHERD' && (
                         <button
-                            title="Priority Support"
+                            title={t('priorityHelp')}
                             onClick={() => setIsSupportModalOpen(true)}
+                            className="priority-btn"
                             style={{
                                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                                 padding: '0 12px', height: '32px', borderRadius: '8px',
@@ -330,7 +450,7 @@ export default function LandingPageClient({
                             onMouseOver={(e:any) => e.currentTarget.style.transform='translateY(-1px)'}
                             onMouseOut={(e:any) => e.currentTarget.style.transform='translateY(0)'}
                         >
-                            <span style={{ marginRight: '6px' }}>✨</span> Priority Help
+                            <span style={{ marginRight: '6px' }}>✨</span> <span className="priority-help-text">{t('priorityHelp')}</span>
                         </button>
                     )}
 
@@ -377,12 +497,12 @@ export default function LandingPageClient({
                                     ⚙️
                                 </a>
                             )}
-                            <button className="nav-sign" onClick={() => signOut()}>Sign Out</button>
+                            <button className="nav-sign" onClick={() => signOut()}>{t('signOut')}</button>
                         </>
                     ) : (
                         <>
-                            <button className="nav-sign" onClick={() => window.location.href = '/auth/login'}>Sign In</button>
-                            <button className="nav-join" onClick={() => window.location.href = '/auth/register'}>Join Free</button>
+                            <button className="nav-sign" onClick={() => window.location.href = '/auth/login'}>{t('signIn')}</button>
+                            <button className="nav-join" onClick={() => window.location.href = '/auth/register'}>{t('joinFree')}</button>
                         </>
                     )}
                 </div>
@@ -409,25 +529,35 @@ export default function LandingPageClient({
                     pointerEvents: isMobileMenuOpen ? 'auto' : 'none'
                 }}
             >
-                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('home'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgHome size={20} /> Home</button>
-                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('hymns'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgMusic size={20} /> Hymns</button>
-                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('diary'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgBook size={20} /> Church Diary</button>
-                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('echo'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgNewspaper size={20} /> The Echo</button>
-                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('devo'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgPray size={20} /> Devotionals</button>
-                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('subs'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgCard size={20} /> Subscriptions</button>
+                <div 
+                    className="lang-toggle" 
+                    onClick={() => setLang(l => l === 'en' ? 'fr' : 'en')}
+                    style={{ margin: '0 0 20px 0', width: 'fit-content' }}
+                >
+                    <span className={lang === 'en' ? 'active' : ''}>EN</span>
+                    <div className="divider"></div>
+                    <span className={lang === 'fr' ? 'active' : ''}>FR</span>
+                </div>
+
+                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('home'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgHome size={20} /> {t('home')}</button>
+                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('hymns'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgMusic size={20} /> {t('hymns')}</button>
+                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('diary'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgBook size={20} /> {t('diary')}</button>
+                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('echo'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgNewspaper size={20} /> {t('echo')}</button>
+                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('devo'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgPray size={20} /> {t('devo')}</button>
+                <button className="nav-tab-mobile" onClick={(e) => { (window as any).showPage('subs'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}> <SvgCard size={20} /> {t('subs')}</button>
                 
                 <div style={{ height: '1px', background: 'var(--border2)', margin: '20px 0' }}></div>
                 
                 {!session ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <button className="nav-tab-mobile" style={{ color: 'var(--gold)' }} onClick={() => window.location.href = '/auth/register'}>✨ Join Free</button>
-                        <button className="nav-tab-mobile" onClick={() => window.location.href = '/auth/login'}>👤 Sign In</button>
+                        <button className="nav-tab-mobile" style={{ color: 'var(--gold)' }} onClick={() => window.location.href = '/auth/register'}>✨ {t('joinFree')}</button>
+                        <button className="nav-tab-mobile" onClick={() => window.location.href = '/auth/login'}>👤 {t('signIn')}</button>
                     </div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                          <button className="nav-tab-mobile" style={{ color: '#c0392b' }} onClick={() => signOut()}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '10px' }}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                            Sign Out
+                            {t('signOut')}
                          </button>
                     </div>
                 )}
@@ -459,21 +589,25 @@ export default function LandingPageClient({
                     <div className="float-icon" style={{ top: '80%', left: '18%', animationDelay: '.6s', color: 'rgba(253, 250, 245, 0.15)' }}><SvgNewspaper size={22} /></div>
                     <div className="float-icon" style={{ top: '12%', right: '22%', animationDelay: '1.7s', color: 'rgba(253, 250, 245, 0.15)' }}><SvgCard size={22} /></div>
 
-                    <p className="hero-eyebrow" style={{ animation: 'fadeUp .8s .2s ease both', position: 'relative', zIndex: 2 }}>A sacred space for every believer</p>
-                    <h1 className="hero-h1" style={{ animation: 'fadeUp .8s .4s ease both', position: 'relative', zIndex: 2 }}>Sing. Listen.<br /><em>Remember.</em></h1>
+                    <p className="hero-eyebrow" style={{ animation: 'fadeUp .8s .2s ease both', position: 'relative', zIndex: 2 }}>{t('heroEyebrow')}</p>
+                    <h1 className="hero-h1" style={{ animation: 'fadeUp .8s .4s ease both', position: 'relative', zIndex: 2 }}>
+                        {t('heroTitle').split('. ').map((word: string, i: number, arr: string[]) => (
+                             <span key={i}>{word}{i < arr.length - 1 ? '. ' : ''}{i === 1 ? <br/> : ''}</span>
+                        ))}
+                    </h1>
                     <p className="hero-sub" style={{ maxWidth: '500px', animation: 'fadeUp .8s .6s ease both', position: 'relative', zIndex: 2 }}>
-                        Read beloved hymns, keep a personal church diary, stay connected through The Echo, and grow daily with morning devotionals.
+                        {t('heroSub')}
                     </p>
                     <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center', animation: 'fadeUp .8s .8s ease both', marginTop: '8px', position: 'relative', zIndex: 2 }}>
                         <button onClick={() => (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1])} className="btn-primary" style={{ background: 'var(--gold)', color: 'var(--cream)', border: 'none' }}>
-                            {subscriptionType ? 'Access Library' : 'Explore Hymns'} &rarr;
+                            {t('heroBtnPrimary')} &rarr;
                         </button>
                         <button 
                             onClick={(e) => { e.preventDefault(); (window as any).showPage('subs', document.querySelectorAll('.nav-tab')[5]); }}
                             className="btn-ghost" 
                             style={{ borderColor: 'rgba(253, 250, 245, 0.4)', color: 'var(--cream)', background: 'transparent' }}
                         >
-                            {subscriptionType ? 'My Plan' : 'View Plans'}
+                            {t('heroBtnGhost')}
                         </button>
                     </div>
                     <div className="hero-scroll" style={{ animation: 'fadeUp .8s 1.1s ease both', color: 'rgba(253, 250, 245, 0.6)' }}>
@@ -494,7 +628,7 @@ export default function LandingPageClient({
                 {/* MARQUEE TICKER */}
                 <div className="marquee-section reveal from-bottom">
                     <p style={{ fontSize: '.62rem', letterSpacing: '.28em', textTransform: 'uppercase', color: 'var(--gold)', textAlign: 'center', marginBottom: '32px', fontWeight: 300 }}>
-                        From the hymn library
+                        {t('fromHymnLibrary')}
                     </p>
                     <div className="marquee-wrap" style={{ marginBottom: '12px' }}>
                         <div className="marquee-track">
@@ -516,35 +650,51 @@ export default function LandingPageClient({
                 <section className="sticky-section">
                     <div className="sticky-left">
                         <div className="sticky-panel active" data-panel="0">
-                            <p className="sticky-label"><SvgMusic size={14} /> Hymns</p>
-                            <h2 className="sticky-title">Ancient words,<br /><em>ever new</em></h2>
-                            <p className="sticky-body">Hundreds of classic and contemporary hymns, beautifully typeset. Search by theme, scripture or season. Every word carries centuries of faith.</p>
-                            <button onClick={(e) => (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1])} className="sticky-btn">Browse Hymns &rarr;</button>
+                            <p className="sticky-label"><SvgMusic size={14} /> {t('hymns')}</p>
+                            <h2 className="sticky-title">
+                                {t('hymnsLabel').split(', ').map((word: string, i: number, arr: string[]) => (
+                                    <span key={i}>{word}{i < arr.length - 1 ? ', ' : ''}{i === 0 ? <br/> : ''}</span>
+                                ))}
+                            </h2>
+                            <p className="sticky-body">{t('hymnsBody')}</p>
+                            <button onClick={(e) => (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1])} className="sticky-btn">{t('hymnsBtn')} &rarr;</button>
                         </div>
                         <div className="sticky-panel" data-panel="1">
-                            <p className="sticky-label"><SvgBook size={14} /> Church Diary</p>
-                            <h2 className="sticky-title">Your faith,<br /><em>written down</em></h2>
-                            <p className="sticky-body">Every time a hymn moves you, write it down. Over time your diary becomes a testimony — a sacred record of how God spoke through music.</p>
-                            <button onClick={(e) => (window as any).showPage('diary', document.querySelectorAll('.nav-tab')[2])} className="sticky-btn">Open Diary &rarr;</button>
+                            <p className="sticky-label"><SvgBook size={14} /> {t('diary')}</p>
+                            <h2 className="sticky-title">
+                                {t('diaryLabel').split(', ').map((word: string, i: number, arr: string[]) => (
+                                    <span key={i}>{word}{i < arr.length - 1 ? ', ' : ''}{i === 0 ? <br/> : ''}</span>
+                                ))}
+                            </h2>
+                            <p className="sticky-body">{t('diaryBody')}</p>
+                            <button onClick={(e) => (window as any).showPage('diary', document.querySelectorAll('.nav-tab')[2])} className="sticky-btn">{t('diaryBtn')} &rarr;</button>
                         </div>
                         <div className="sticky-panel" data-panel="2">
-                            <p className="sticky-label"><SvgNewspaper size={14} /> The Echo</p>
-                            <h2 className="sticky-title">Stories that<br /><em>resonate</em></h2>
-                            <p className="sticky-body">Testimonies, church news, and community voices. The Echo carries the stories of believers from around the world.</p>
-                            <button onClick={(e) => (window as any).showPage('echo', document.querySelectorAll('.nav-tab')[3])} className="sticky-btn">Read The Echo &rarr;</button>
+                            <p className="sticky-label"><SvgNewspaper size={14} /> {t('echo')}</p>
+                            <h2 className="sticky-title">
+                                {t('echoLabel').split(' that ').map((word: string, i: number, arr: string[]) => (
+                                    <span key={i}>{word}{i < arr.length - 1 ? ' ' : ''}{i === 0 ? <br/> : ''}</span>
+                                ))}
+                            </h2>
+                            <p className="sticky-body">{t('echoBody')}</p>
+                            <button onClick={(e) => (window as any).showPage('echo', document.querySelectorAll('.nav-tab')[3])} className="sticky-btn">{t('echoBtn')} &rarr;</button>
                         </div>
                         <div className="sticky-panel" data-panel="3">
-                            <p className="sticky-label"><SvgPray size={14} /> Devotionals</p>
-                            <h2 className="sticky-title">Morning by<br /><em>morning</em></h2>
-                            <p className="sticky-body">365 daily devotionals — scripture, reflection and prayer. Start every day grounded in God's word, with a companion hymn to carry you through.</p>
-                            <button onClick={(e) => (window as any).showPage('devo', document.querySelectorAll('.nav-tab')[4])} className="sticky-btn">Today's Devotional &rarr;</button>
+                            <p className="sticky-label"><SvgPray size={14} /> {t('devo')}</p>
+                            <h2 className="sticky-title">
+                                {t('devoLabel').split(' by ').map((word: string, i: number, arr: string[]) => (
+                                    <span key={i}>{word}{i < arr.length - 1 ? ' ' : ''}{i === 0 ? <br/> : ''}</span>
+                                ))}
+                            </h2>
+                            <p className="sticky-body">{t('devoBody')}</p>
+                            <button onClick={(e) => (window as any).showPage('devo', document.querySelectorAll('.nav-tab')[4])} className="sticky-btn">{t('devoBtn')} &rarr;</button>
                         </div>
                     </div>
                     <div className="sticky-right">
                         <div className="sticky-cards-wrap">
                             <div className="sticky-card active" data-card="0" style={{ backgroundImage: "linear-gradient(rgba(26, 21, 16, 0.75), rgba(26, 21, 16, 0.95)), url('/worship_hymns.png')", backgroundSize: 'cover', backgroundPosition: 'center', color: 'var(--cream)', borderColor: 'rgba(255,255,255,0.1)' }}>
                                 <div className="sc-icon" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--cream)' }}><SvgMusic size={22} /></div>
-                                <p className="sc-num" style={{ color: 'var(--gold)' }}>{initialHymns.length}+ Hymns</p>
+                                <p className="sc-num" style={{ color: 'var(--gold)' }}>{initialHymns.length}+ {t('hymns')}</p>
                                 <p className="sc-title" style={{ color: 'var(--cream)' }}>{initialHymns[0]?.title || 'Amazing Grace'}</p>
                                 <p className="sc-sub" style={{ color: 'rgba(247,243,236,0.6)' }}>{initialHymns[0]?.author || 'John Newton · 1779'}</p>
                                 <div className="sc-bar"><div className="sc-bar-fill" style={{ background: 'var(--gold)' }}></div></div>
@@ -554,29 +704,29 @@ export default function LandingPageClient({
                             </div>
                             <div className="sticky-card" data-card="1" style={{ backgroundImage: "linear-gradient(rgba(26, 21, 16, 0.8), rgba(26, 21, 16, 0.95)), url('/church_diary.png')", backgroundSize: 'cover', backgroundPosition: 'center', color: 'var(--cream)', borderColor: 'rgba(255,255,255,0.1)' }}>
                                 <div className="sc-icon" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--cream)' }}><SvgBook size={22} /></div>
-                                <p className="sc-num" style={{ color: 'var(--gold)' }}>Diary Entry &middot; {initialDiary[0] ? new Date(initialDiary[0].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Feb 25'}</p>
-                                <p className="sc-title" style={{ color: 'var(--cream)' }}>{initialDiary[0]?.title || 'Morning of Quiet Grace'}</p>
-                                <p className="sc-sub" style={{ color: 'rgba(247,243,236,0.6)' }}>{initialDiary[0]?.hymn || 'Great Is Thy Faithfulness'}</p>
-                                <p className="sc-body" style={{ color: 'rgba(247,243,236,0.8)' }}>&ldquo;{initialDiary[0]?.body?.substring(0, 60) || 'The second verse felt like a letter written directly to me...'}...&rdquo;</p>
+                                <p className="sc-num" style={{ color: 'var(--gold)' }}>{t('diary')} &middot; {initialDiary[0] ? new Date(initialDiary[0].date).toLocaleDateString(lang === 'en' ? 'en-US' : 'fr-FR', { month: 'short', day: 'numeric' }) : 'Feb 25'}</p>
+                                <p className="sc-title" style={{ color: 'var(--cream)' }}>{initialDiary[0]?.title || (lang === 'en' ? 'Morning of Quiet Grace' : 'Matin de grâce paisible')}</p>
+                                <p className="sc-sub" style={{ color: 'rgba(247,243,236,0.6)' }}>{initialDiary[0]?.hymn || (lang === 'en' ? 'Great Is Thy Faithfulness' : 'Grande est ta fidélité')}</p>
+                                <p className="sc-body" style={{ color: 'rgba(247,243,236,0.8)' }}>&ldquo;{initialDiary[0]?.body?.substring(0, 60) || (lang === 'en' ? 'The second verse felt like a letter written directly to me...' : 'Le deuxième couplet ressemblait à une lettre qui m\'était adressée...')}...&rdquo;</p>
                                 <div style={{ display: 'flex', gap: '6px', marginTop: '16px', flexWrap: 'wrap' }}>
-                                    {initialDiary[0]?.theme ? initialDiary[0].theme.split(',').map((t: string) => <span key={t} className="sc-badge" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(247,243,236,0.7)' }}>{t.trim()}</span>) : <><span className="sc-badge" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(247,243,236,0.7)' }}>Gratitude</span><span className="sc-badge" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(247,243,236,0.7)' }}>Faithfulness</span></>}
+                                    {initialDiary[0]?.theme ? initialDiary[0].theme.split(',').map((t: string) => <span key={t} className="sc-badge" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(247,243,236,0.7)' }}>{t.trim()}</span>) : <><span className="sc-badge" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(247,243,236,0.7)' }}>{lang === 'en' ? 'Gratitude' : 'Gratitude'}</span><span className="sc-badge" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(247,243,236,0.7)' }}>{lang === 'en' ? 'Faithfulness' : 'Fidélité'}</span></>}
                                 </div>
                             </div>
                             <div className="sticky-card" data-card="2" style={{ backgroundImage: "linear-gradient(rgba(26, 21, 16, 0.8), rgba(26, 21, 16, 0.95)), url('/echo_community.png')", backgroundSize: 'cover', backgroundPosition: 'center', color: 'var(--cream)', borderColor: 'rgba(255,255,255,0.1)' }}>
                                 <div className="sc-icon" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--cream)' }}><SvgNewspaper size={22} /></div>
-                                <p className="sc-num" style={{ color: 'var(--gold)' }}>The Echo &middot; Latest</p>
+                                <p className="sc-num" style={{ color: 'var(--gold)' }}>{t('echo')} &middot; {t('latestEcho')}</p>
                                 <p className="sc-title" style={{ color: 'var(--cream)' }}>{initialEcho[0]?.title || 'From Doubt to Devotion'}</p>
                                 <p className="sc-sub" style={{ color: 'rgba(247,243,236,0.6)' }}>{initialEcho[0]?.author || 'Sarah M.'} &middot; {initialEcho[0]?.date || 'Feb 22, 2026'}</p>
                                 <p className="sc-body" style={{ color: 'rgba(247,243,236,0.8)' }}>&ldquo;{initialEcho[0]?.excerpt?.substring(0, 60) || 'Then one Sunday morning, a single hymn changed everything…'}...&rdquo;</p>
-                                <span className="sc-badge" style={{ marginTop: '16px', display: 'inline-block', textTransform: 'capitalize', borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(247,243,236,0.7)' }}>{initialEcho[0]?.cat || 'Testimony'}</span>
+                                <span className="sc-badge" style={{ marginTop: '16px', display: 'inline-block', textTransform: 'capitalize', borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(247,243,236,0.7)' }}>{initialEcho[0]?.cat || (lang === 'en' ? 'Testimony' : 'Témoignage')}</span>
                             </div>
                             <div className="sticky-card" data-card="3" style={{ backgroundImage: "linear-gradient(rgba(26, 21, 16, 0.8), rgba(26, 21, 16, 0.95)), url('/daily_devo.png')", backgroundSize: 'cover', backgroundPosition: 'center', color: 'var(--cream)', borderColor: 'rgba(255,255,255,0.1)' }}>
                                 <div className="sc-icon" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--cream)' }}><SvgPray size={22} /></div>
-                                <p className="sc-num" style={{ color: 'var(--gold)' }}>Today's Devotional</p>
-                                <p className="sc-title" style={{ color: 'var(--cream)' }}>{initialDevotional?.title || 'Still Waters'}</p>
+                                <p className="sc-num" style={{ color: 'var(--gold)' }}>{t('todayDevo')}</p>
+                                <p className="sc-title" style={{ color: 'var(--cream)' }}>{initialDevotional?.title || (lang === 'en' ? 'Still Waters' : 'Eaux paisibles')}</p>
                                 <p className="sc-sub" style={{ color: 'rgba(247,243,236,0.6)' }}>{initialDevotional?.date || 'Feb 25, 2026'}</p>
                                 <p className="sc-body" style={{ color: 'rgba(247,243,236,0.8)' }}>&ldquo;{initialDevotional?.content?.split('### Reflection')[1]?.replace(/[#>\[\]!\n"]/g, ' ')?.substring(0, 75).trim() || 'He leads me beside quiet waters, he refreshes my soul.'}...&rdquo;</p>
-                                <span className="sc-badge" style={{ marginTop: '16px', display: 'inline-block', borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(247,243,236,0.7)' }}>Peace &middot; Rest</span>
+                                <span className="sc-badge" style={{ marginTop: '16px', display: 'inline-block', borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(247,243,236,0.7)' }}>{lang === 'en' ? 'Peace · Rest' : 'Paix · Repos'}</span>
                             </div>
                         </div>
                     </div>
@@ -586,15 +736,15 @@ export default function LandingPageClient({
                 {/* CHURCH ANNOUNCEMENTS IN HOME PAGE */}
                 <section className="announcements-section reveal from-bottom">
                     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                        <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '2.5rem', color: 'var(--ink)', marginBottom: '40px', textAlign: 'center', fontStyle: 'italic' }}>Church Announcements</h2>
+                        <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '2.5rem', color: 'var(--ink)', marginBottom: '40px', textAlign: 'center', fontStyle: 'italic' }}>{lang === 'en' ? 'Church Announcements' : 'Annonces de l\'Église'}</h2>
                         <div id="announcementsList" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
-                            {initialAnnouncements.length > 0 ? initialAnnouncements.map((ann, i) => (
+                            {initialAnnouncements && initialAnnouncements.length > 0 ? initialAnnouncements.map((ann, i) => (
                                 <div key={i} style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '2px', padding: '32px' }}>
                                     <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.6rem', fontWeight: 400, color: 'var(--ink)', marginBottom: '16px', lineHeight: 1.2 }}>{ann.title}</h3>
                                     <p style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.1rem', color: 'var(--muted)', lineHeight: 1.8 }}>{ann.content}</p>
                                 </div>
                             )) : (
-                                <p style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.2rem', color: 'var(--muted)', fontStyle: 'italic', textAlign: 'center', width: '100%' }}>No active announcements.</p>
+                                <p style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.2rem', color: 'var(--muted)', fontStyle: 'italic', textAlign: 'center', width: '100%', padding: '20px 0' }}>{lang === 'en' ? 'No active announcements.' : 'Aucune annonce active.'}</p>
                             )}
                         </div>
                     </div>
@@ -607,26 +757,26 @@ export default function LandingPageClient({
                         <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 'clamp(2.5rem, 4vw, 3.5rem)', color: 'var(--ink)', marginBottom: '64px', fontWeight: 300 }}>Worship across all your devices</h2>
                         
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '40px', alignItems: 'flex-start' }}>
-                            <div className="hiw-card" onClick={(e) => (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1])}>
+                            <div className="hiw-card" onClick={() => (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1])}>
                                 <div className="hiw-icon" style={{ background: 'var(--cream)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', border: '1px solid var(--border)' }}>
                                     <SvgMusic size={28} />
                                 </div>
-                                <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.4rem', fontWeight: 400, marginBottom: '12px' }}>1. Find your song</h3>
-                                <p style={{ fontSize: '.9rem', color: 'var(--muted)', lineHeight: 1.7, fontWeight: 300 }}>Search our library of 850+ hymns by theme, scripture, or author. Press play to hear the melody or read the sheet music.</p>
+                                <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.4rem', fontWeight: 400, marginBottom: '12px' }}>{lang === 'en' ? '1. Find your song' : '1. Trouvez votre chant'}</h3>
+                                <p style={{ fontSize: '.9rem', color: 'var(--muted)', lineHeight: 1.7, fontWeight: 300 }}>{lang === 'en' ? 'Search our library of 850+ hymns by theme, scripture, or author. Press play to hear the melody or read the sheet music.' : 'Recherchez parmi nos 850+ cantiques par thème, écriture ou auteur. Appuyez sur lecture pour entendre la mélodie.'}</p>
                             </div>
-                            <div className="hiw-card" onClick={(e) => (window as any).showPage('diary', document.querySelectorAll('.nav-tab')[2])}>
+                            <div className="hiw-card" onClick={() => (window as any).showPage('diary', document.querySelectorAll('.nav-tab')[2])}>
                                 <div className="hiw-icon" style={{ background: 'var(--cream)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', border: '1px solid var(--border)' }}>
                                     <SvgBook size={28} />
                                 </div>
-                                <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.4rem', fontWeight: 400, marginBottom: '12px' }}>2. Record your journey</h3>
-                                <p style={{ fontSize: '.9rem', color: 'var(--muted)', lineHeight: 1.7, fontWeight: 300 }}>Save your favorite hymns and attach personal diary entries. Keep a record of how God speaks to you through music.</p>
+                                <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.4rem', fontWeight: 400, marginBottom: '12px' }}>{lang === 'en' ? '2. Record your journey' : '2. Notez votre parcours'}</h3>
+                                <p style={{ fontSize: '.9rem', color: 'var(--muted)', lineHeight: 1.7, fontWeight: 300 }}>{lang === 'en' ? 'Save your favorite hymns and attach personal diary entries. Keep a record of how God speaks to you through music.' : 'Sauvegardez vos cantiques préférés et ajoutez des entrées personnelles. Gardez une trace de la parole de Dieu.'}</p>
                             </div>
-                            <div className="hiw-card" onClick={(e) => (window as any).showPage('echo', document.querySelectorAll('.nav-tab')[3])}>
+                            <div className="hiw-card" onClick={() => (window as any).showPage('echo', document.querySelectorAll('.nav-tab')[3])}>
                                 <div className="hiw-icon" style={{ background: 'var(--cream)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', border: '1px solid var(--border)' }}>
                                     <SvgNewspaper size={28} />
                                 </div>
-                                <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.4rem', fontWeight: 400, marginBottom: '12px' }}>3. Stay connected</h3>
-                                <p style={{ fontSize: '.9rem', color: 'var(--muted)', lineHeight: 1.7, fontWeight: 300 }}>Read testimonies from the community in The Echo, and start each morning grounded with our daily devotionals.</p>
+                                <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.4rem', fontWeight: 400, marginBottom: '12px' }}>{lang === 'en' ? '3. Stay connected' : '3. Restez connecté'}</h3>
+                                <p style={{ fontSize: '.9rem', color: 'var(--muted)', lineHeight: 1.7, fontWeight: 300 }}>{lang === 'en' ? 'Read testimonies from the community in The Echo, and start each morning grounded with our daily devotionals.' : 'Lisez des témoignages dans L\'Écho et commencez chaque matin avec nos dévotions quotidiennes.'}</p>
                             </div>
                         </div>
                     </div>
@@ -641,13 +791,13 @@ export default function LandingPageClient({
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px' }}>
                             {initialTestimonials && initialTestimonials.length > 0 ? (
-                                initialTestimonials.map((t: any, idx: number) => (
+                                initialTestimonials.map((t, idx) => (
                                     <div key={idx} style={{ background: 'var(--warm)', padding: '40px', border: '1px solid var(--border)', position: 'relative' }}>
                                         <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '4rem', color: 'rgba(184, 147, 90, 0.15)', position: 'absolute', top: '10px', left: '24px', lineHeight: 1 }}>"</span>
                                         <p style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.1rem', color: 'var(--ink2)', lineHeight: 1.8, fontStyle: 'italic', marginBottom: '24px', position: 'relative', zIndex: 1 }}>"{t.content}"</p>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                             <div style={{ width: '40px', height: '40px', background: '#e0d5c1', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Cormorant Garamond", serif', fontSize: '1.2rem', color: '#6e1799' }}>
-                                                {t.authorName.charAt(0)}
+                                                {t.authorName?.charAt(0) || 'P'}
                                             </div>
                                             <div>
                                                 <p style={{ fontSize: '.85rem', fontWeight: 500, color: 'var(--ink)' }}>{t.authorName}</p>
@@ -659,7 +809,7 @@ export default function LandingPageClient({
                                     </div>
                                 ))
                             ) : (
-                                <p style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.2rem', color: 'var(--muted)', fontStyle: 'italic', textAlign: 'center', width: '100%', padding: '40px 0' }}>Community voices will appear here soon.</p>
+                                <p style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.2rem', color: 'var(--muted)', fontStyle: 'italic', textAlign: 'center', width: '100%', padding: '40px 0' }}>{lang === 'en' ? 'Community voices will appear here soon.' : 'Les témoignages de la communauté apparaîtront bientôt.'}</p>
                             )}
                         </div>
                     </div>
@@ -671,10 +821,10 @@ export default function LandingPageClient({
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                         <span style={{ fontSize: '40vw', color: 'rgba(255,255,255,.015)', fontFamily: "'Cormorant Garamond',serif", lineHeight: 1 }}>✝</span>
                     </div>
-                    <p style={{ fontSize: '.65rem', letterSpacing: '.3em', textTransform: 'uppercase', color: 'var(--gold)', fontWeight: 300, marginBottom: '16px' }}>Begin today</p>
-                    <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(2.5rem,5vw,4rem)', fontWeight: 300, color: '#f7f3ec', lineHeight: 1.2, marginBottom: '20px' }}>Your sacred practice<br /><em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>starts here.</em></h2>
-                    <p style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(247,243,236,.45)', marginBottom: '44px' }}>Free to join. No commitment required. Just you and the music of faith.</p>
-                    <button onClick={(e) => { e.preventDefault(); (window as any).showPage('subs', document.querySelectorAll('.nav-tab')[5]); }} style={{ padding: '14px 40px', background: '#6e1799', color: '#fdfaf5', border: 'none', cursor: 'pointer', fontSize: '.72rem', letterSpacing: '.18em', textTransform: 'uppercase', fontWeight: 300, transition: 'background .3s' }}>Join Free Today</button>
+                    <p style={{ fontSize: '.65rem', letterSpacing: '.3em', textTransform: 'uppercase', color: 'var(--gold)', fontWeight: 300, marginBottom: '16px' }}>{lang === 'en' ? 'Begin today' : 'Commencez aujourd\'hui'}</p>
+                    <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(2.5rem,5vw,4rem)', fontWeight: 300, color: '#f7f3ec', lineHeight: 1.2, marginBottom: '20px' }}>{lang === 'en' ? 'Your sacred practice' : 'Votre pratique sacrée'}<br /><em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>{lang === 'en' ? 'starts here.' : 'commence ici.'}</em></h2>
+                    <p style={{ fontSize: '.82rem', fontWeight: 300, color: 'rgba(247,243,236,.45)', marginBottom: '44px' }}>{lang === 'en' ? 'Free to join. No commitment required. Just you and the music of faith.' : 'Inscription gratuite. Aucun engagement. Juste vous et la musique de la foi.'}</p>
+                    <button onClick={(e) => { e.preventDefault(); (window as any).showPage('subs', document.querySelectorAll('.nav-tab')[5]); }} style={{ padding: '14px 40px', background: '#6e1799', color: '#fdfaf5', border: 'none', cursor: 'pointer', fontSize: '.72rem', letterSpacing: '.18em', textTransform: 'uppercase', fontWeight: 300, transition: 'background .3s' }}>{lang === 'en' ? 'Join Free Today' : 'Rejoignez-nous gratuitement'}</button>
                 </section>
 
                 {/* GRACEFUL GIVING SECTION */}
@@ -682,21 +832,21 @@ export default function LandingPageClient({
                     <div style={{ position: 'absolute', top: 0, right: 0, width: '400px', height: '400px', background: 'rgba(110, 23, 153, 0.02)', borderRadius: '50%', filter: 'blur(80px)', marginRight: '-200px', marginTop: '-200px' }}></div>
                     <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
                         <div style={{ marginBottom: '48px' }}>
-                            <p style={{ fontSize: '.65rem', letterSpacing: '.35em', textTransform: 'uppercase', color: 'var(--gold)', fontWeight: 300, marginBottom: '16px' }}>Faith in Action</p>
+                            <p style={{ fontSize: '.65rem', letterSpacing: '.35em', textTransform: 'uppercase', color: 'var(--gold)', fontWeight: 300, marginBottom: '16px' }}>{lang === 'en' ? 'Faith in Action' : 'La foi en action'}</p>
                             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 'clamp(2.5rem, 4vw, 3.5rem)', color: 'var(--ink)', fontWeight: 300, lineHeight: 1.1 }}>
-                                Graceful <em style={{ color: 'var(--gold)', fontStyle: 'italic', fontWeight: 400 }}>Giving</em>
+                                {lang === 'en' ? 'Graceful' : 'Dons'} <em style={{ color: 'var(--gold)', fontStyle: 'italic', fontWeight: 400 }}>{lang === 'en' ? 'Giving' : 'gracieux'}</em>
                             </h2>
                             <div style={{ width: '40px', height: '3px', background: 'var(--gold)', margin: '24px auto', borderRadius: '2px', opacity: 0.3 }}></div>
                             <p style={{ fontSize: '.95rem', color: 'var(--muted)', fontWeight: 300, lineHeight: 1.8, maxWidth: '600px', margin: '0 auto' }}>
-                                Your generosity fuels our mission to bring the music of faith to every corner of the world. Support our community projects and digital ministry.
+                                {lang === 'en' ? 'Your generosity fuels our mission to bring the music of faith to every corner of the world. Support our community projects and digital ministry.' : 'Votre générosité nourrit notre mission de porter la musique de la foi dans tous les coins du monde.'}
                             </p>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px', marginBottom: '64px' }}>
                             {[
-                                { title: 'Tithes & Offerings', desc: 'Support the daily operations and spiritual life of the church.', icon: '🙏' },
-                                { title: 'Mission & Outreach', desc: 'Directly fund our community support and global mission projects.', icon: '🌍' },
-                                { title: 'Church Development', desc: 'Help us grow our physical and digital sacred spaces.', icon: '🏛️' }
+                                { title: lang === 'en' ? 'Tithes & Offerings' : 'Dîmes et Offrandes', desc: lang === 'en' ? 'Support the daily operations and spiritual life of the church.' : 'Soutenez les opérations quotidiennes et la vie spirituelle.', icon: '🙏' },
+                                { title: lang === 'en' ? 'Mission & Outreach' : 'Mission et Rayonnement', desc: lang === 'en' ? 'Directly fund our community support and global mission projects.' : 'Financer nos projets de soutien communautaire et nos missions.', icon: '🌍' },
+                                { title: lang === 'en' ? 'Church Development' : 'Développement de l\'Église', desc: lang === 'en' ? 'Help us grow our physical and digital sacred spaces.' : 'Aidez-nous à développer nos espaces sacrés physiques et numériques.', icon: '🏛️' }
                             ].map((item, idx) => (
                                 <div key={idx} style={{ background: 'var(--warm)', padding: '40px', border: '1px solid var(--border)', borderRadius: '2px', transition: 'all 0.3s' }}>
                                     <div style={{ fontSize: '2rem', marginBottom: '20px' }}>{item.icon}</div>
@@ -710,11 +860,11 @@ export default function LandingPageClient({
                             onClick={() => (window as any).showPage('subs', document.querySelectorAll('.nav-tab')[5])}
                             style={{ padding: '16px 48px', background: 'var(--gold)', color: '#fff', border: 'none', borderRadius: '0', fontSize: '.75rem', letterSpacing: '.2em', textTransform: 'uppercase', fontWeight: 300, cursor: 'pointer', boxShadow: '0 20px 40px rgba(110, 23, 153, 0.2)' }}
                         >
-                            Give a Gift of Faith &rarr;
+                            {lang === 'en' ? 'Give a Gift of Faith' : 'Faire un don de foi'} &rarr;
                         </button>
                         
                         <p style={{ fontSize: '.7rem', color: 'var(--muted)', marginTop: '32px', fontStyle: 'italic', opacity: 0.6 }}>
-                            Secure encrypted giving via mobile money & international cards.
+                            {lang === 'en' ? 'Secure encrypted giving via mobile money & international cards.' : 'Dons sécurisés via mobile money et cartes internationales.'}
                         </p>
                     </div>
                 </section>
@@ -759,11 +909,11 @@ export default function LandingPageClient({
                             </p>
                         </div>
                         <div>
-                            <p style={{ fontSize: '.6rem', letterSpacing: '.28em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '18px' }}>Explore</p>
+                            <p style={{ fontSize: '.6rem', letterSpacing: '.28em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '18px' }}>{lang === 'en' ? 'Explore' : 'Explorer'}</p>
                             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '11px' }}>
-                                <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgMusic size={13} /> Hymns</a></li>
-                                <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('diary', document.querySelectorAll('.nav-tab')[2]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgBook size={13} /> Church Diary</a></li>
-                                <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('echo', document.querySelectorAll('.nav-tab')[3]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgNewspaper size={13} /> The Echo</a></li>
+                                <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('hymns', document.querySelectorAll('.nav-tab')[1]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgMusic size={13} /> {t('hymns')}</a></li>
+                                <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('diary', document.querySelectorAll('.nav-tab')[2]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgBook size={13} /> {t('diary')}</a></li>
+                                <li><a href="#" onClick={(e) => { e.preventDefault(); (window as any).showPage('echo', document.querySelectorAll('.nav-tab')[3]); }} style={{ fontSize: '.78rem', fontWeight: 300, color: 'rgba(247,243,236,.5)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgNewspaper size={13} /> {t('echo')}</a></li>
                             </ul>
                         </div>
                         <div>
@@ -792,7 +942,7 @@ export default function LandingPageClient({
                         <div style={{ padding: '24px', borderBottom: '1px solid #efefef', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span style={{ fontSize: '1.2rem' }}>✨</span>
-                                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#1a1816' }}>Priority Help Request</h3>
+                                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#1a1816' }}>{t('supportTitle')}</h3>
                             </div>
                             <button 
                                 onClick={() => setIsSupportModalOpen(false)}
@@ -802,13 +952,13 @@ export default function LandingPageClient({
                         
                         <div style={{ padding: '24px' }}>
                             <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '20px', lineHeight: 1.5 }}>
-                                As a Shepherd Partner, your requests are handled with priority. Please describe your query or technical issue below.
+                                {t('supportDesc')}
                             </p>
                             
                             <textarea
                                 value={supportMessage}
                                 onChange={(e) => setSupportMessage(e.target.value)}
-                                placeholder="How can we assist you today?"
+                                placeholder={t('supportPlaceholder')}
                                 style={{
                                     width: '100%', height: '150px', padding: '16px', borderRadius: '12px',
                                     border: '1px solid #ddd', fontSize: '0.9rem', outline: 'none',
@@ -827,11 +977,11 @@ export default function LandingPageClient({
                                             body: JSON.stringify({ message: supportMessage })
                                         });
                                         if (res.ok) {
-                                            window.alert("Your priority request has been sent to our administration team. Grace be with you!");
+                                            window.alert(t('supportSuccess'));
                                             setIsSupportModalOpen(false);
                                             setSupportMessage('');
                                         } else {
-                                            window.alert("Failed to send request. Please try again later.");
+                                            window.alert(t('supportError'));
                                         }
                                     } catch (e) {
                                         window.alert("An error occurred. Please try again.");
@@ -846,7 +996,7 @@ export default function LandingPageClient({
                                     transition: 'all 0.2s'
                                 }}
                             >
-                                {isSubmitting ? "Sending..." : "Submit Priority Request"}
+                                {isSubmitting ? (lang === 'fr' ? "Envoi..." : "Sending...") : (lang === 'fr' ? "Soumettre la demande" : "Submit Priority Request")}
                             </button>
                         </div>
                     </div>
@@ -869,8 +1019,8 @@ export default function LandingPageClient({
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(30,30,30,0.7) 0%, var(--surface) 100%)' }}></div>
                     </div>
                     <div style={{ position: 'relative', zIndex: 1 }}>
-                        <p className="hero-eyebrow" style={{ color: '#fff', opacity: 0.9, letterSpacing: '0.25em', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Ancient words, ever new</p>
-                        <h1 className="hero-h1" style={{ color: '#fff', textShadow: '0 4px 12px rgba(0,0,0,0.4)', marginTop: '16px' }}>The Hymn <em>Library</em></h1>
+                        <p className="hero-eyebrow" style={{ color: '#fff', opacity: 0.9, letterSpacing: '0.25em', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{t('hymnHeroEyebrow')}</p>
+                        <h1 className="hero-h1" style={{ color: '#fff', textShadow: '0 4px 12px rgba(0,0,0,0.4)', marginTop: '16px' }}>{t('hymnHeroTitle')} <em>{t('hymnHeroTitleItalic')}</em></h1>
                     </div>
                 </section>
                 <div className="hymn-search-wrap">
@@ -879,60 +1029,60 @@ export default function LandingPageClient({
                             <div style={{ padding: '0 16px', color: 'var(--gold)', opacity: 0.6 }}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                             </div>
-                            <input type="text" id="hymnSearch" placeholder="Search by title, number, author or scripture..." onInput={(e) => (window as any).onSearchInput(e.currentTarget.value)} style={{ flex: 1, padding: '16px 8px', fontSize: '1.1rem', background: 'transparent', border: 'none', color: 'var(--ink)' }} />
+                            <input type="text" id="hymnSearch" placeholder={t('hymnSearchPlaceholder')} onInput={(e) => (window as any).onSearchInput(e.currentTarget.value)} style={{ flex: 1, padding: '16px 8px', fontSize: '1.1rem', background: 'transparent', border: 'none', color: 'var(--ink)' }} />
                             <div id="search-clear-btn" style={{ display: 'none', cursor: 'pointer', padding: '0 16px', color: 'var(--muted)', opacity: 0.5 }} onClick={() => (window as any).clearSearch()} title="Clear search">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                             </div>
-                            <button id="search-btn-main" className="btn-primary" onClick={() => (window as any).onFindClick()} style={{ margin: '4px', padding: '12px 28px', borderRadius: '12px' }}>Find Hymns</button>
+                            <button id="search-btn-main" className="btn-primary" onClick={() => (window as any).onFindClick()} style={{ margin: '4px', padding: '12px 28px', borderRadius: '12px' }}>{t('hymnFind')}</button>
                         </div>
                         <div id="search-status" style={{ marginTop: '12px', fontSize: '0.85rem', color: 'var(--muted)', fontStyle: 'italic', textAlign: 'center', minHeight: '1.2em', opacity: 0.8 }}></div>
                     </div>
                     <div className="hymn-advanced-filters">
                         <div className="hymn-filter-field">
-                            <label className="hymn-filter-label">Occasion</label>
+                            <label className="hymn-filter-label">{t('hymnOccasion')}</label>
                             <select id="occasionSelect" className="hymn-select" onChange={() => (window as any).filterHymns()}>
-                                <option value="all">All Occasions</option>
-                                <option value="morning">Morning Prayer</option>
-                                <option value="evening">Evening Prayer</option>
-                                <option value="easter">Easter</option>
-                                <option value="christmas">Christmas</option>
-                                <option value="burial">Burial</option>
-                                <option value="wedding">Wedding</option>
-                                <option value="praise">General Praise</option>
+                                <option value="all">{t('hymnAllOccasions')}</option>
+                                <option value="morning">{t('hymnOccMorning')}</option>
+                                <option value="evening">{t('hymnOccEvening')}</option>
+                                <option value="easter">{t('hymnOccEaster')}</option>
+                                <option value="christmas">{t('hymnOccChristmas')}</option>
+                                <option value="burial">{t('hymnOccBurial')}</option>
+                                <option value="wedding">{t('hymnOccWedding')}</option>
+                                <option value="praise">{t('hymnOccPraise')}</option>
                             </select>
                         </div>
                         <div className="hymn-filter-field">
-                            <label className="hymn-filter-label">Tempo</label>
+                            <label className="hymn-filter-label">{t('hymnTempo')}</label>
                             <select id="tempoSelect" className="hymn-select" onChange={() => (window as any).filterHymns()}>
-                                <option value="all">Any Tempo</option>
-                                <option value="fast">Fast & Joyful</option>
-                                <option value="medium">Medium</option>
-                                <option value="slow">Slow & Solemn</option>
+                                <option value="all">{t('hymnAnyTempo')}</option>
+                                <option value="fast">{t('hymnTempoFast')}</option>
+                                <option value="medium">{t('hymnTempoMedium')}</option>
+                                <option value="slow">{t('hymnTempoSlow')}</option>
                             </select>
                         </div>
                     </div>
                     <div className="hymn-filters">
-                        <button className="filter-btn active" onClick={(e) => (window as any).setFilter(e.currentTarget, 'all')}>All</button>
-                        <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'praise')}>Praise</button>
-                        <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'grace')}>Grace</button>
-                        <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'faith')}>Faith</button>
-                        <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'comfort')}>Comfort</button>
-                        <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'advent')}>Advent</button>
+                        <button className="filter-btn active" onClick={(e) => (window as any).setFilter(e.currentTarget, 'all')}>{t('hymnAll')}</button>
+                        <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'praise')}>{t('hymnPraise')}</button>
+                        <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'grace')}>{t('hymnGrace')}</button>
+                        <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'faith')}>{t('hymnFaith')}</button>
+                        <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'comfort')}>{t('hymnComfort')}</button>
+                        <button className="filter-btn" onClick={(e) => (window as any).setFilter(e.currentTarget, 'advent')}>{t('hymnAdvent')}</button>
                         <span style={{ margin: '0 8px', borderLeft: '1px solid var(--border)', opacity: 0.3 }}></span>
-                        <button className="filter-btn" onClick={() => (window as any).openPlaylists()} title="View Saved Sets" style={{ color: 'var(--gold)' }}>📂 Playlists</button>
+                        <button className="filter-btn" onClick={() => (window as any).openPlaylists()} title="View Saved Sets" style={{ color: 'var(--gold)' }}>📂 {t('hymnPlaylists')}</button>
                     </div>
 
                     {isPaywallActive && (
                         <div style={{ maxWidth: '400px', margin: '32px auto 0', padding: '16px', borderRadius: '16px', background: 'rgba(110, 23, 153, 0.04)', border: '1px solid rgba(110, 23, 153, 0.1)', textAlign: 'center' }}>
                             <p style={{ fontSize: '0.65rem', fontWeight: 800, color: '#6e1799', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '8px' }}>✨ Limited Library Access</p>
                             <p style={{ fontSize: '0.85rem', color: 'var(--muted)', fontWeight: 300, lineHeight: 1.4, marginBottom: '16px' }}>
-                                Showing {initialHymns.length} foundational hymns for your tier. Upgrade to access all 1,750+ hymns.
+                                {t('hymnUpgradeMsg')}
                             </p>
                             <button 
                                 onClick={() => (window as any).showPage('subs', document.querySelectorAll('.nav-tab')[5])}
                                 style={{ padding: '8px 20px', background: '#6e1799', color: '#fff', border: 'none', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer' }}
                             >
-                                Upgrade Membership &rarr;
+                                {t('hymnUpgradeBtn')} &rarr;
                             </button>
                         </div>
                     )}
@@ -946,10 +1096,10 @@ export default function LandingPageClient({
                     <div className="hymn-modal">
                         <div className="modal-content">
                             <div className="modal-actions" style={{ display: 'flex', gap: '8px', zIndex: 10 }}>
-                                <button className="font-btn" onClick={() => (window as any).prevHymn()} title="Previous Hymn" style={{ fontSize: '1.2rem', padding: '0 8px' }}>←</button>
-                                <button className="font-btn" onClick={() => (window as any).nextHymn()} title="Next Hymn" style={{ fontSize: '1.2rem', padding: '0 8px' }}>→</button>
+                                <button className="font-btn" onClick={() => (window as any).prevHymn()} title={t('modalPrevious')} style={{ fontSize: '1.2rem', padding: '0 8px' }}>←</button>
+                                <button className="font-btn" onClick={() => (window as any).nextHymn()} title={t('modalNext')} style={{ fontSize: '1.2rem', padding: '0 8px' }}>→</button>
                                 <span style={{ flex: 1 }}></span>
-                                <button className="font-btn" onClick={() => (window as any).toggleDarkMode()} title="Toggle Dark Mode" style={{ fontSize: '1.1rem' }}>🌙</button>
+                                <button className="font-btn" onClick={() => (window as any).toggleDarkMode()} title={t('modalDarkMode')} style={{ fontSize: '1.1rem' }}>🌙</button>
                                 <div className="font-controls" style={{ display: 'flex', gap: '8px', borderLeft: '1px solid var(--border)', paddingLeft: '8px', marginLeft: '4px' }}>
                                     <button className="font-btn" onClick={() => (window as any).changeFontSize(-1)}>A-</button>
                                     <button className="font-btn" onClick={() => (window as any).changeFontSize(1)}>A+</button>
@@ -965,7 +1115,7 @@ export default function LandingPageClient({
                             <div className="modal-divider"></div>
                             <div className="modal-lyrics" id="m-lyrics"></div>
                             <div className="modal-player">
-                                <p className="player-label">Listen Now</p>
+                                <p className="player-label">{t('modalListen')}</p>
                                 <div className="player-wave-container">
                                     <div className="player-wave" id="modalWave"></div>
                                     <div className="player-progress-container" id="playerProgressArea" onClick={(e) => (window as any).seekAudio(e)}>
@@ -979,13 +1129,13 @@ export default function LandingPageClient({
                                     </div>
                                 </div>
                                 <div className="player-controls">
-                                    <button className="pc-btn modal-play-btn" onClick={(e) => (window as any).togglePlay(e.currentTarget)}>▶ Play</button>
-                                    <button className="pc-btn" id="modal-fav-btn" onClick={(e) => { if ((window as any)._ttsHymn) (window as any).toggleFavorite((window as any)._ttsHymn.id, e.currentTarget, true); }}>♡ Add to Favorites</button>
+                                    <button className="pc-btn modal-play-btn" onClick={(e) => (window as any).togglePlay(e.currentTarget)}>▶ {t('modalPlay')}</button>
+                                    <button className="pc-btn" id="modal-fav-btn" onClick={(e) => { if ((window as any)._ttsHymn) (window as any).toggleFavorite((window as any)._ttsHymn.id, e.currentTarget, true); }}>♡ {t('modalAddFav')}</button>
                                 </div>
                                 <div className="modal-utils">
-                                    <button className="util-btn" onClick={() => { if ((window as any)._ttsHymn) (window as any).addToPlaylist((window as any)._ttsHymn.id); }}>➕ Add to Playlist</button>
-                                    <button className="util-btn" onClick={() => (window as any).copyLyrics()}>📋 Copy Lyrics</button>
-                                    <button className="util-btn" onClick={() => (window as any).shareHymn()}>🔗 Share</button>
+                                    <button className="util-btn" onClick={() => { if ((window as any)._ttsHymn) (window as any).addToPlaylist((window as any)._ttsHymn.id); }}>➕ {t('modalAddPlaylist')}</button>
+                                    <button className="util-btn" onClick={() => (window as any).copyLyrics()}>📋 {t('modalCopyLyrics')}</button>
+                                    <button className="util-btn" onClick={() => (window as any).shareHymn()}>🔗 {t('modalShare')}</button>
                                 </div>
                             </div>
                             <button className="modal-close" onClick={() => (window as any).closeModal()}>✕</button>
@@ -1000,8 +1150,8 @@ export default function LandingPageClient({
                 <div className="diary-layout" style={{ maxWidth: '1200px', margin: '40px auto', display: 'grid', gridTemplateColumns: '350px 1fr', gap: '32px', padding: '0 24px 100px' }}>
                     <aside className="diary-sidebar" style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid rgba(184,147,90,0.1)', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', height: 'fit-content', overflow: 'hidden' }}>
                         <div className="diary-sidebar-head" style={{ padding: '24px', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(184,147,90,0.03)' }}>
-                            <h2 className="diary-sidebar-title" style={{ margin: 0, fontStyle: 'italic', fontSize: '1.4rem' }}>My Reflections</h2>
-                            <button className="new-entry-btn" onClick={() => (window as any).showNewEntry()} style={{ background: 'var(--gold)', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>+ New Entry</button>
+                            <h2 className="diary-sidebar-title" style={{ margin: 0, fontStyle: 'italic', fontSize: '1.4rem' }}>{t('diaryMyReflections')}</h2>
+                            <button className="new-entry-btn" onClick={() => (window as any).showNewEntry()} style={{ background: 'var(--gold)', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>+ {t('diaryNewEntry')}</button>
                         </div>
                         <div className="diary-entry-list" id="diaryList" style={{ maxHeight: '600px', overflowY: 'auto' }}></div>
                     </aside>
@@ -1017,23 +1167,23 @@ export default function LandingPageClient({
                         {/* NEW ENTRY FORM */}
                         <div className="new-entry-form" id="newEntryForm" style={{ display: 'none', background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--gold)', padding: '40px', boxShadow: '0 30px 60px rgba(0,0,0,0.15)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                                <h2 className="nef-title" style={{ margin: 0, fontStyle: 'italic' }}>Capture Your Thoughts</h2>
-                                <button className="nef-cancel" onClick={() => (window as any).cancelNewEntry()} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}>✕ Cancel</button>
+                                <h2 className="nef-title" style={{ margin: 0, fontStyle: 'italic' }}>{t('diaryCapture')}</h2>
+                                <button className="nef-cancel" onClick={() => (window as any).cancelNewEntry()} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}>✕ {t('diaryCancel')}</button>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                                 <div>
-                                    <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: '8px', display: 'block' }}>Entry Title</label>
-                                    <input type="text" id="newDiaryTitle" placeholder="e.g. A morning of quiet grace..." style={{ width: '100%', padding: '16px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.1)', background: 'rgba(184,147,90,0.02)', outline: 'none', fontSize: '1.1rem' }} />
+                                    <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: '8px', display: 'block' }}>{t('diaryTitleLabel')}</label>
+                                    <input type="text" id="newDiaryTitle" placeholder={t('diaryTitlePlaceholder')} style={{ width: '100%', padding: '16px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.1)', background: 'rgba(184,147,90,0.02)', outline: 'none', fontSize: '1.1rem' }} />
                                 </div>
                                 <div>
-                                    <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: '8px', display: 'block' }}>Companion Hymn (Optional)</label>
-                                    <input type="text" id="newDiaryHymn" placeholder="Search for a hymn..." style={{ width: '100%', padding: '16px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.1)', background: 'rgba(184,147,90,0.02)', outline: 'none' }} />
+                                    <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: '8px', display: 'block' }}>{t('diaryHymnLabel')}</label>
+                                    <input type="text" id="newDiaryHymn" placeholder={t('diaryHymnPlaceholder')} style={{ width: '100%', padding: '16px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.1)', background: 'rgba(184,147,90,0.02)', outline: 'none' }} />
                                 </div>
                                 <div>
-                                    <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: '8px', display: 'block' }}>Your Reflection</label>
-                                    <textarea id="newDiaryBody" placeholder="What is the Spirit speaking to you today?" style={{ width: '100%', height: '250px', padding: '20px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.1)', background: 'rgba(184,147,90,0.02)', outline: 'none', fontSize: '1.05rem', lineHeight: '1.6', resize: 'none' }}></textarea>
+                                    <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: '8px', display: 'block' }}>{t('diaryBodyLabel')}</label>
+                                    <textarea id="newDiaryBody" placeholder={t('diaryBodyPlaceholder')} style={{ width: '100%', height: '250px', padding: '20px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.1)', background: 'rgba(184,147,90,0.02)', outline: 'none', fontSize: '1.05rem', lineHeight: '1.6', resize: 'none' }}></textarea>
                                 </div>
-                                <button className="btn-primary" onClick={() => (window as any).saveDiaryEntry()} style={{ padding: '18px', borderRadius: '14px', fontSize: '1rem' }}>Save to My Diary</button>
+                                <button className="btn-primary" onClick={() => (window as any).saveDiaryEntry()} style={{ padding: '18px', borderRadius: '14px', fontSize: '1rem' }}>{t('diarySave')}</button>
                             </div>
                         </div>
                     </main>
@@ -1045,9 +1195,9 @@ export default function LandingPageClient({
          ══════════════════════════════════════ */}
             <div className="page" id="page-echo">
                 <div className="echo-hero">
-                    <p className="echo-hero-label">COMMUNITY &amp; STORIES</p>
-                    <h1 className="echo-hero-title">The <em>Echo</em></h1>
-                    <p className="echo-hero-sub">Stories of faith, testimonies, church news and the voices that echo across our community.</p>
+                    <p className="echo-hero-label">{t('echoHeroLabel')}</p>
+                    <h1 className="echo-hero-title">{t('echoHeroTitle')} <em>{t('echoHeroTitleItalic')}</em></h1>
+                    <p className="echo-hero-sub">{t('echoHeroSub')}</p>
                 </div>
 
                 <div className="echo-filters-wrap" style={{ maxWidth: '800px', margin: '0 auto 40px', padding: '0 24px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
@@ -1055,7 +1205,7 @@ export default function LandingPageClient({
                         <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
                         <input 
                             type="text" 
-                            placeholder="Search by title or content..." 
+                            placeholder={t('echoSearchPlaceholder')} 
                             onInput={(e) => (window as any).onEchoSearch(e.currentTarget.value)}
                             style={{ width: '100%', padding: '16px 16px 16px 44px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.9rem', outline: 'none', transition: 'border-color 0.2s' }}
                             onFocus={e => e.currentTarget.style.borderColor = 'var(--gold)'}
@@ -1066,38 +1216,37 @@ export default function LandingPageClient({
                         onChange={(e) => (window as any).onEchoYearChange(e.currentTarget.value)}
                         style={{ padding: '0 20px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.9rem', outline: 'none', cursor: 'pointer', height: '48px' }}
                     >
-                        <option value="">All Years</option>
+                        <option value="">{t('echoAllYears')}</option>
                         <option value="2026">2026</option>
                         <option value="2025">2025</option>
                         <option value="2024">2024</option>
                     </select>
-
                     <select 
                         onChange={(e) => (window as any).onEchoMonthChange(e.currentTarget.value)}
                         style={{ padding: '0 20px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.9rem', outline: 'none', cursor: 'pointer', height: '48px' }}
                     >
-                        <option value="">All Months</option>
-                        <option value="Jan">January</option>
-                        <option value="Feb">February</option>
-                        <option value="Mar">March</option>
-                        <option value="Apr">April</option>
-                        <option value="May">May</option>
-                        <option value="Jun">June</option>
-                        <option value="Jul">July</option>
-                        <option value="Aug">August</option>
-                        <option value="Sep">September</option>
-                        <option value="Oct">October</option>
-                        <option value="Nov">November</option>
-                        <option value="Dec">December</option>
+                        <option value="">{t('echoAllMonths')}</option>
+                        <option value="Jan">{t('monthJan')}</option>
+                        <option value="Feb">{t('monthFeb')}</option>
+                        <option value="Mar">{t('monthMar')}</option>
+                        <option value="Apr">{t('monthApr')}</option>
+                        <option value="May">{t('monthMay')}</option>
+                        <option value="Jun">{t('monthJun')}</option>
+                        <option value="Jul">{t('monthJul')}</option>
+                        <option value="Aug">{t('monthAug')}</option>
+                        <option value="Sep">{t('monthSep')}</option>
+                        <option value="Oct">{t('monthOct')}</option>
+                        <option value="Nov">{t('monthNov')}</option>
+                        <option value="Dec">{t('monthDec')}</option>
                     </select>
                 </div>
 
                 <div className="echo-categories">
-                    <button className="echo-cat active" onClick={(e) => (window as any).setEchoCat(e.currentTarget, 'all')}>All</button>
-                    <button className="echo-cat" onClick={(e) => (window as any).setEchoCat(e.currentTarget, 'testimony')}>Testimonies</button>
-                    <button className="echo-cat" onClick={(e) => (window as any).setEchoCat(e.currentTarget, 'news')}>Church News</button>
-                    <button className="echo-cat" onClick={(e) => (window as any).setEchoCat(e.currentTarget, 'music')}>Music &amp; Worship</button>
-                    <button className="echo-cat" onClick={(e) => (window as any).setEchoCat(e.currentTarget, 'community')}>Community</button>
+                    <button className="echo-cat active" onClick={(e) => (window as any).setEchoCat(e.currentTarget, 'all')}>{t('echoCatAll')}</button>
+                    <button className="echo-cat" onClick={(e) => (window as any).setEchoCat(e.currentTarget, 'testimony')}>{t('echoCatTestimony')}</button>
+                    <button className="echo-cat" onClick={(e) => (window as any).setEchoCat(e.currentTarget, 'news')}>{t('echoCatNews')}</button>
+                    <button className="echo-cat" onClick={(e) => (window as any).setEchoCat(e.currentTarget, 'music')}>{t('echoCatMusic')}</button>
+                    <button className="echo-cat" onClick={(e) => (window as any).setEchoCat(e.currentTarget, 'community')}>{t('echoCatCommunity')}</button>
                 </div>
                 <div className="echo-grid" id="echoGrid"></div>
             </div>
@@ -1107,7 +1256,7 @@ export default function LandingPageClient({
          ══════════════════════════════════════ */}
             <div className="page" id="page-devo">
                 <div className="devo-hero">
-                    <h1 className="devo-today-title">Daily Devotional</h1>
+                    <h1 className="devo-today-title">{t('devoTodayTitle')}</h1>
                 </div>
 
                 {/* Main Content Layout for Devotionals */}
@@ -1115,7 +1264,7 @@ export default function LandingPageClient({
                     {/* Current Devotional Content Container */}
                     <div id="currentDevoContent" style={{ minHeight: '200px' }}></div>
                     <div className="devo-archive" style={{ marginTop: '64px' }}>
-                        <h2 className="devo-archive-title">Previous Devotionals</h2>
+                        <h2 className="devo-archive-title">{t('devoArchiveTitle')}</h2>
                         <div className="devo-archive-grid" id="devoArchive"></div>
                     </div>
                 </div>
@@ -1139,10 +1288,10 @@ export default function LandingPageClient({
                         <div style={{ position: 'relative', display: 'inline-block', marginBottom: '8px' }}>
                             <div style={{ position: 'absolute', inset: '-4px', background: 'linear-gradient(to right, #6e1799, #b8935a)', filter: 'blur(10px)', opacity: 0.15 }}></div>
                             <h2 style={{ position: 'relative', fontFamily: '"Cormorant Garamond", serif', fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', color: 'var(--ink)', fontWeight: 300, letterSpacing: '0.08em' }}>
-                                THE <span style={{ color: '#6e1799', fontStyle: 'italic', fontWeight: 500 }}>JOURNEY</span> PLANS
+                                {t('subsHeroTitle')} <span style={{ color: '#6e1799', fontStyle: 'italic', fontWeight: 500 }}>{t('subsHeroTitleItalic')}</span> {t('subsHeroPlans')}
                             </h2>
                         </div>
-                        <p style={{ fontSize: '0.65rem', letterSpacing: '0.35em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 300, marginTop: '16px' }}>Support the digital ministry</p>
+                        <p style={{ fontSize: '0.65rem', letterSpacing: '0.35em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 300, marginTop: '16px' }}>{t('subsHeroSub')}</p>
                     </div>
 
                     {/* Current Plan Summary (Spotify Style) */}
@@ -1151,8 +1300,8 @@ export default function LandingPageClient({
                             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                                 <div style={{ width: '48px', height: '48px', background: '#6e1799', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>🛡️</div>
                                 <div>
-                                    <p style={{ fontSize: '0.6rem', fontWeight: 800, color: '#6e1799', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '4px' }}>Membership Verified</p>
-                                    <h3 style={{ fontSize: '1.4rem', fontWeight: 300, color: 'var(--ink)', fontFamily: '"Cormorant Garamond", serif' }}>You are currently on the <strong style={{ fontStyle: 'italic', fontWeight: 500 }}>{subscriptionType}</strong> Tier</h3>
+                                    <p style={{ fontSize: '0.6rem', fontWeight: 800, color: '#6e1799', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '4px' }}>{t('membershipVerified')}</p>
+                                    <h3 style={{ fontSize: '1.4rem', fontWeight: 300, color: 'var(--ink)', fontFamily: '"Cormorant Garamond", serif' }}>{t('currentlyOnTier1')} <strong style={{ fontStyle: 'italic', fontWeight: 500 }}>{subscriptionType}</strong> {t('currentlyOnTier2')}</h3>
                                 </div>
                             </div>
                             {/* Only show Admin Billing link to Administrative roles */}
@@ -1161,7 +1310,7 @@ export default function LandingPageClient({
                                     onClick={() => window.location.href = '/admin/subscriptions'} 
                                     style={{ padding: '12px 24px', background: 'transparent', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}
                                 >
-                                    Manage Billing &rarr;
+                                    {t('manageBilling')} &rarr;
                                 </button>
                             )}
                         </div>
@@ -1170,9 +1319,9 @@ export default function LandingPageClient({
                     {/* Tiers Grid */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
                         {[
-                            { type: 'SEEKER', name: 'The Seeker', price: '1,500', level: 1, desc: 'Ideal for casual readers and new believers.', features: ['Access to 200 Hymns', 'Latest Echo Issue (Current)', 'Personal Church Diary'] },
-                            { type: 'PILGRIM', name: 'The Pilgrim', price: '4,500', level: 2, desc: 'Our standard for daily worship and study.', features: ['Access to 400 Hymns', 'Complete Echo Archives', 'Personal Church Diary'], recommended: true },
-                            { type: 'SHEPHERD', name: 'The Shepherd', price: '12,000', level: 3, desc: 'The ultimate patronage for the digital ministry.', features: ['Unlimited Hymn Access', 'Complete Echo Archives', 'Personal Church Diary', 'Priority Support & Updates'] }
+                            { type: 'SEEKER', name: t('seekerName'), price: '1,500', level: 1, desc: t('seekerDesc'), features: [t('feat200'), t('featEcho'), t('featDiary')] },
+                            { type: 'PILGRIM', name: t('pilgrimName'), price: '4,500', level: 2, desc: t('pilgrimDesc'), features: [t('feat400'), t('featEchoArc'), t('featDiary')], recommended: true },
+                            { type: 'SHEPHERD', name: t('shepherdName'), price: '12,000', level: 3, desc: t('shepherdDesc'), features: [t('featUnl'), t('featEchoArc'), t('featDiary'), t('featSupport')] }
                         ].map((plan, i) => {
                             const isCurrent = subscriptionType === plan.type;
                             const isUpgrade = subscriptionType && plan.level > (subscriptionType === 'SEEKER' ? 1 : subscriptionType === 'PILGRIM' ? 2 : 3);
@@ -1202,14 +1351,14 @@ export default function LandingPageClient({
                                         zIndex: plan.recommended ? 2 : 1,
                                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                                     }}>
-                                    {plan.recommended && !isCurrent && <span style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: '#6e1799', color: '#fff', padding: '4px 16px', borderRadius: '40px', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em' }}>Recommended</span>}
-                                    {isCurrent && <span style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'var(--ink)', color: '#fff', padding: '4px 16px', borderRadius: '40px', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em' }}>Current Plan</span>}
+                                    {plan.recommended && !isCurrent && <span style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: '#6e1799', color: '#fff', padding: '4px 16px', borderRadius: '40px', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em' }}>{t('recommended')}</span>}
+                                    {isCurrent && <span style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'var(--ink)', color: '#fff', padding: '4px 16px', borderRadius: '40px', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em' }}>{t('currentPlan')}</span>}
                                     
                                     <div style={{ marginBottom: '32px' }}>
                                         <h4 style={{ fontSize: '1.25rem', fontFamily: '"Cormorant Garamond", serif', color: 'var(--ink)', marginBottom: '16px', fontStyle: 'italic', fontWeight: 500 }}>{plan.name}</h4>
                                         <p style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
                                             <span style={{ fontSize: '2.5rem', fontWeight: 300, color: 'var(--ink)', fontFamily: '"Cormorant Garamond", serif' }}>{plan.price}</span>
-                                            <span style={{ fontSize: '0.7rem', color: 'var(--muted)', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em' }}>XAF / month</span>
+                                            <span style={{ fontSize: '0.7rem', color: 'var(--muted)', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('monthly')}</span>
                                         </p>
                                         <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginTop: '12px', lineHeight: 1.6 }}>{plan.desc}</p>
                                     </div>
@@ -1235,7 +1384,7 @@ export default function LandingPageClient({
                                             transition: 'transform 0.2s', opacity: isCurrent ? 0.6 : 1
                                         }}
                                     >
-                                        {isCurrent ? 'Active Membership' : (isUpgrade ? 'Upgrade Journey' : 'Select Plan')}
+                                        {isCurrent ? t('activeMembership') : (isUpgrade ? t('upgradeJourney') : t('selectPlan'))}
                                     </button>
                                 </div>
                             )
@@ -1245,21 +1394,21 @@ export default function LandingPageClient({
                     {/* Trust Banner/Stats Footer */}
                     <div style={{ marginTop: '80px', paddingTop: '64px', borderTop: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '32px', textAlign: 'center', opacity: 0.8 }}>
                         <div>
-                            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#6e1799', marginBottom: '8px' }}>Global Reach</p>
+                            <p style={{ fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#6e1799', marginBottom: '8px' }}>{t('globalReach')}</p>
                             <p style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '2.5rem', color: 'var(--ink)' }}>25k+</p>
-                            <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '4px' }}>Hymns sung monthly</p>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '4px' }}>{t('hymnsSung')}</p>
                         </div>
                         <div>
                             <p style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '2.5rem', color: 'var(--ink)' }}>850+</p>
-                            <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '4px' }}>Original scores</p>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '4px' }}>{t('originalScores')}</p>
                         </div>
                         <div>
                             <p style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '2.5rem', color: 'var(--ink)' }}>70+</p>
-                            <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '4px' }}>Congregations linked</p>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '4px' }}>{t('congregations')}</p>
                         </div>
                         <div>
                             <p style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '2.5rem', color: 'var(--ink)' }}>100%</p>
-                            <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '4px' }}>Spiritual dedication</p>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '4px' }}>{t('spiritualDed')}</p>
                         </div>
                     </div>
                 </div>
@@ -1270,11 +1419,11 @@ export default function LandingPageClient({
                 <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setIsFavoritesOpen(false)}>
                     <div style={{ background: '#F7F3EC', padding: '40px', borderRadius: '16px', width: '90%', maxWidth: '600px', maxHeight: '75vh', overflowY: 'auto', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexShrink: 0 }}>
-                            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '2.2rem', color: '#1A1A1A', margin: 0 }}>My Favorite Hymns</h2>
+                            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '2.2rem', color: '#1A1A1A', margin: 0 }}>{t('favTitle')}</h2>
                             <button onClick={() => setIsFavoritesOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.8rem', cursor: 'pointer', color: '#666', padding: 0 }}>✕</button>
                         </div>
                         {favorites.length === 0 ? (
-                            <p style={{ color: '#666', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>You haven't saved any hymns yet. Click the heart icon on any hymn to add it here!</p>
+                            <p style={{ color: '#666', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>{t('favEmpty')}</p>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', overflowY: 'auto', paddingRight: '12px', margin: '0 -12px 0 0' }}>
                                 {initialHymns.filter(h => favorites.includes(h.id)).map(h => (
@@ -1299,7 +1448,7 @@ export default function LandingPageClient({
             {favorites.length > 0 && (
                 <button onClick={() => setIsFavoritesOpen(true)} style={{ position: 'fixed', bottom: '30px', right: '30px', background: '#6e1799', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '30px', boxShadow: '0 10px 20px rgba(110, 23, 153, 0.3)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', zIndex: 100, transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
                     <span style={{ color: '#ffb3b3', fontSize: '1.2rem' }}>♥</span>
-                    <span style={{ fontSize: '0.8rem', letterSpacing: '0.05em', fontWeight: 500 }}>My Favorites ({favorites.length})</span>
+                    <span style={{ fontSize: '0.8rem', letterSpacing: '0.05em', fontWeight: 500 }}>{t('favFloating')} ({favorites.length})</span>
                 </button>
             )}
 

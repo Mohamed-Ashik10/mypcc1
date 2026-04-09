@@ -1,4 +1,42 @@
 ; (function () {
+    const t = (en, fr) => (window.currentLang === 'fr' ? fr : en);
+
+    function translateTag(tag) {
+        if (window.currentLang !== 'fr') return tag;
+        const lower = String(tag).trim().toLowerCase();
+        const map = {
+            'grace': 'Grâce',
+            'faith': 'Foi',
+            'comfort': 'Confort',
+            'peace': 'Paix',
+            'praise': 'Louange',
+            'wonder': 'Émerveillement',
+            'devotion': 'Dévotion',
+            'advent': 'Avent',
+            'psalm 103': 'Psaume 103',
+            'psalm 104:1': 'Psaume 104:1',
+            'hebrews 10:22': 'Hébreux 10:22',
+            'lamentations 3:23': 'Lamentations 3:23'
+        };
+        return map[lower] || tag;
+    }
+
+    function translateCategory(cat) {
+        if (window.currentLang !== 'fr') return cat;
+        if (!cat) return '';
+        const lower = String(cat).trim().toLowerCase();
+        const map = {
+            'news': 'Actualités',
+            'music': 'Musique',
+            'community': 'Communauté',
+            'guidance': 'Conseil',
+            'faith': 'Foi',
+            'premium': 'Premium',
+            'testimonial': 'Témoignage'
+        };
+        return map[lower] || cat;
+    }
+
     // ══ MARKDOWN PARSER ══
     function mdToHtml(str) {
         if (!str) return '';
@@ -161,7 +199,7 @@
         if (isFav) {
             window.hymnFavorites = window.hymnFavorites.filter(id => id !== hymnId);
             if (isModalBtn) {
-                el.innerHTML = '♡ Add to Favorites';
+                el.innerHTML = '♡ ' + t('Add to Favorites', 'Ajouter aux Favoris');
                 el.style.color = '';
             } else {
                 el.style.color = 'rgba(247,243,236,.2)';
@@ -169,7 +207,7 @@
         } else {
             window.hymnFavorites.push(hymnId);
             if (isModalBtn) {
-                el.innerHTML = '♥ Saved to Favorites';
+                el.innerHTML = '♥ ' + t('Saved to Favorites', 'Enregistré aux Favoris');
                 el.style.color = '#d9534f';
             } else {
                 el.style.color = '#d9534f';
@@ -202,7 +240,7 @@
                 if (isModalBtn) {
                     const mBtn = document.getElementById('modal-fav-btn');
                     if (mBtn) {
-                        mBtn.innerHTML = isFav ? '♥ Saved to Favorites' : '♡ Add to Favorites';
+                        mBtn.innerHTML = isFav ? '♥ ' + t('Saved to Favorites', 'Enregistré aux Favoris') : '♡ ' + t('Add to Favorites', 'Ajouter aux Favoris');
                         mBtn.style.color = isFav ? '#d9534f' : '';
                     }
                 }
@@ -243,8 +281,8 @@
             info.style.padding = '12px 20px';
             info.style.borderRadius = '12px';
             info.innerHTML = `
-                <span style="font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; color: var(--gold);">Viewing Playlist: <strong>${window._activePlaylistName}</strong></span>
-                <button style="background: none; border: 1px solid var(--gold); color: var(--gold); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; text-transform: uppercase;" onclick="window._activePlaylistName=null; renderHymns(window.hymns_db)">Back to All Hymns</button>
+                <span style="font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; color: var(--gold);">${t('Viewing Playlist:', 'Liste de lecture :')} <strong>${window._activePlaylistName}</strong></span>
+                <button style="background: none; border: 1px solid var(--gold); color: var(--gold); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; text-transform: uppercase;" onclick="window._activePlaylistName=null; renderHymns(window.hymns_db)">${t('Back to All Hymns', 'Retour aux cantiques')}</button>
             `;
             grid.appendChild(info);
         }
@@ -260,17 +298,17 @@
             // Add Remove button if in playlist view
             let removeBtn = '';
             if (window._activePlaylistName) {
-                removeBtn = `<div class="hymn-rem" style="position:absolute; top:45px; right:12px; font-size:1.1rem; cursor:pointer; color:#d9534f; z-index:2; opacity: 0.6; transition: opacity 0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" onclick="event.stopPropagation(); window.removeFromPlaylist('${window._activePlaylistName}', '${h.id}')" title="Remove from Playlist">🗑️</div>`;
+                removeBtn = `<div class="hymn-rem" style="position:absolute; top:45px; right:12px; font-size:1.1rem; cursor:pointer; color:#d9534f; z-index:2; opacity: 0.6; transition: opacity 0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" onclick="event.stopPropagation(); window.removeFromPlaylist('${window._activePlaylistName}', '${h.id}')" title="${t('Remove from Playlist', 'Retirer de la liste')}">🗑️</div>`;
             }
 
             card.innerHTML = `
-      <div class="hymn-fav" style="position:absolute; top:12px; right:12px; font-size:1.4rem; cursor:pointer; color:${isFav ? '#d9534f' : 'rgba(247,243,236,.2)'}; z-index:2; transition: color 0.3s;" onclick="event.stopPropagation(); window.toggleFavorite('${h.id}', this)" title="Add to Favorites">♥</div>
+      <div class="hymn-fav" style="position:absolute; top:12px; right:12px; font-size:1.4rem; cursor:pointer; color:${isFav ? '#d9534f' : 'rgba(247,243,236,.2)'}; z-index:2; transition: color 0.3s;" onclick="event.stopPropagation(); window.toggleFavorite('${h.id}', this)" title="${t('Add to Favorites', 'Ajouter aux Favoris')}">♥</div>
       ${removeBtn}
       <div class="hymn-play">▶</div>
-      <p class="hymn-num">No. ${h.num}</p>
+      <p class="hymn-num">${t('No.', 'N°')} ${h.num}</p>
       <h3 class="hymn-name">${h.title}</h3>
-      <p class="hymn-author">${h.author || ''}</p>
-      <div class="hymn-tags">${(Array.isArray(h.tags) ? h.tags : (typeof h.tags === 'string' ? h.tags.split(/[,;]\s*/) : [])).map(t => `<span class="htag">${t}</span>`).join('')}</div>`;
+      <p class="hymn-author">${(h.author || '').trim().toLowerCase() === 'pcc sacred library' ? t('PCC Sacred Library', "Bibliothèque Sacrée de l'EPC") : (h.author || '')}</p>
+      <div class="hymn-tags">${(Array.isArray(h.tags) ? h.tags : (typeof h.tags === 'string' ? h.tags.split(/[,;]\s*/) : [])).map(tg => `<span class="htag">${translateTag(tg)}</span>`).join('')}</div>`;
             card.onclick = () => openHymn(h);
             grid.appendChild(card);
         });
@@ -295,9 +333,9 @@
             `;
             upgradeCard.innerHTML = `
                 <div style="font-size: 2rem; margin-bottom: 8px; opacity: 0.9;">✨</div>
-                <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-style: italic; font-weight: 500; margin: 0 0 8px 0;">Unlock 1,750+ Hymns</h3>
-                <p style="font-size: 0.85rem; font-weight: 300; line-height: 1.4; opacity: 0.9; padding: 0 16px;">Upgrade to Pilgrims or Shepherds to access the entire sacred library.</p>
-                <button style="margin-top: 20px; background: var(--warm); color: var(--gold); border: none; padding: 8px 20px; font-weight: 500; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;">Upgrade Plan</button>
+                <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-style: italic; font-weight: 500; margin: 0 0 8px 0;">${t('Unlock 1,750+ Hymns', 'Débloquez 1 750+ Cantiques')}</h3>
+                <p style="font-size: 0.85rem; font-weight: 300; line-height: 1.4; opacity: 0.9; padding: 0 16px;">${t('Upgrade to Pilgrims or Shepherds to access the entire sacred library.', 'Passez au forfait Pèlerin ou Berger pour accéder à toute la bibliothèque.')}</p>
+                <button style="margin-top: 20px; background: var(--warm); color: var(--gold); border: none; padding: 8px 20px; font-weight: 500; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;">${t('Upgrade Plan', 'Améliorer le plan')}</button>
             `;
             upgradeCard.onclick = () => {
                 if (typeof window.showPage === 'function') {
@@ -527,10 +565,10 @@
         if (q) {
             list = list.filter(h => h.searchScore > 60);
             list.sort((a, b) => b.searchScore - a.searchScore);
-            if (status) status.innerHTML = `Searching for "${q}" &bull; <strong>Found ${list.length} hymns</strong>`;
+            if (status) status.innerHTML = t(`Searching for "${q}" &bull; <strong>Found ${list.length} hymns</strong>`, `Recherche de "${q}" &bull; <strong>${list.length} cantiques trouvés</strong>`);
         } else {
             list.sort((a, b) => parseInt(a.num || a.number || 0) - parseInt(b.num || b.number || 0));
-            if (status) status.innerHTML = `Showing <strong>${list.length}</strong> hymns in this category`;
+            if (status) status.innerHTML = t(`Showing <strong>${list.length}</strong> hymns in this category`, `Affichage de <strong>${list.length}</strong> cantiques dans cette catégorie`);
         }
 
         if (list.length === 0) {
@@ -544,7 +582,7 @@
             grid.innerHTML = `
                 <div style="grid-column: 1/-1; padding: 100px 20px; text-align: center; color: var(--muted); background: var(--cream); border: 1px dashed var(--border); border-radius: 4px;">
                     <div style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3; color: var(--gold);">✝</div>
-                    <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-style: italic; color: var(--ink);">No hymns match your current filters.</p>
+                    <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-style: italic; color: var(--ink);">${t('No hymns match your current filters.', 'Aucun cantique ne correspond à vos filtres.')}</p>
                     ${searchResultsOnly.length > 0 ? `
                         <p style="font-size: 0.95rem; margin-top: 12px; color: var(--gold); font-weight: 500;">
                             We found ${searchResultsOnly.length} matches for "${q}", but they are hidden by your current category/filter.
@@ -554,7 +592,7 @@
                     `}
                     <button onclick="window.setFilter(null, 'all', true)" 
                             style="margin-top: 24px; background: var(--gold); border: none; color: var(--warm); padding: 12px 32px; cursor: pointer; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;">
-                        Clear All Filters & See All Matches
+                        ${t('Clear All Filters & See All Matches', 'Effacer tous les filtres et voir tout')}
                     </button>
                 </div>
             `;
@@ -688,9 +726,9 @@
         const scriptureEl = document.getElementById('m-scripture');
         const periodEl = document.getElementById('m-period');
 
-        if (mEyebrow) mEyebrow.textContent = 'Hymn No. ' + h.num;
+        if (mEyebrow) mEyebrow.textContent = t('Hymn No.', 'Cantique N°') + ' ' + h.num;
         if (mTitle) mTitle.textContent = h.title;
-        if (mAuthor) mAuthor.textContent = h.author;
+        if (mAuthor) mAuthor.textContent = (h.author || '').trim().toLowerCase() === 'pcc sacred library' ? t('PCC Sacred Library', "Bibliothèque Sacrée de l'EPC") : (h.author || '');
 
         // --- Metadata Extraction ---
         const metadataRegistry = {
@@ -806,16 +844,19 @@
         }
 
         buildWave('modalWave', 22);
-        if (hModal) hModal.classList.add('open');
+        if (hModal) {
+            hModal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
 
         _updateProgressUI();
         const btn = document.querySelector('.modal-play-btn');
-        if (btn) btn.textContent = '▶ Play';
+        if (btn) btn.textContent = '▶ ' + t('Play', 'Jouer');
 
         const favBtn = document.getElementById('modal-fav-btn');
         if (favBtn) {
             const isFav = (window.hymnFavorites || []).includes(h.id);
-            favBtn.innerHTML = isFav ? '♥ Saved to Favorites' : '♡ Add to Favorites';
+            favBtn.innerHTML = isFav ? '♥ ' + t('Saved to Favorites', 'Enregistré aux Favoris') : '♡ ' + t('Add to Favorites', 'Ajouter aux Favoris');
             favBtn.style.color = isFav ? '#d9534f' : '';
         }
     }
@@ -827,6 +868,7 @@
         _ttsSpeaking = false; _ttsPaused = false;
         const hModal = document.getElementById('hymnModal');
         if (hModal) hModal.classList.remove('open');
+        document.body.style.overflow = '';
     }
 
     function showToast(text) {
@@ -1055,10 +1097,10 @@
         });
 
         navigator.clipboard.writeText(text.trim()).then(() => {
-            showToast('Lyrics copied to clipboard');
+            showToast(t('Lyrics copied to clipboard', 'Paroles copiées'));
         }).catch(err => {
             console.error('Failed to copy', err);
-            showToast('Failed to copy lyrics');
+            showToast(t('Failed to copy lyrics', 'Échec de la copie'));
         });
     };
 
@@ -1067,7 +1109,7 @@
         const h = _ttsHymn;
         const shareData = {
             title: `${h.num} - ${h.title}`,
-            text: `Check out this hymn from the PCC Library: "${h.title}" by ${h.author}.`,
+            text: t(`Check out this hymn from the PCC Library: "${h.title}" by ${h.author}.`, `Découvrez ce cantique de la Bibliothèque de l'EPC : "${h.title}" par ${h.author}.`),
             url: window.location.href
         };
 
@@ -1423,7 +1465,7 @@
         if (!list) return;
 
         const sidebarTitle = document.querySelector('.diary-sidebar-title');
-        if (sidebarTitle) sidebarTitle.textContent = window._diaryMode === 'church' ? 'Church Diary' : 'My Journal';
+        if (sidebarTitle) sidebarTitle.textContent = window._diaryMode === 'church' ? t('Church Diary', "Journal de l'Église") : t('My Journal', 'Mon Journal');
 
         const official = window.diary_db_official || [];
         const currentData = window._diaryMode === 'church' ? official : personalEntries;
@@ -1446,14 +1488,14 @@
             limitBanner = `
                 <div style="padding:12px 20px; background:rgba(184,147,90,0.05); border-bottom:1px solid rgba(0,0,0,0.05);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <span style="font-size:0.65rem; font-weight:700; color:var(--ink2); text-transform:uppercase; letter-spacing:0.05em;">Limit: ${sub} Plan</span>
+                        <span style="font-size:0.65rem; font-weight:700; color:var(--ink2); text-transform:uppercase; letter-spacing:0.05em;">${t('Limit:', 'Limite :')} ${sub} ${t('Plan', 'Forfait')}</span>
                         <span style="font-size:0.65rem; font-weight:700; color:${isFull ? 'var(--gold)' : 'var(--muted)'};">${count} / ${limit === 10000 ? '∞' : limit} used</span>
                     </div>
                     <div style="width:100%; height:4px; background:rgba(0,0,0,0.05); border-radius:2px; overflow:hidden;">
                         <div style="width:${percent}%; height:100%; background:${isFull ? 'var(--gold)' : 'var(--ink2)'}; transition:width 0.5s ease;"></div>
                     </div>
                     ${isFull ? `
-                        <p style="margin:8px 0 0 0; font-size:0.6rem; color:var(--gold); font-weight:600; cursor:pointer;" onclick="renderPlans(); document.querySelector('#pricing-section')?.scrollIntoView({behavior:'smooth'})">Limit reached! Upgrade plan to save more &rarr;</p>
+                        <p style="margin:8px 0 0 0; font-size:0.6rem; color:var(--gold); font-weight:600; cursor:pointer;" onclick="renderPlans(); document.querySelector('#pricing-section')?.scrollIntoView({behavior:'smooth'})">${t('Limit reached! Upgrade plan to save more', 'Limite atteinte ! Améliorez votre forfait pour sauvegarder plus')} &rarr;</p>
                     ` : ''}
                 </div>
             `;
@@ -1462,13 +1504,13 @@
         const tabsHTML = `
             ${limitBanner}
             <div style="display:flex; padding:0 12px; border-bottom:1px solid rgba(0,0,0,0.05); background:rgba(184,147,90,0.02);">
-                <button onclick="window.switchDiaryMode('church')" style="flex:1; padding:12px; background:none; border:none; border-bottom: 2px solid ${window._diaryMode === 'church' ? 'var(--gold)' : 'transparent'}; color: ${window._diaryMode === 'church' ? 'var(--gold)' : 'var(--muted)'}; font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer;">Church</button>
-                <button onclick="window.switchDiaryMode('personal')" style="flex:1; padding:12px; background:none; border:none; border-bottom: 2px solid ${window._diaryMode === 'personal' ? 'var(--gold)' : 'transparent'}; color: ${window._diaryMode === 'personal' ? 'var(--gold)' : 'var(--muted)'}; font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer;">Personal</button>
+                <button onclick="window.switchDiaryMode('church')" style="flex:1; padding:12px; background:none; border:none; border-bottom: 2px solid ${window._diaryMode === 'church' ? 'var(--gold)' : 'transparent'}; color: ${window._diaryMode === 'church' ? 'var(--gold)' : 'var(--muted)'}; font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer;">${t('Church', 'Église')}</button>
+                <button onclick="window.switchDiaryMode('personal')" style="flex:1; padding:12px; background:none; border:none; border-bottom: 2px solid ${window._diaryMode === 'personal' ? 'var(--gold)' : 'transparent'}; color: ${window._diaryMode === 'personal' ? 'var(--gold)' : 'var(--muted)'}; font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer;">${t('Personal', 'Personnel')}</button>
             </div>
         `;
 
         if (currentData.length === 0) {
-            list.innerHTML = tabsHTML + '<div style="padding:40px; text-align:center; opacity:0.5; font-size:0.9rem;">No entries found.</div>';
+            list.innerHTML = tabsHTML + `<div style="padding:40px; text-align:center; opacity:0.5; font-size:0.9rem;">${t('No entries found.', 'Aucune entrée trouvée.')}</div>`;
             return;
         }
 
@@ -1478,8 +1520,8 @@
                     <span style="font-size:0.7rem; color:var(--muted); letter-spacing:0.05em;">${e.date}</span>
                     ${window._diaryMode === 'personal' ? `<button onclick="event.stopPropagation(); window.deleteDiaryEntry(${i})" style="background:none; border:none; opacity:0.3; cursor:pointer;" title="Delete">🗑️</button>` : ''}
                 </div>
-                <h4 style="margin: 8px 0 4px 0; font-family:'Cormorant Garamond', serif; font-size:1.1rem; color: ${i === active ? 'var(--gold)' : 'inherit'}">${e.title || 'Untitled'}</h4>
-                <p style="margin:0; font-size:0.8rem; opacity:0.6; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;">${e.body || e.theme || 'No theme content'}</p>
+                <h4 style="margin: 8px 0 4px 0; font-family:'Cormorant Garamond', serif; font-size:1.1rem; color: ${i === active ? 'var(--gold)' : 'inherit'}">${e.title || t('Untitled', 'Sans titre')}</h4>
+                <p style="margin:0; font-size:0.8rem; opacity:0.6; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;">${e.body || e.theme || t('No theme content', 'Aucun thème défini')}</p>
             </div>
         `).join('');
 
@@ -1487,6 +1529,10 @@
     }
 
     window.switchDiaryMode = function (mode) {
+        if (mode === 'personal' && (!window.userSession || !window.userSession.user)) {
+            showAuthRequiredModal(t("Sign in to access your personal spiritual journal and sync your records across all devices.", "Connectez-vous pour accéder à votre journal spirituel personnel et synchroniser vos entrées sur tous vos appareils."));
+            return;
+        }
         window._diaryMode = mode;
         const newBtn = document.querySelector('.new-entry-btn');
         if (newBtn) newBtn.style.display = mode === 'personal' ? 'block' : 'none';
@@ -1515,26 +1561,26 @@
         if (window._diaryMode === 'church') {
             container.innerHTML = `
                 <div style="position:relative; z-index:1;">
-                    <p style="color:var(--gold); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.2em; margin-bottom:12px;">Church Diary &bull; ${e.date}</p>
-                    <h1 style="font-family:'Cormorant Garamond', serif; font-size:3.5rem; color:var(--ink); margin:0 0 20px 0; line-height:1.1;">${e.title || 'Official Theme'}</h1>
-                    <p style="color:var(--gold); font-family:'Cormorant Garamond', serif; font-size:1.8rem; margin-bottom:40px; font-style:italic;">"${e.theme || 'No theme set'}"</p>
+                    <p style="color:var(--gold); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.2em; margin-bottom:12px;">${window._diaryMode === 'church' ? t('Church Diary', "Journal de l'Église") : t('My Journal', 'Mon Journal')} &bull; ${e.date}</p>
+                    <h1 style="font-family:'Cormorant Garamond', serif; font-size:3.5rem; color:var(--ink); margin:0 0 20px 0; line-height:1.1;">${e.title || t('Official Theme', 'Thème Officiel')}</h1>
+                    <p style="color:var(--gold); font-family:'Cormorant Garamond', serif; font-size:1.8rem; margin-bottom:40px; font-style:italic;">"${e.theme || t('No theme set', 'Aucun thème défini')}"</p>
                     
                     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:24px; margin-bottom:48px;">
                         ${e.readingOne ? `
                             <div style="background:white; padding:16px; border:1px solid #e8e1d5; border-radius:12px;">
-                                <p style="font-size:0.6rem; text-transform:uppercase; color:var(--muted); margin-bottom:4px;">Reading I</p>
+                                <p style="font-size:0.6rem; text-transform:uppercase; color:var(--muted); margin-bottom:4px;">${t('Reading I', 'Première Lecture')}</p>
                                 <p style="font-weight:600; font-size:0.85rem;">${e.readingOne}</p>
                             </div>
                         ` : ''}
                         ${e.readingTwo ? `
                             <div style="background:white; padding:16px; border:1px solid #e8e1d5; border-radius:12px;">
-                                <p style="font-size:0.6rem; text-transform:uppercase; color:var(--muted); margin-bottom:4px;">Reading II</p>
+                                <p style="font-size:0.6rem; text-transform:uppercase; color:var(--muted); margin-bottom:4px;">${t('Reading II', 'Deuxième Lecture')}</p>
                                 <p style="font-weight:600; font-size:0.85rem;">${e.readingTwo}</p>
                             </div>
                         ` : ''}
                         ${e.readingThree ? `
                             <div style="background:white; padding:16px; border:1px solid #e8e1d5; border-radius:12px;">
-                                <p style="font-size:0.6rem; text-transform:uppercase; color:var(--muted); margin-bottom:4px;">Reading III / Gospel</p>
+                                <p style="font-size:0.6rem; text-transform:uppercase; color:var(--muted); margin-bottom:4px;">${t('Reading III / Gospel', 'Troisième Lecture / Évangile')}</p>
                                 <p style="font-weight:600; font-size:0.85rem;">${e.readingThree}</p>
                             </div>
                         ` : ''}
@@ -1546,13 +1592,13 @@
                         <div style="display:flex; align-items:center; gap:20px; padding:24px; background:white; border:1px solid #e8e1d5; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.03);">
                             <div style="width:40px; height:40px; background:var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:1.2rem;">♪</div>
                             <div>
-                                <p style="margin:0; font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em;">Suggested Hymn</p>
+                                <p style="margin:0; font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em;">${t('Suggested Hymn', 'Cantique Suggéré')}</p>
                                 <p style="margin:0; font-weight:600; color:var(--gold);">${e.hymn}</p>
                             </div>
                         </div>
                     ` : ''}
                     <div style="margin-top:60px; display:flex; gap:16px;">
-                        <button style="background:var(--gold); color:white; border:none; padding:12px 24px; border-radius:12px; cursor:pointer;" onclick="window.toggleDiarySpeech()">📖 Listen to Theme & Readings</button>
+                        <button style="background:var(--gold); color:white; border:none; padding:12px 24px; border-radius:12px; cursor:pointer;" onclick="window.toggleDiarySpeech()">📖 ${t('Listen to Theme & Readings', 'Écouter le Thème et les Lectures')}</button>
                     </div>
                 </div>
             `;
@@ -1560,18 +1606,18 @@
             // Personal Mode
             container.innerHTML = `
                 <div style="position:relative; z-index:1;">
-                    <p style="color:var(--gold); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.2em; margin-bottom:12px;">My Journal &bull; ${e.date}</p>
-                    <h1 style="font-family:'Cormorant Garamond', serif; font-size:3.5rem; color:var(--ink); margin:0 0 40px 0; line-height:1;">${e.title || 'Untitled Reflection'}</h1>
+                    <p style="color:var(--gold); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.2em; margin-bottom:12px;">${t('My Journal', 'Mon Journal')} &bull; ${e.date}</p>
+                    <h1 style="font-family:'Cormorant Garamond', serif; font-size:3.5rem; color:var(--ink); margin:0 0 40px 0; line-height:1;">${e.title || t('Untitled Reflection', 'Réflexion sans titre')}</h1>
                     <div style="font-family:'Cormorant Garamond', serif; font-size:1.5rem; line-height:1.8; color:rgba(40,40,40,0.9); margin-bottom:60px; white-space: pre-wrap;">${e.body}</div>
                     ${e.hymn ? `
                         <div style="display:flex; align-items:center; gap:20px; padding:24px; background:white; border:1px solid #e8e1d5; border-radius:16px;">
                             <div style="width:40px; height:40px; background:var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:1.2rem;">♪</div>
-                            <div><p style="margin:0; font-size:0.7rem; color:var(--muted); text-transform:uppercase;">Inspiration</p><p style="margin:0; font-weight:600; color:var(--gold);">${e.hymn}</p></div>
+                            <div><p style="margin:0; font-size:0.7rem; color:var(--muted); text-transform:uppercase;">${t('Inspiration', 'Inspiration')}</p><p style="margin:0; font-weight:600; color:var(--gold);">${e.hymn}</p></div>
                         </div>
                     ` : ''}
                     <div style="margin-top:60px; display:flex; gap:16px;">
-                        <button style="background:var(--gold); color:white; border:none; padding:12px 24px; border-radius:12px; cursor:pointer; font-weight:600;" onclick="window.toggleDiarySpeech()">📖 Listen to Reflection</button>
-                        <button style="background:rgba(184,147,90,0.05); color:var(--gold); border:1px solid rgba(184,147,90,0.2); padding:12px 24px; border-radius:12px; cursor:pointer;" onclick="window.shareByEmail(${i})">✉️ Share reflection</button>
+                        <button style="background:var(--gold); color:white; border:none; padding:12px 24px; border-radius:12px; cursor:pointer; font-weight:600;" onclick="window.toggleDiarySpeech()">📖 ${t('Listen to Reflection', 'Écouter la Réflexion')}</button>
+                        <button style="background:rgba(184,147,90,0.05); color:var(--gold); border:1px solid rgba(184,147,90,0.2); padding:12px 24px; border-radius:12px; cursor:pointer;" onclick="window.shareByEmail(${i})">✉️ ${t('Share reflection', 'Partager la réflexion')}</button>
                     </div>
                 </div>
             `;
@@ -1653,6 +1699,10 @@
     }
 
     window.showNewEntry = function () {
+        if (!window.userSession || !window.userSession.user) {
+            showAuthRequiredModal(t("Please sign in to keep a private spiritual diary of your own.", "Veuillez vous connecter pour tenir votre propre journal spirituel privé."));
+            return;
+        }
         const mc = document.getElementById('diaryMainContent');
         const nef = document.getElementById('newEntryForm');
         if (mc) mc.style.display = 'none';
@@ -1791,8 +1841,8 @@
             grid.innerHTML = `
                 <div style="grid-column: 1 / -1; padding: 60px 20px; text-align: center; background: rgba(0,0,0,0.02); border-radius: 24px; border: 1px dashed rgba(0,0,0,0.1);">
                     <p style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;">🗞️</p>
-                    <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--gold); margin-bottom: 8px;">No issues of The Echo found</h3>
-                    <p style="color: var(--muted); font-size: 0.9rem;">Check back soon for latest community newsletters and articles.</p>
+                    <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--gold); margin-bottom: 8px;">${t('No issues of The Echo found', "Aucun numéro de L'Écho trouvé")}</h3>
+                    <p style="color: var(--muted); font-size: 0.9rem;">${t('Check back soon for latest community newsletters and articles.', 'Revenez bientôt pour les dernières nouvelles de la communauté.')}</p>
                 </div>
             `;
             return;
@@ -1808,14 +1858,14 @@
             <div class="echo-card ${isFeatured ? 'featured' : ''}" style="position:relative;">
               ${isFeatured ? `
                 <div style="position:absolute; top:0; left:0; background:var(--gold); color:white; font-size:10px; font-weight:900; padding:4px 12px; border-bottom-right-radius:12px; z-index:2; text-transform:uppercase; letter-spacing:0.1em;">
-                  ★ Issue of the Month
+                  ★ ${t('Issue of the Month', 'Numéro du Mois')}
                 </div>
               ` : ''}
               <div class="echo-img-placeholder" style="${a.coverUrl ? `background-image:url('${a.coverUrl}'); background-size:cover; background-position:center;` : ''} ${isFeatured ? '' : 'height:160px; pointer-events:none; border-radius:12px 12px 0 0;'}">
                 ${a.coverUrl ? '' : '✝'}
               </div>
               <div style="${isFeatured ? '' : 'padding: 20px 24px 0;'}">
-                <p class="echo-card-cat">${a.cat}</p>
+                <p class="echo-card-cat">${translateCategory(a.cat)}</p>
                 <h3 class="echo-card-title">${a.title}</h3>
                 <p class="echo-card-excerpt">${a.excerpt}</p>
                 <div class="echo-card-meta">
@@ -1825,7 +1875,7 @@
                 </div>
                 <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; margin-top:16px; border-top:1px solid rgba(0,0,0,0.05); padding-top:12px;">
                     <span class="echo-read" style="cursor:pointer; font-size:0.85rem; font-weight:600; color:var(--gold); display:flex; align-items:center; gap:4px;" onclick="window.openEchoArticle(${originalIndex})">
-                        📖 Read More 
+                        📖 ${t('Read More', 'Lire la suite')} 
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </span>
                 </div>
@@ -2136,7 +2186,7 @@
 
         if (grid) {
             if (dbArchive.length === 0) {
-                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--muted); font-style:italic; padding:40px;">No previous devotionals available.</p>';
+                grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--muted); font-style:italic; padding:40px;">${t('No previous devotionals available.', 'Aucune dévotion précédente disponible.')}</p>`;
             } else {
                 grid.innerHTML = dbArchive.map((d, idx) => {
                     // Extract reference for the card
@@ -2170,12 +2220,12 @@
                       <div class="devo-arc-card" onclick="window.openArchiveDevotional(window.archive_db[${idx}], ${hasCardAccess})" style="position:relative; overflow:hidden; padding:0; border-radius:10px; cursor:pointer; min-height:220px; display:flex; flex-direction:column; justify-content:flex-end;" onmouseover="this.querySelector('.dac-bg').style.transform='scale(1.08)'" onmouseout="this.querySelector('.dac-bg').style.transform='scale(1)'">
                         <div class="dac-bg" style="position:absolute; inset:0; ${imgStyle}; transition: transform 0.4s ease-out;"></div>
                         <div style="position:relative; z-index:1; padding:22px 20px; background: linear-gradient(to top, rgba(20,16,12,0.95) 0%, rgba(20,16,12,0.8) 50%, transparent 100%);">
-                          ${d.category ? `<span style="display:inline-block; background:rgba(184,147,90,0.85); color:#fff; font-size:0.55rem; letter-spacing:0.2em; text-transform:uppercase; padding:3px 10px; border-radius:50px; margin-bottom:8px;">${d.category}</span>` : ''}
+                          ${d.category ? `<span style="display:inline-block; background:rgba(184,147,90,0.85); color:#fff; font-size:0.55rem; letter-spacing:0.2em; text-transform:uppercase; padding:3px 10px; border-radius:50px; margin-bottom:8px;">${translateCategory(d.category)}</span>` : ''}
                           ${!hasCardAccess ? `<span style="display:inline-block; background:linear-gradient(135deg, #6e1799, #4a0f66); color:#fff; font-size:0.5rem; letter-spacing:0.15em; text-transform:uppercase; padding:3px 8px; border-radius:4px; margin-left:6px; margin-bottom:8px; border:1px solid rgba(255,255,255,0.1); box-shadow:0 2px 4px rgba(0,0,0,0.2);">💎 Premium</span>` : ''}
                           <p class="dac-date" style="color:rgba(253,250,245,0.6); margin:0 0 4px 0;">${d.date}</p>
                           <p class="dac-title" style="color:#fdfaf5; margin:0 0 4px 0; font-size:1.1rem;">${d.title}</p>
-                          <p class="dac-ref" style="color:rgba(253,250,245,0.5); margin-bottom: 8px;">${ref || d.reading || 'Daily Grace'}</p>
-                          ${d.excerpt ? `<p style="color:rgba(253,250,245,0.7); font-size:0.75rem; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${hasCardAccess ? d.excerpt : 'Unlock this full devotional reflection via upgrade.'}</p>` : ''}
+                          <p class="dac-ref" style="color:rgba(253,250,245,0.5); margin-bottom: 8px;">${ref || d.reading || t('Daily Grace', 'Grâce Quotidienne')}</p>
+                          ${d.excerpt ? `<p style="color:rgba(253,250,245,0.7); font-size:0.75rem; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${hasCardAccess ? d.excerpt : t('Unlock this full devotional reflection via upgrade.', 'Débloquez cette réflexion en vous abonnant.')}</p>` : ''}
                         </div>
                       </div>`;
                 }).join('');
@@ -2187,10 +2237,12 @@
         if (!currentContainer) return;
 
         const d = window.devotional_db || {
-            title: 'Still Waters',
+            title: t('Still Waters', 'Eaux Paisibles'),
             date: 'February 25, 2026',
-            content: '> [!NOTE]\n> "He makes me lie down in green pastures, he leads me beside quiet waters, he refreshes my soul."\n> PSALM 23:2–3\n\n### Reflection\nThere are moments when the world demands more than we have to give. The noise becomes deafening — obligations pile up, anxieties whisper, and the pace of life never seems to slow. It is into precisely this moment that the Shepherd speaks: lie down.\n\nThe invitation to still waters is not passive surrender — it is an act of trust. To rest in God\'s provision is to declare, with your body and your breath, that He is enough. That today\'s worries are held. That you are known and guided.\n\n### Prayer\nLord, still the rushing waters of my mind today. Let me hear Your voice above the noise. Lead me to the quiet places where my soul is restored, and remind me that in Your presence, I lack nothing. Amen.\n\n### Companion Hymn\nBe Still, My Soul',
-            author: 'Worship Team'
+            content: window.currentLang === 'fr' 
+                     ? '> [!NOTE]\n> "Il me fait reposer dans de verts pâturages, il me dirige près des eaux paisibles, il restaure mon âme."\n> PSAUME 23:2–3\n\n### Réflexion\nIl y a des moments où le monde exige plus que ce que nous avons à donner. Le bruit devient assourdissant — les obligations s\'accumulent... L\'invitation aux eaux paisibles n\'est pas une reddition passive — c\'est un acte de confiance.\n\n### Prière\nSeigneur, apaise les eaux tumultueuses de mon esprit aujourd\'hui. Laisse-moi entendre Ta voix au-dessus du bruit. Amen.\n\n### Cantique\nSois tranquille, mon âme' 
+                     : '> [!NOTE]\n> "He makes me lie down in green pastures, he leads me beside quiet waters, he refreshes my soul."\n> PSALM 23:2–3\n\n### Reflection\nThere are moments when the world demands more than we have to give. The noise becomes deafening — obligations pile up, anxieties whisper, and the pace of life never seems to slow. It is into precisely this moment that the Shepherd speaks: lie down.\n\nThe invitation to still waters is not passive surrender — it is an act of trust. To rest in God\'s provision is to declare, with your body and your breath, that He is enough. That today\'s worries are held. That you are known and guided.\n\n### Prayer\nLord, still the rushing waters of my mind today. Let me hear Your voice above the noise. Lead me to the quiet places where my soul is restored, and remind me that in Your presence, I lack nothing. Amen.\n\n### Companion Hymn\nBe Still, My Soul',
+            author: t('Worship Team', "Équipe d'Adoration")
         };
 
         function parseFullDevotion(d) {
@@ -2228,9 +2280,9 @@
                             margin-bottom: 14px;
                             width: fit-content;
                             backdrop-filter: blur(4px);
-                        ">${d.category}</span>` : ''}
+                        ">${translateCategory(d.category)}</span>` : ''}
                         <p style="font-size:0.7rem; letter-spacing:0.18em; text-transform:uppercase; color:rgba(253,250,245,0.7); margin-bottom:10px;">
-                            Today's Devotional &middot; ${d.date} &middot; <span style="color:#b8935a; font-weight:600;">${Math.max(1, Math.ceil((d.content || '').split(' ').length / 200))} MIN READ</span>
+                            ${t("Today's Devotional", "Dévotion d'aujourd'hui")} &middot; ${d.date} &middot; <span style="color:#b8935a; font-weight:600;">${Math.max(1, Math.ceil((d.content || '').split(' ').length / 200))} ${t('MIN READ', 'MIN DE LECTURE')}</span>
                         </p>
                         <h1 style="
                             font-family: 'Cormorant Garamond', serif;
@@ -2242,7 +2294,7 @@
                             text-shadow: 0 2px 12px rgba(0,0,0,0.4);
                         ">${d.title}</h1>
                         <p style="font-size: 0.78rem; color: rgba(253,250,245,0.65); font-weight: 300;">
-                            By ${d.author || 'PCC Community'}
+                            ${t('By', 'Par')} ${d.author || 'PCC Community'}
                         </p>
                     </div>
                 `;
@@ -2270,9 +2322,9 @@
                             border-radius: 50px;
                             margin-bottom: 14px;
                             border: 1px solid rgba(184,147,90,0.3);
-                        ">${d.category}</span>` : ''}
+                        ">${translateCategory(d.category)}</span>` : ''}
                         <p style="font-size:0.7rem; letter-spacing:0.18em; text-transform:uppercase; color:rgba(253,250,245,0.45); margin-bottom:10px; position:relative; z-index:1;">
-                            Today's Devotional &middot; ${d.date} &middot; <span style="color:#b8935a; font-weight:600;">${Math.max(1, Math.ceil((d.content || '').split(' ').length / 200))} MIN READ</span>
+                            ${t("Today's Devotional", "Dévotion d'aujourd'hui")} &middot; ${d.date} &middot; <span style="color:#b8935a; font-weight:600;">${Math.max(1, Math.ceil((d.content || '').split(' ').length / 200))} ${t('MIN READ', 'MIN DE LECTURE')}</span>
                         </p>
                         <h1 style="
                             font-family: 'Cormorant Garamond', serif;
@@ -2285,7 +2337,7 @@
                             z-index: 1;
                         ">${d.title}</h1>
                         <p style="font-size: 0.78rem; color: rgba(253,250,245,0.45); font-weight: 300; position:relative; z-index:1;">
-                            By ${d.author || 'PCC Community'}
+                            ${t('By', 'Par')} ${d.author || 'PCC Community'}
                         </p>
                     </div>
                 `;
@@ -2318,9 +2370,9 @@
                     isQuote = false;
                 }
 
-                if (trimmed.startsWith('### Reflection')) { currentSection = 'reflection'; continue; }
-                if (trimmed.startsWith('### Prayer')) { currentSection = 'prayer'; continue; }
-                if (trimmed.toLowerCase().includes('### companion hymn')) { currentSection = 'hymn'; continue; }
+                if (trimmed.startsWith('### Reflection') || trimmed.startsWith('### Réflexion')) { currentSection = 'reflection'; continue; }
+                if (trimmed.startsWith('### Prayer') || trimmed.startsWith('### Prière')) { currentSection = 'prayer'; continue; }
+                if (trimmed.toLowerCase().includes('### companion hymn') || trimmed.toLowerCase().includes('### cantique')) { currentSection = 'hymn'; continue; }
 
                 if (trimmed !== '') {
                     sections[currentSection] += trimmed + '\n\n';
@@ -2346,7 +2398,7 @@
                            onmouseover="this.style.background='rgba(184,147,90,0.15)'; this.style.borderColor='rgba(184,147,90,0.6)'"
                            onmouseout="this.style.background='rgba(184,147,90,0.05)'; this.style.borderColor='rgba(184,147,90,0.3)'"
                         >
-                            <span style="font-size:1.1rem">📖</span> Read Full Passage: ${d.reading}
+                            <span style="font-size:1.1rem">📖</span> ${t('Read Full Passage:', 'Lire le Passage :')} ${d.reading}
                         </button>
                         <div class="inline-scripture-container" style="display:none; text-align: left; background: rgba(26,21,16,0.6); border: 1px solid rgba(184,147,90,0.2); border-radius: 12px; padding: 24px; margin-top: 20px; color: rgba(253,250,245,0.85); font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; line-height: 1.7; max-height: 400px; overflow-y: auto; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
                             <!-- scripture injected here -->
@@ -2371,7 +2423,7 @@
             if (sections.reflection.trim()) {
                 html += `
                     <div class="devo-reflection" style="position:relative;">
-                        <h3 class="devo-reflection-title">Reflection</h3>
+                        <h3 class="devo-reflection-title">${t('Reflection', 'Réflexion')}</h3>
                         <div class="devo-reflection-body">
                 `;
 
@@ -2393,16 +2445,15 @@
                     
                     <div style="background: rgba(184,147,90,0.06); border: 1px solid rgba(184,147,90,0.2); border-radius: 12px; padding: 36px 24px; text-align: center; margin-top: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
                         <div style="font-size:2.2rem; margin-bottom:12px; opacity: 0.9;">🔒</div>
-                        <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.6rem; color:#b8935a; margin-bottom:10px;">Premium Devotional</h3>
+                        <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.6rem; color:#b8935a; margin-bottom:10px;">${t('Premium Devotional', 'Dévotion Premium')}</h3>
                         <p style="color:rgba(253,250,245,0.65); font-size:0.9rem; margin-bottom:24px; line-height:1.6; max-width: 400px; margin-left: auto; margin-right: auto;">
-                            This devotional requires the <strong style="color:rgba(253,250,245,0.9);">${d.minPlan === 'SHEPHERD' ? 'Shepherd' : 'Pilgrim'}</strong> plan. 
-                            Upgrade your faith journey to unlock this full reflection, prayer, and our entire library.
+                            ${t('This devotional requires the', 'Cette dévotion nécessite le plan')} <strong style="color:rgba(253,250,245,0.9);">${d.minPlan === 'SHEPHERD' ? t('Shepherd', 'Berger') : t('Pilgrim', 'Pèlerin')}</strong> ${t('plan. Upgrade your faith journey to unlock this full reflection, prayer, and our entire library.', "Améliorez votre parcours de foi pour débloquer l'ensemble de cette réflexion, la prière, et notre bibliothèque.")}
                         </p>
                         <button onclick="window.showPage('subs', document.querySelectorAll('.nav-tab')[5]); if(typeof closeModal === 'function'){closeModal('devoModal');}" 
                             style="background: linear-gradient(135deg, #b8935a, #d4af37); color:#1a1510; border:none; padding:12px 28px; border-radius:8px; font-weight:700; cursor:pointer; font-size: 0.85rem; letter-spacing: 0.05em; transition: transform 0.2s; box-shadow: 0 4px 12px rgba(184,147,90,0.3);"
                             onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'"
                         >
-                            View Subscription Plans
+                            ${t('View Subscription Plans', "Voir les plans d'abonnement")}
                         </button>
                     </div>
                     `;
@@ -2415,7 +2466,7 @@
             if (sections.prayer.trim()) {
                 html += `
                     <div class="devo-prayer">
-                        <p class="devo-prayer-label">Prayer</p>
+                        <p class="devo-prayer-label">${t('Prayer', 'Prière')}</p>
                         <p class="devo-prayer-text">${mdToHtml(sections.prayer.trim())}</p>
                     </div>
                 `;
@@ -2427,14 +2478,14 @@
                 const safeHymnName = hymnName.replace(/'/g, "\\'");
                 html += `
                     <div class="devo-reflection" style="margin-top:30px; padding: 24px; background: rgba(184,147,90,0.03); border: 1px solid rgba(184,147,90,0.15); border-radius: 12px; text-align: center;">
-                        <h3 class="devo-reflection-title" style="margin-bottom: 12px;">Companion Hymn</h3>
-                        <p style="color: rgba(253,250,245,0.6); font-size: 0.85rem; margin-bottom: 16px;">Reflect further by singing today's recommended hymn.</p>
+                        <h3 class="devo-reflection-title" style="margin-bottom: 12px;">${t('Companion Hymn', 'Cantique Associé')}</h3>
+                        <p style="color: rgba(253,250,245,0.6); font-size: 0.85rem; margin-bottom: 16px;">${t("Reflect further by singing today's recommended hymn.", "Réfléchissez davantage en chantant le cantique recommandé d'aujourd'hui.")}</p>
                         <button onclick="window.openCompanionHymn('${safeHymnName}')" 
                             style="background: var(--gold); color: #1a1510; border: none; padding: 10px 24px; border-radius: 50px; font-weight: 600; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s;"
                             onmouseover="this.style.boxShadow='0 4px 15px rgba(184,147,90,0.4)'; this.style.transform='translateY(-2px)'"
                             onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)'"
                         >
-                            🎵 Open "${hymnName}"
+                            🎵 ${t('Open', 'Ouvrir')} "${hymnName}"
                         </button>
                     </div>
                 `;
@@ -2465,15 +2516,15 @@
                 content.innerHTML = `
                     <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 40px; text-align:center; min-height:350px;">
                         <div style="font-size:3.5rem; margin-bottom:24px;">💎</div>
-                        <h2 style="font-family:'Cormorant Garamond',serif; font-size:2rem; color:#1a1510; margin-bottom:12px;">${planLabel} Content</h2>
+                        <h2 style="font-family:'Cormorant Garamond',serif; font-size:2rem; color:#1a1510; margin-bottom:12px;">${planLabel} ${t('Content', 'Contenu')}</h2>
                         <p style="color:#6b7280; font-size:0.95rem; line-height:1.7; max-width:340px; margin-bottom:32px;">
                             ${isLoggedIn
-                                ? 'Your current plan does not include this devotional. Upgrade to unlock the full reflection, prayer, and scripture guide.'
-                                : 'Please sign in and upgrade your plan to access this full devotional reflection.'}
+                                ? t('Your current plan does not include this devotional. Upgrade to unlock the full reflection, prayer, and scripture guide.', "Votre plan actuel n'inclut pas cette dévotion. Mettez à niveau pour débloquer la réflexion complète, la prière et le guide.")
+                                : t('Please sign in and upgrade your plan to access this full devotional reflection.', "Veuillez vous connecter et mettre à niveau votre plan pour accéder à cette réflexion complète.")}
                         </p>
                         ${isLoggedIn
-                            ? `<button onclick="window.closeDevoModal(); window.showPage('subs', document.querySelectorAll('.nav-tab')[5]);" style="padding:14px 32px; background:linear-gradient(135deg,#6e1799,#4a0f66); color:#fff; border:none; border-radius:12px; font-size:0.9rem; font-weight:700; cursor:pointer; letter-spacing:0.05em;">✨ Upgrade Plan</button>`
-                            : `<button onclick="window.location.href='/auth/login'" style="padding:14px 32px; background:linear-gradient(135deg,#6e1799,#4a0f66); color:#fff; border:none; border-radius:12px; font-size:0.9rem; font-weight:700; cursor:pointer; letter-spacing:0.05em;">🔑 Sign In to Continue</button>`}
+                            ? `<button onclick="window.closeDevoModal(); window.showPage('subs', document.querySelectorAll('.nav-tab')[5]);" style="padding:14px 32px; background:linear-gradient(135deg,#6e1799,#4a0f66); color:#fff; border:none; border-radius:12px; font-size:0.9rem; font-weight:700; cursor:pointer; letter-spacing:0.05em;">✨ ${t('Upgrade Plan', 'Mettre à niveau')}</button>`
+                            : `<button onclick="window.location.href='/auth/login'" style="padding:14px 32px; background:linear-gradient(135deg,#6e1799,#4a0f66); color:#fff; border:none; border-radius:12px; font-size:0.9rem; font-weight:700; cursor:pointer; letter-spacing:0.05em;">🔑 ${t('Sign In to Continue', 'Connectez-vous pour continuer')}</button>`}
                     </div>`;
                 modal.classList.add('open');
                 document.body.style.overflow = 'hidden';
@@ -2627,10 +2678,20 @@
 
     function showAuthRequiredModal(message) {
         const existing = document.getElementById('authReqModal');
-        if (existing) existing.remove();
+        if (existing) {
+            existing.remove();
+            document.body.style.overflow = '';
+        }
 
         const modal = document.createElement('div');
         modal.id = 'authReqModal';
+        document.body.style.overflow = 'hidden';
+
+        const closeModalFunc = () => {
+            modal.remove();
+            document.body.style.overflow = '';
+        };
+
         modal.style.cssText = `
             position: fixed; inset: 0; background: rgba(10, 8, 6, 0.85); 
             backdrop-filter: blur(8px); z-index: 9999; 
@@ -2639,7 +2700,7 @@
         `;
         modal.innerHTML = `
             <div style="background: #fdfaf5; max-width: 380px; width: 85%; padding: 40px 32px; border: 1px solid rgba(184, 147, 90, 0.3); position: relative; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
-                <button onclick="document.getElementById('authReqModal').remove()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.1rem; color: #a09585; cursor: pointer;">&times;</button>
+                <button onclick="window.closeAuthModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.1rem; color: #a09585; cursor: pointer;">&times;</button>
                 <div style="font-size: 2rem; margin-bottom: 15px; color: #b8935a;">✧</div>
                 <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 400; color: #1a1510; margin-bottom: 10px; line-height: 1.1;">Sign Up First</h3>
                 <p style="font-family: 'Jost', sans-serif; font-size: 0.82rem; color: #7a7060; margin-bottom: 30px; line-height: 1.5;">${message}</p>
@@ -2650,8 +2711,9 @@
                 </div>
             </div>
         `;
+        window.closeAuthModal = closeModalFunc;
         document.body.appendChild(modal);
-        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+        modal.onclick = (e) => { if (e.target === modal) closeModalFunc(); };
     }
 
     // ══ INIT ══
@@ -2660,6 +2722,10 @@
     renderEcho();
     renderPlans();
     renderDevotional();
+
+    // Expose render functions to window for language toggle re-rendering
+    window.renderHymns = renderHymns;
+    window.renderDiary = renderDiary;
 
     // ══ STICKY SCROLL — panel + card switching ══
     function initStickyScroll() {
@@ -2918,7 +2984,7 @@
         // Toggle visibility if already fetched
         if (container.style.display === 'block') {
             container.style.display = 'none';
-            btn.innerHTML = `<span style="font-size:1.1rem">📖</span> Read Full Passage: ${decodeURIComponent(reference)}`;
+            btn.innerHTML = `<span style="font-size:1.1rem">📖</span> ${t('Read Full Passage:', 'Lire le Passage :')} ${decodeURIComponent(reference)}`;
             return;
         }
 
@@ -3172,7 +3238,7 @@
         const stats = {
             favorites: (window.hymnFavorites || []).length,
             entries: (window.diary_db_personal || []).length,
-            role: session.user.role || 'Member'
+            role: session.user.role || t('Member', 'Membre')
         };
 
         container.innerHTML = `
@@ -3181,38 +3247,38 @@
                     <div style="width: 100px; height: 100px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem; color: #1a1510;">
                         ${session.user.name ? session.user.name.charAt(0) : '👤'}
                     </div>
-                    <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; color: var(--ink); font-weight: 300;">${session.user.name || 'Sacred Member'}</h1>
+                    <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; color: var(--ink); font-weight: 300;">${session.user.name || t('Sacred Member', 'Membre Sacré')}</h1>
                     <p style="color: var(--muted); font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase;">${stats.role} &bull; ${session.user.email}</p>
                 </div>
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 60px;">
                     <div style="background: rgba(184,147,90,0.05); border: 1px solid rgba(184,147,90,0.1); border-radius: 20px; padding: 30px; text-align: center;">
-                        <p style="text-transform: uppercase; font-size: 0.65rem; color: #6e1799; letter-spacing: 0.2em; margin-bottom: 10px;">Favorite Hymns</p>
+                        <p style="text-transform: uppercase; font-size: 0.65rem; color: #6e1799; letter-spacing: 0.2em; margin-bottom: 10px;">${t('Favorite Hymns', 'Cantiques Favoris')}</p>
                         <p style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; color: var(--ink);">${stats.favorites}</p>
-                        <button onclick="window.renderProfileFavorites()" style="margin-top: 15px; background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.75rem;">View All</button>
+                        <button onclick="window.renderProfileFavorites()" style="margin-top: 15px; background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.75rem;">${t('View All', 'Tout Voir')}</button>
                     </div>
                     <div style="background: rgba(184,147,90,0.05); border: 1px solid rgba(184,147,90,0.1); border-radius: 20px; padding: 30px; text-align: center;">
-                        <p style="text-transform: uppercase; font-size: 0.65rem; color: #6e1799; letter-spacing: 0.2em; margin-bottom: 10px;">Journal Entries</p>
+                        <p style="text-transform: uppercase; font-size: 0.65rem; color: #6e1799; letter-spacing: 0.2em; margin-bottom: 10px;">${t('Journal Entries', 'Entrées du Journal')}</p>
                         <p style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; color: var(--ink);">${stats.entries}</p>
-                        <button onclick="window.exportDiaryToPDF()" style="margin-top: 15px; background: var(--gold); border: none; color: #1a1510; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; font-weight: 600;">Export PDF</button>
+                        <button onclick="window.exportDiaryToPDF()" style="margin-top: 15px; background: var(--gold); border: none; color: #1a1510; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; font-weight: 600;">${t('Export PDF', 'Exporter en PDF')}</button>
                     </div>
                     <div style="background: rgba(184,147,90,0.05); border: 1px solid rgba(184,147,90,0.1); border-radius: 20px; padding: 30px; text-align: center;">
-                        <p style="text-transform: uppercase; font-size: 0.65rem; color: #6e1799; letter-spacing: 0.2em; margin-bottom: 10px;">Account Tier</p>
-                        <p style="font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--ink);">${window.subscriptionType || 'Free Tier'}</p>
-                        <button onclick="window.showPage('subs', document.querySelectorAll('.nav-tab')[5])" style="margin-top: 15px; background: transparent; border: 1px solid rgba(0,0,0,0.1); color: var(--muted); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.75rem;">Manage Plan</button>
+                        <p style="text-transform: uppercase; font-size: 0.65rem; color: #6e1799; letter-spacing: 0.2em; margin-bottom: 10px;">${t('Account Tier', 'Niveau du Compte')}</p>
+                        <p style="font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--ink);">${window.subscriptionType || t('Free Tier', 'Forfait Gratuit')}</p>
+                        <button onclick="window.showPage('subs', document.querySelectorAll('.nav-tab')[5])" style="margin-top: 15px; background: transparent; border: 1px solid rgba(0,0,0,0.1); color: var(--muted); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.75rem;">${t('Manage Plan', 'Gérer le Forfait')}</button>
                     </div>
                 </div>
 
                 <div style="padding: 40px; background: rgba(184,147,90,0.03); border: 1px solid rgba(184,147,90,0.1); border-radius: 24px; margin-bottom: 60px;">
-                    <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; margin-bottom: 25px; color: #1a1510;">Guidance for Your Spiritual Journey</h2>
+                    <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; margin-bottom: 25px; color: #1a1510;">${t('Guidance for Your Spiritual Journey', 'Conseils pour votre parcours spirituel')}</h2>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
                         <div>
-                            <h3 style="font-size: 0.8rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; font-weight: 700;">The Sacred Journal</h3>
-                            <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.7;">Your Journal is a private, encrypted oasis where you can record personal prayers, reflections on devotionals, or intimate thoughts. These entries are tied exclusively to your account, serving as a digital landscape of your faith walk over time.</p>
+                            <h3 style="font-size: 0.8rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; font-weight: 700;">${t('The Sacred Journal', 'Le Journal Sacré')}</h3>
+                            <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.7;">${t('Your Journal is a private, encrypted oasis where you can record personal prayers, reflections on devotionals, or intimate thoughts. These entries are tied exclusively to your account, serving as a digital landscape of your faith walk over time.', 'Votre journal est une oasis privée et cryptée où vous pouvez enregistrer vos prières personnelles, vos réflexions sur les dévotions ou vos pensées intimes. Ces entrées sont liées exclusivement à votre compte.')}</p>
                         </div>
                         <div>
-                            <h3 style="font-size: 0.8rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; font-weight: 700;">Spiritual Export (PDF)</h3>
-                            <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.7;">The <strong>Export PDF</strong> tool is designed to bridge the gap between your digital and physical spiritual life. With one click, we typeset your entire history of journal entries into a beautiful, printable document to preserve your testimony for years to come.</p>
+                            <h3 style="font-size: 0.8rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; font-weight: 700;">${t('Spiritual Export (PDF)', 'Exportation Spirituelle (PDF)')}</h3>
+                            <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.7;">${t('The <strong>Export PDF</strong> tool is designed to bridge the gap between your digital and physical spiritual life. With one click, we typeset your entire history of journal entries into a beautiful, printable document to preserve your testimony for years to come.', "L'outil d'<strong>exportation PDF</strong> est conçu pour combler le fossé entre votre vie spirituelle numérique et physique. En un clic, nous mettons en page tout votre historique pour préserver votre témoignage.")}</p>
                         </div>
                     </div>
                 </div>
@@ -3231,19 +3297,19 @@
 
         let html = `
             <div style="border-top: 1px solid rgba(184,147,90,0.1); padding-top: 40px;">
-                <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; margin-bottom: 25px;">Saved for Reflection</h2>
+                <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; margin-bottom: 25px;">${t('Saved for Reflection', 'Enregistré pour réflexion')}</h2>
         `;
 
         if (favHymns.length === 0) {
-            html += `<p style="color: var(--muted); font-style: italic;">Your favorites library is currently empty.</p>`;
+            html += `<p style="color: var(--muted); font-style: italic;">${t('Your favorites library is currently empty.', 'Votre bibliothèque de favoris est actuellement vide.')}</p>`;
         } else {
             html += `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">`;
             favHymns.forEach(h => {
                 html += `
                     <div style="padding: 20px; background: #fff; border: 1px solid #f0e6d6; border-radius: 12px; position: relative;">
-                        <p style="font-size: 0.6rem; color: var(--gold); font-weight: 700; text-transform: uppercase; margin-bottom: 6px;">Hymn #${h.num || '?'}</p>
+                        <p style="font-size: 0.6rem; color: var(--gold); font-weight: 700; text-transform: uppercase; margin-bottom: 6px;">${t('Hymn #', 'Cantique #')}${h.num || '?'}</p>
                         <h4 style="font-size: 1rem; color: var(--ink); margin: 0 0 12px 0;">${h.title}</h4>
-                        <button onclick="window.openHymn(${JSON.stringify(h).replace(/"/g, '&quot;')})" style="background: none; border: 1px solid #f0e6d6; color: var(--muted); padding: 5px 12px; border-radius: 50px; font-size: 0.7rem; cursor: pointer;">Open Now</button>
+                        <button onclick="window.openHymn(${JSON.stringify(h).replace(/"/g, '&quot;')})" style="background: none; border: 1px solid #f0e6d6; color: var(--muted); padding: 5px 12px; border-radius: 50px; font-size: 0.7rem; cursor: pointer;">${t('Open Now', 'Ouvrir')}</button>
                     </div>
                 `;
             });
@@ -3258,7 +3324,7 @@
     window.exportDiaryToPDF = () => {
         const entries = window.diary_db_personal || [];
         if (entries.length === 0) {
-            alert("No journal entries found to export!");
+            alert(t("No journal entries found to export!", "Aucune entrée de journal trouvée pour l'exportation !"));
             return;
         }
 
